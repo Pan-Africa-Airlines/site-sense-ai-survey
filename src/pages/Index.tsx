@@ -9,7 +9,7 @@ const Index = () => {
     <>
       <NavigationBar />
       <NetworkingBanner 
-        title="SiteSense Network Monitoring" 
+        title="EskomSiteIQ Network Monitoring" 
         subtitle="AI-powered real-time insights for your network infrastructure"
       />
       <Dashboard />

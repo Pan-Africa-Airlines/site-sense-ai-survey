@@ -84,8 +84,10 @@ const NavigationBar: React.FC = () => {
               />
             </div>
             <div className="h-8 w-px bg-gray-300 mx-4"></div>
-            <div className="text-akhanya-secondary font-bold text-2xl mr-2">SiteSense</div>
-            <div className="text-sm bg-akhanya text-white px-2 py-1 rounded">AI</div>
+            <div className="text-akhanya-secondary font-bold text-2xl mr-0">
+              Eskom<span>Site</span><span className="text-red-600">IQ</span>
+            </div>
+            <div className="text-sm bg-akhanya text-white px-2 py-1 rounded ml-2">AI</div>
           </div>
           
           <div className="flex space-x-2">

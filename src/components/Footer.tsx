@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
     <footer className="mt-auto py-4 text-center border-t border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Powered by Akhanya IT. All rights reserved &copy; {new Date().getFullYear()}
+          EskomSite<span className="text-red-600">IQ</span> by Akhanya IT & BCX. All rights reserved &copy; {new Date().getFullYear()}
         </p>
       </div>
     </footer>
