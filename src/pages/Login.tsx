@@ -65,14 +65,19 @@ const Login = () => {
   return (
     <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
       {/* Theme toggle */}
-      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-        <Sun className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-        <Switch 
-          checked={isDarkMode}
-          onCheckedChange={toggleTheme}
-          className="data-[state=checked]:bg-gray-600"
-        />
-        <Moon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+      <div className="absolute top-4 right-4 z-50">
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-full p-2 flex items-center gap-2 border border-gray-200 dark:border-gray-700">
+          <Sun className="h-5 w-5 text-yellow-500 dark:text-yellow-300" />
+          <Switch 
+            checked={isDarkMode}
+            onCheckedChange={toggleTheme}
+            className="data-[state=checked]:bg-akhanya data-[state=checked]:border-akhanya"
+          />
+          <Moon className="h-5 w-5 text-gray-500 dark:text-blue-300" />
+          <span className="text-xs font-medium ml-1 text-gray-800 dark:text-gray-200">
+            {isDarkMode ? 'Dark' : 'Light'}
+          </span>
+        </div>
       </div>
 
       {/* Background with overlay and image */}
