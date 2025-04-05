@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AdminNavBar from "@/components/AdminNavBar";
 import AdminProtectedRoute from "@/components/AdminProtectedRoute";
@@ -18,8 +17,72 @@ import {
 
 // Mock data for demonstration
 const MOCK_ASSESSMENT_DATA = [
-  { id: 1, siteName: "Eskom Substation A", region: "Gauteng", date: "2025-04-01", status: "completed", engineer: "John Smith" },
-  { id: 2, siteName: "Power Station B", region: "Western Cape", date: "2025-04-02", status: "pending", engineer: "Sarah Johnson" },
+  { 
+    id: 1, 
+    siteName: "Eskom Substation A", 
+    region: "Gauteng", 
+    date: "2025-04-01", 
+    status: "completed", 
+    engineer: "John Smith",
+    car: {
+      make: "Toyota",
+      model: "Hilux",
+      year: "2023",
+      registration: "GP 123-456",
+      odometer: "15,432 km",
+      condition: {
+        exterior: "Good",
+        interior: "Excellent",
+        tires: "75% tread remaining",
+        fuel: "3/4 tank"
+      },
+      maintenance: {
+        lastService: "2025-02-15",
+        nextService: "2025-08-15",
+        oilChange: "Due in 2,500 km",
+        issues: "None"
+      },
+      safety: {
+        firstAid: "Present and complete",
+        warningTriangle: "Present",
+        fireExtinguisher: "Present and charged",
+        safetyVest: "Present"
+      }
+    }
+  },
+  { 
+    id: 2, 
+    siteName: "Power Station B", 
+    region: "Western Cape", 
+    date: "2025-04-02", 
+    status: "pending", 
+    engineer: "Sarah Johnson",
+    car: {
+      make: "Ford",
+      model: "Ranger",
+      year: "2022",
+      registration: "WC 234-567",
+      odometer: "25,890 km",
+      condition: {
+        exterior: "Good",
+        interior: "Good",
+        tires: "60% tread remaining",
+        fuel: "1/2 tank"
+      },
+      maintenance: {
+        lastService: "2025-01-10",
+        nextService: "2025-07-10",
+        oilChange: "Due in 1,000 km",
+        issues: "Right rear brake light intermittent"
+      },
+      safety: {
+        firstAid: "Present and complete",
+        warningTriangle: "Present",
+        fireExtinguisher: "Present and charged",
+        safetyVest: "Present"
+      }
+    }
+  },
   { id: 3, siteName: "Transmission Tower C", region: "KwaZulu-Natal", date: "2025-04-03", status: "completed", engineer: "David Williams" },
   { id: 4, siteName: "Distribution Center D", region: "Free State", date: "2025-03-28", status: "completed", engineer: "Emily Brown" },
   { id: 5, siteName: "Renewable Plant E", region: "Eastern Cape", date: "2025-03-25", status: "completed", engineer: "Michael Davis" },

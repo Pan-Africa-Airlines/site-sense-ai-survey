@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Dialog,
@@ -16,7 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, MapPin, User, FileText, Clipboard, CheckCircle } from "lucide-react";
+import { Calendar, MapPin, User, FileText, Clipboard, CheckCircle, Car } from "lucide-react";
 
 type AssessmentDetailsProps = {
   isOpen: boolean;
@@ -56,9 +57,10 @@ const AssessmentDetailsDialog = ({ isOpen, onClose, assessment }: AssessmentDeta
 
         <ScrollArea className="max-h-[calc(90vh-120px)]">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="technical">Technical Details</TabsTrigger>
+              <TabsTrigger value="car">Car Assessment</TabsTrigger>
               <TabsTrigger value="photos">Site Photos</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
             </TabsList>
@@ -145,6 +147,55 @@ const AssessmentDetailsDialog = ({ isOpen, onClose, assessment }: AssessmentDeta
                     ]}
                   />
                 </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="car" className="space-y-4 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoCard 
+                  icon={<Car className="h-5 w-5 text-gray-500" />} 
+                  title="Vehicle Information"
+                  details={[
+                    { label: "Make", value: "Toyota" },
+                    { label: "Model", value: "Hilux" },
+                    { label: "Year", value: "2023" },
+                    { label: "Registration", value: "GP 123-456" },
+                    { label: "Odometer", value: "15,432 km" }
+                  ]}
+                />
+                
+                <InfoCard 
+                  icon={<Clipboard className="h-5 w-5 text-gray-500" />} 
+                  title="Vehicle Condition"
+                  details={[
+                    { label: "Exterior", value: "Good" },
+                    { label: "Interior", value: "Excellent" },
+                    { label: "Tires", value: "75% tread remaining" },
+                    { label: "Fuel Level", value: "3/4 tank" }
+                  ]}
+                />
+                
+                <InfoCard 
+                  icon={<FileText className="h-5 w-5 text-gray-500" />} 
+                  title="Maintenance Status"
+                  details={[
+                    { label: "Last Service", value: "2025-02-15" },
+                    { label: "Next Service Due", value: "2025-08-15" },
+                    { label: "Oil Change", value: "Due in 2,500 km" },
+                    { label: "Outstanding Issues", value: "None" }
+                  ]}
+                />
+                
+                <InfoCard 
+                  icon={<CheckCircle className="h-5 w-5 text-gray-500" />} 
+                  title="Safety Equipment"
+                  details={[
+                    { label: "First Aid Kit", value: "Present and complete" },
+                    { label: "Warning Triangle", value: "Present" },
+                    { label: "Fire Extinguisher", value: "Present and charged" },
+                    { label: "Safety Vest", value: "Present" }
+                  ]}
+                />
               </div>
             </TabsContent>
             
