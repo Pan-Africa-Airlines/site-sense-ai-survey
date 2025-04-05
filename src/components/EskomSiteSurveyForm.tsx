@@ -1,1156 +1,972 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sparkles, ChevronDown, ChevronUp, AlertCircle, Calendar, MapPin, Check, MapIcon } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAI } from "@/contexts/AIContext";
-import { toast } from "sonner";
-import { MapPin, Info, Check, Calendar, Users, Building, Router, FileText, Power, Radio, Thermometer, Save, Loader } from "lucide-react";
-import ImageCapture from "./ImageCapture";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { FormField } from "./FormFieldsConfiguration";
+import { useNavigate } from "react-router-dom";
+import ImageCapture from "./ImageCapture";
 import { Json } from "@/integrations/supabase/types";
 
-interface SiteOwnerContact {
-  name: string;
-  cellphone: string;
-  email: string;
+interface Core {
+  number: number;
+  used: boolean;
 }
 
-interface Attendee {
-  date: string;
-  name: string;
-  company: string;
-  department: string;
-  cellphone: string;
+interface Circuit {
+  circuit: string;
+  mcbRating: string;
+  used: boolean;
+  label: string;
 }
 
-interface TransportLink {
-  linkNumber: string;
-  linkType: string;
+interface FiberConnection {
   direction: string;
-  capacity: string;
+  connectionType: string;
+  numberOfCores: string;
+  cores: Core[];
 }
 
-interface SurveyOutcomeParty {
-  name: string;
-  signature: string;
-  date: string;
-  accepted: boolean;
-  comments: string;
+interface DBBox {
+  chargerLabel: string;
+  chargerType: "single" | "dual";
+  circuits: {
+    chargerA: Circuit[];
+    chargerB: Circuit[];
+  };
 }
 
-interface FormDataType {
+interface EskomSurveyFormData {
   siteName: string;
   region: string;
   date: string;
-  siteId: string;
   siteType: string;
+  siteId: string;
   address: string;
   gpsCoordinates: string;
   buildingPhoto: string;
-  
-  attendees: Attendee[];
-  
-  surveyOutcome: {
-    oemContractor: SurveyOutcomeParty;
-    oemEngineer: SurveyOutcomeParty;
-    eskomRepresentative: SurveyOutcomeParty;
-  };
-  
-  buildingName: string;
-  buildingType: string;
-  floorLevel: string;
-  roomNumber: string;
-  
-  accessRequirements: string;
-  securityRequirements: string;
-  vehicleType: string;
-  
-  siteOwnerContacts: SiteOwnerContact[];
-  
-  cableAccess: string;
-  roomLighting: string;
-  fireProtection: string;
-  coolingMethod: string;
-  coolingRating: string;
-  roomTemperature: string;
-  roomCondition: string;
-  
-  numberOfRouters: string;
-  cabinetLocationPhoto: string;
-  
-  transportLinks: TransportLink[];
-  
-  chargerALoadCurrent: string;
-  chargerBLoadCurrent: string;
-  powerSupplyMethod: string;
-  dcCableLength: string;
-  
-  equipmentRoomPhotos: string;
-  cabinetLocationPhotos: string;
-  dcPowerDistributionPhotos: string;
-  transportEquipmentPhotos: string;
-  odfPhotos: string;
-  accessEquipmentPhotos: string;
-  cableRoutingPhotos: string;
-  ceilingHvacPhotos: string;
-  
-  installationRequirements: {
-    accessSecurity: string;
-    coolingVentilation: string;
-    flooringType: string;
-    fireProtection: string;
-    roomLighting: string;
-    roofType: string;
-    powerCables: string;
-  };
-  
-  generalRemarks: string;
-  
-  odfDetails: Array<{
-    cabinetName: string;
-    direction: string;
-    connectionType: string;
-    numberOfCores: string;
-    cores: Array<{
-      number: number;
-      used: boolean;
-    }>;
-  }>;
-  
-  cabinetLayoutNotes: string;
-  
-  chargerLoadDistribution: {
-    siteName: string;
-    chargerLabel: string;
-    chargerType: string;
-    circuits: {
-      chargerA: Array<{
-        circuit: string;
-        mcbRating: string;
-        used: boolean;
-        label: string;
-      }>;
-      chargerB: Array<{
-        circuit: string;
-        mcbRating: string;
-        used: boolean;
-        label: string;
-      }>;
-    };
-  };
-  
-  roomLayoutDrawing: string;
-  
-  useAIAssistance: boolean;
-  [key: string]: any;
+  status: string;
+  contactPersonName: string;
+  contactPersonNumber: string;
+  accessToSite: string;
+  siteAccessibilityComments: string;
+  networkAvailability: string;
+  existingNetworkInfrastructure: string;
+  fiberConnections: FiberConnection[];
+  routerLocation: string;
+  routerPowerAvailability: string;
+  routerRackMounting: string;
+  routerComments: string;
+  upsAvailability: string;
+  upsSpecifications: string;
+  upsComments: string;
+  dbBoxAvailability: string;
+  dbBox: DBBox;
+  dbBoxComments: string;
+  earthingAvailability: string;
+  earthingQuality: string;
+  earthingComments: string;
+  lightningProtectionAvailability: string;
+  lightningProtectionType: string;
+  lightningProtectionComments: string;
+  surgeProtectionAvailability: string;
+  surgeProtectionType: string;
+  surgeProtectionComments: string;
+  poleAvailability: string;
+  poleType: string;
+  poleCondition: string;
+  poleHeight: string;
+  poleComments: string;
+  rooftopAccess: string;
+  rooftopType: string;
+  rooftopCondition: string;
+  rooftopHeight: string;
+  rooftopComments: string;
+  towerAvailability: string;
+  towerType: string;
+  towerCondition: string;
+  towerHeight: string;
+  towerComments: string;
+  additionalNotes: string;
 }
 
-interface EskomSiteSurveyFormProps {
-  onSubmit?: (data: any) => void;
-  assessmentData?: any; // Optional assessment data to pre-fill fields
-  showAIRecommendations?: boolean;
-}
-
-const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ 
-  onSubmit, 
-  assessmentData, 
-  showAIRecommendations = false 
-}) => {
-  const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
-  const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
-  const [savedDrafts, setSavedDrafts] = useLocalStorage<Record<string, any>>("eskomSurveyDrafts", {});
-  const [formConfig, setFormConfig] = useLocalStorage<any>("formConfig", {});
-  const [searchParams] = useSearchParams();
+const EskomSiteSurveyForm = () => {
+  const [siteName, setSiteName] = useState("");
+  const [region, setRegion] = useState("");
+  const [date, setDate] = useState("");
+  const [siteType, setSiteType] = useState("");
+  const [siteId, setSiteId] = useState("");
+  const [address, setAddress] = useState("");
+  const [gpsCoordinates, setGpsCoordinates] = useState("");
+  const [buildingPhoto, setBuildingPhoto] = useState("");
+  const [status, setStatus] = useState("");
+  const [contactPersonName, setContactPersonName] = useState("");
+  const [contactPersonNumber, setContactPersonNumber] = useState("");
+  const [accessToSite, setAccessToSite] = useState("");
+  const [siteAccessibilityComments, setSiteAccessibilityComments] = useState("");
+  const [networkAvailability, setNetworkAvailability] = useState("");
+  const [existingNetworkInfrastructure, setExistingNetworkInfrastructure] = useState("");
+  const [routerLocation, setRouterLocation] = useState("");
+  const [routerPowerAvailability, setRouterPowerAvailability] = useState("");
+  const [routerRackMounting, setRouterRackMounting] = useState("");
+  const [routerComments, setRouterComments] = useState("");
+  const [upsAvailability, setUpsAvailability] = useState("");
+  const [upsSpecifications, setUpsSpecifications] = useState("");
+  const [upsComments, setUpsComments] = useState("");
+  const [dbBoxAvailability, setDbBoxAvailability] = useState("");
+  const [dbBoxComments, setDbBoxComments] = useState("");
+  const [earthingAvailability, setEarthingAvailability] = useState("");
+  const [earthingQuality, setEarthingQuality] = useState("");
+  const [earthingComments, setEarthingComments] = useState("");
+  const [lightningProtectionAvailability, setLightningProtectionAvailability] = useState("");
+  const [lightningProtectionType, setLightningProtectionType] = useState("");
+  const [lightningProtectionComments, setLightningProtectionComments] = useState("");
+  const [surgeProtectionAvailability, setSurgeProtectionAvailability] = useState("");
+  const [surgeProtectionType, setSurgeProtectionType] = useState("");
+  const [surgeProtectionComments, setSurgeProtectionComments] = useState("");
+  const [poleAvailability, setPoleAvailability] = useState("");
+  const [poleType, setPoleType] = useState("");
+  const [poleCondition, setPoleCondition] = useState("");
+  const [poleHeight, setPoleHeight] = useState("");
+  const [poleComments, setPoleComments] = useState("");
+  const [rooftopAccess, setRooftopAccess] = useState("");
+  const [rooftopType, setRooftopType] = useState("");
+  const [rooftopCondition, setRooftopCondition] = useState("");
+  const [rooftopHeight, setRooftopHeight] = useState("");
+  const [rooftopComments, setRooftopComments] = useState("");
+  const [towerAvailability, setTowerAvailability] = useState("");
+  const [towerType, setTowerType] = useState("");
+  const [towerCondition, setTowerCondition] = useState("");
+  const [towerHeight, setTowerHeight] = useState("");
+  const [towerComments, setTowerComments] = useState("");
+  const [additionalNotes, setAdditionalNotes] = useState("");
+  const [sectionCompletion, setSectionCompletion] = useState({
+    "Site Information": false,
+    "Contact Information": false,
+    "Network Infrastructure": false,
+    "Router Details": false,
+    "UPS Details": false,
+    "DB Box Details": false,
+    "Earthing Details": false,
+    "Lightning Protection": false,
+    "Surge Protection": false,
+    "Pole Details": false,
+    "Rooftop Details": false,
+    "Tower Details": false,
+    "Additional Notes": false,
+  });
+  const [aiSuggestions, setAiSuggestions] = useState<{ [key: string]: string }>({});
+  const { toast } = useToast();
+  const { getSuggestion, isProcessing } = useAI();
   const navigate = useNavigate();
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const surveyId = searchParams.get('id');
-  
-  const getActiveFields = () => {
-    if (!formConfig || !formConfig.eskomSurvey || !formConfig.eskomSurvey.fields) {
-      return [];
-    }
-    return formConfig.eskomSurvey.fields.filter((field: FormField) => field.active !== false);
+
+  const validateSiteInformation = () => {
+    return (
+      siteName !== "" &&
+      region !== "" &&
+      date !== "" &&
+      siteType !== "" &&
+      siteId !== "" &&
+      address !== "" &&
+      gpsCoordinates !== "" &&
+      buildingPhoto !== "" &&
+      status !== ""
+    );
   };
 
-  const activeFields = getActiveFields();
-  
-  const isFieldActive = (fieldId: string) => {
-    if (!activeFields.length) return true; // If no configuration, show all fields
-    return activeFields.some((field: FormField) => field.id === fieldId || field.id.endsWith(`_${fieldId}`));
+  const validateContactInformation = () => {
+    return (
+      contactPersonName !== "" &&
+      contactPersonNumber !== "" &&
+      accessToSite !== "" &&
+      siteAccessibilityComments !== ""
+    );
   };
-  
-  const initialFormData: FormDataType = {
-    siteName: assessmentData?.siteName || "",
-    region: assessmentData?.region || "",
-    date: new Date().toISOString().split('T')[0],
-    siteId: "",
-    siteType: "",
-    address: "",
-    gpsCoordinates: "",
-    buildingPhoto: "",
-    
-    attendees: [
-      { date: "", name: "", company: "", department: "", cellphone: "" }
-    ],
-    
-    surveyOutcome: {
-      oemContractor: { name: "", signature: "", date: "", accepted: false, comments: "" },
-      oemEngineer: { name: "", signature: "", date: "", accepted: false, comments: "" },
-      eskomRepresentative: { name: "", signature: "", date: "", accepted: false, comments: "" }
-    },
-    
-    buildingName: "",
-    buildingType: "",
-    floorLevel: "",
-    roomNumber: "",
-    
-    accessRequirements: "",
-    securityRequirements: "",
-    vehicleType: "",
-    
-    siteOwnerContacts: [
-      { name: "", cellphone: "", email: "" }
-    ],
-    
-    cableAccess: "",
-    roomLighting: "",
-    fireProtection: "",
-    coolingMethod: "",
-    coolingRating: "",
-    roomTemperature: "",
-    roomCondition: "",
-    
-    numberOfRouters: "",
-    cabinetLocationPhoto: "",
-    
-    transportLinks: [
-      { linkNumber: "1", linkType: "", direction: "", capacity: "" },
-      { linkNumber: "2", linkType: "", direction: "", capacity: "" },
-      { linkNumber: "3", linkType: "", direction: "", capacity: "" },
-      { linkNumber: "4", linkType: "", direction: "", capacity: "" }
-    ],
-    
-    chargerALoadCurrent: "",
-    chargerBLoadCurrent: "",
-    powerSupplyMethod: "",
-    dcCableLength: "",
-    
-    equipmentRoomPhotos: "",
-    cabinetLocationPhotos: "",
-    dcPowerDistributionPhotos: "",
-    transportEquipmentPhotos: "",
-    odfPhotos: "",
-    accessEquipmentPhotos: "",
-    cableRoutingPhotos: "",
-    ceilingHvacPhotos: "",
-    
-    installationRequirements: {
-      accessSecurity: "",
-      coolingVentilation: "",
-      flooringType: "",
-      fireProtection: "",
-      roomLighting: "",
-      roofType: "",
-      powerCables: ""
-    },
-    
-    generalRemarks: "",
-    
-    odfDetails: [
-      { 
-        cabinetName: "", 
-        direction: "", 
-        connectionType: "", 
-        numberOfCores: "",
-        cores: Array(48).fill(0).map((_, i) => ({ number: i+1, used: false }))
-      }
-    ],
-    
-    cabinetLayoutNotes: "",
-    
-    chargerLoadDistribution: {
-      siteName: "",
-      chargerLabel: "",
-      chargerType: "single", // or "dual"
-      circuits: {
-        chargerA: Array(26).fill(0).map((_, i) => ({ 
-          circuit: String.fromCharCode(65 + i), 
-          mcbRating: "", 
-          used: false, 
-          label: "" 
-        })),
-        chargerB: Array(26).fill(0).map((_, i) => ({ 
-          circuit: String.fromCharCode(65 + i), 
-          mcbRating: "", 
-          used: false, 
-          label: "" 
-        }))
-      }
-    },
-    
-    roomLayoutDrawing: "",
-    
-    useAIAssistance: true
+
+  const validateNetworkInfrastructure = () => {
+    return (
+      networkAvailability !== "" &&
+      existingNetworkInfrastructure !== ""
+    );
   };
-  
-  const [formData, setFormData] = useState<FormDataType>(initialFormData);
-  const [aiSuggestions, setAiSuggestions] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState("basic");
-  const [draftName, setDraftName] = useState<string>("");
+
+  const validateRouterDetails = () => {
+    return (
+      routerLocation !== "" &&
+      routerPowerAvailability !== "" &&
+      routerRackMounting !== "" &&
+      routerComments !== ""
+    );
+  };
+
+  const validateUPSDetails = () => {
+    return (
+      upsAvailability !== "" &&
+      upsSpecifications !== "" &&
+      upsComments !== ""
+    );
+  };
+
+  const validateDBBoxDetails = () => {
+    return (
+      dbBoxAvailability !== "" &&
+      formData.dbBox.chargerLabel !== "" &&
+      dbBoxComments !== ""
+    );
+  };
+
+  const validateEarthingDetails = () => {
+    return (
+      earthingAvailability !== "" &&
+      earthingQuality !== "" &&
+      earthingComments !== ""
+    );
+  };
+
+  const validateLightningProtection = () => {
+    return (
+      lightningProtectionAvailability !== "" &&
+      lightningProtectionType !== "" &&
+      lightningProtectionComments !== ""
+    );
+  };
+
+  const validateSurgeProtection = () => {
+    return (
+      surgeProtectionAvailability !== "" &&
+      surgeProtectionType !== "" &&
+      surgeProtectionComments !== ""
+    );
+  };
+
+  const validatePoleDetails = () => {
+    return (
+      poleAvailability !== "" &&
+      poleType !== "" &&
+      poleCondition !== "" &&
+      poleHeight !== "" &&
+      poleComments !== ""
+    );
+  };
+
+  const validateRooftopDetails = () => {
+    return (
+      rooftopAccess !== "" &&
+      rooftopType !== "" &&
+      rooftopCondition !== "" &&
+      rooftopHeight !== "" &&
+      rooftopComments !== ""
+    );
+  };
+
+  const validateTowerDetails = () => {
+    return (
+      towerAvailability !== "" &&
+      towerType !== "" &&
+      towerCondition !== "" &&
+      towerHeight !== "" &&
+      towerComments !== ""
+    );
+  };
+
+  const validateAdditionalNotes = () => {
+    return additionalNotes !== "";
+  };
 
   useEffect(() => {
-    if (surveyId) {
-      fetchSurveyData(surveyId);
-    } else {
-      const draftId = searchParams.get('draftId');
-      if (draftId && savedDrafts[draftId]) {
-        setFormData(savedDrafts[draftId]);
-        setDraftName(draftId);
-        toast.success(`Loaded draft: ${draftId}`);
-      }
-    }
-  }, [savedDrafts, searchParams, surveyId]);
+    updateSectionCompletion("Site Information", validateSiteInformation());
+  }, [siteName, region, date, siteType, siteId, address, gpsCoordinates, buildingPhoto, status]);
 
-  const fetchSurveyData = async (id: string) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('site_surveys')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data) {
-        const surveyData = {
-          ...initialFormData,
-          ...data.survey_data,
-          siteName: data.site_name,
-          region: data.region,
-          date: data.date,
-          siteId: data.site_id || '',
-          siteType: data.site_type || '',
-          address: data.address || '',
-          gpsCoordinates: data.gps_coordinates || '',
-          buildingPhoto: data.building_photo || ''
-        };
-        
-        setFormData(surveyData as FormDataType);
-        setDraftName(data.site_name);
-        toast.success(`Loaded survey: ${data.site_name}`);
-      }
-    } catch (error) {
-      console.error('Error fetching survey:', error);
-      toast.error('Failed to load survey data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    updateSectionCompletion("Contact Information", validateContactInformation());
+  }, [contactPersonName, contactPersonNumber, accessToSite, siteAccessibilityComments]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    updateSectionCompletion("Network Infrastructure", validateNetworkInfrastructure());
+  }, [networkAvailability, existingNetworkInfrastructure]);
+
+  useEffect(() => {
+    updateSectionCompletion("Router Details", validateRouterDetails());
+  }, [routerLocation, routerPowerAvailability, routerRackMounting, routerComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("UPS Details", validateUPSDetails());
+  }, [upsAvailability, upsSpecifications, upsComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("DB Box Details", validateDBBoxDetails());
+  }, [dbBoxAvailability, formData.dbBox.chargerLabel, dbBoxComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("Earthing Details", validateEarthingDetails());
+  }, [earthingAvailability, earthingQuality, earthingComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("Lightning Protection", validateLightningProtection());
+  }, [lightningProtectionAvailability, lightningProtectionType, lightningProtectionComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("Surge Protection", validateSurgeProtection());
+  }, [surgeProtectionAvailability, surgeProtectionType, surgeProtectionComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("Pole Details", validatePoleDetails());
+  }, [poleAvailability, poleType, poleCondition, poleHeight, poleComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("Rooftop Details", validateRooftopDetails());
+  }, [rooftopAccess, rooftopType, rooftopCondition, rooftopHeight, rooftopComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("Tower Details", validateTowerDetails());
+  }, [towerAvailability, towerType, towerCondition, towerHeight, towerComments]);
+
+  useEffect(() => {
+    updateSectionCompletion("Additional Notes", validateAdditionalNotes());
+  }, [additionalNotes]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleNestedInputChange = (category: string, field: string, value: any) => {
-    const currentCategory = formData[category as keyof FormDataType];
-    if (currentCategory && typeof currentCategory === 'object') {
-      setFormData({
-        ...formData,
-        [category]: {
-          ...currentCategory,
-          [field]: value
-        }
-      });
+    switch (name) {
+      case "siteName":
+        setSiteName(value);
+        break;
+      case "region":
+        setRegion(value);
+        break;
+      case "date":
+        setDate(value);
+        break;
+      case "siteType":
+        setSiteType(value);
+        break;
+      case "siteId":
+        setSiteId(value);
+        break;
+      case "address":
+        setAddress(value);
+        break;
+      case "gpsCoordinates":
+        setGpsCoordinates(value);
+        break;
+      case "buildingPhoto":
+        setBuildingPhoto(value);
+        break;
+      case "status":
+        setStatus(value);
+        break;
+      case "contactPersonName":
+        setContactPersonName(value);
+        break;
+      case "contactPersonNumber":
+        setContactPersonNumber(value);
+        break;
+      case "accessToSite":
+        setAccessToSite(value);
+        break;
+      case "siteAccessibilityComments":
+        setSiteAccessibilityComments(value);
+        break;
+      case "networkAvailability":
+        setNetworkAvailability(value);
+        break;
+      case "existingNetworkInfrastructure":
+        setExistingNetworkInfrastructure(value);
+        break;
+      case "routerLocation":
+        setRouterLocation(value);
+        break;
+      case "routerPowerAvailability":
+        setRouterPowerAvailability(value);
+        break;
+      case "routerRackMounting":
+        setRouterRackMounting(value);
+        break;
+      case "routerComments":
+        setRouterComments(value);
+        break;
+      case "upsAvailability":
+        setUpsAvailability(value);
+        break;
+      case "upsSpecifications":
+        setUpsSpecifications(value);
+        break;
+      case "upsComments":
+        setUpsComments(value);
+        break;
+      case "dbBoxAvailability":
+        setDbBoxAvailability(value);
+        break;
+      case "dbBoxComments":
+        setDbBoxComments(value);
+        break;
+      case "earthingAvailability":
+        setEarthingAvailability(value);
+        break;
+      case "earthingQuality":
+        setEarthingQuality(value);
+        break;
+      case "earthingComments":
+        setEarthingComments(value);
+        break;
+      case "lightningProtectionAvailability":
+        setLightningProtectionAvailability(value);
+        break;
+      case "lightningProtectionType":
+        setLightningProtectionType(value);
+        break;
+      case "lightningProtectionComments":
+        setLightningProtectionComments(value);
+        break;
+      case "surgeProtectionAvailability":
+        setSurgeProtectionAvailability(value);
+        break;
+      case "surgeProtectionType":
+        setSurgeProtectionType(value);
+        break;
+      case "surgeProtectionComments":
+        setSurgeProtectionComments(value);
+        break;
+      case "poleAvailability":
+        setPoleAvailability(value);
+        break;
+      case "poleType":
+        setPoleType(value);
+        break;
+      case "poleCondition":
+        setPoleCondition(value);
+        break;
+      case "poleHeight":
+        setPoleHeight(value);
+        break;
+      case "poleComments":
+        setPoleComments(value);
+        break;
+      case "rooftopAccess":
+        setRooftopAccess(value);
+        break;
+      case "rooftopType":
+        setRooftopType(value);
+        break;
+      case "rooftopCondition":
+        setRooftopCondition(value);
+        break;
+      case "rooftopHeight":
+        setRooftopHeight(value);
+        break;
+      case "rooftopComments":
+        setRooftopComments(value);
+        break;
+      case "towerAvailability":
+        setTowerAvailability(value);
+        break;
+      case "towerType":
+        setTowerType(value);
+        break;
+      case "towerCondition":
+        setTowerCondition(value);
+        break;
+      case "towerHeight":
+        setTowerHeight(value);
+        break;
+      case "towerComments":
+        setTowerComments(value);
+        break;
+      case "additionalNotes":
+        setAdditionalNotes(value);
+        break;
+      default:
+        break;
     }
   };
 
-  const handleArrayItemChange = (arrayName: string, index: number, field: string, value: any) => {
-    const updatedArray = [...(formData[arrayName as keyof FormDataType] as any[])];
-    updatedArray[index][field] = value;
-    setFormData({ ...formData, [arrayName]: updatedArray });
-  };
-
-  const addArrayItem = (arrayName: string, template: any) => {
-    const updatedArray = [...(formData[arrayName as keyof FormDataType] as any[]), template];
-    setFormData({ ...formData, [arrayName]: updatedArray });
-  };
-
-  const removeArrayItem = (arrayName: string, index: number) => {
-    const updatedArray = [...(formData[arrayName as keyof FormDataType] as any[])];
-    updatedArray.splice(index, 1);
-    setFormData({ ...formData, [arrayName]: updatedArray });
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({ ...formData, [name]: value });
-  };
-  
-  const handleCheckboxChange = (category: string, subCategory: string, field: string, checked: boolean) => {
-    setFormData({
-      ...formData,
-      [category]: {
-        ...formData[category as keyof FormDataType],
-        [subCategory]: {
-          ...(formData[category as keyof FormDataType] as any)[subCategory],
-          [field]: checked
-        }
+  const handleCheckboxChange = (section: string, field: string, value: boolean) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      [section]: {
+        ...prevFormData[section as keyof EskomSurveyFormData],
+        [field]: value
       }
+    }));
+  };
+
+  const handleFiberCoreChange = (fiberIndex: number, coreIndex: number, value: boolean) => {
+    setFormData(prevFormData => {
+      const updatedFiberConnections = [...prevFormData.fiberConnections];
+      const updatedCores = [...updatedFiberConnections[fiberIndex].cores];
+      updatedCores[coreIndex] = { ...updatedCores[coreIndex], used: value };
+      updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], cores: updatedCores };
+      return { ...prevFormData, fiberConnections: updatedFiberConnections };
     });
   };
 
-  const handleImageCapture = (type: string, imageData: string) => {
-    setFormData({
-      ...formData,
-      [type]: imageData
-    });
-
-    if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData, "site").then(analysis => {
-        if (analysis) {
-          setAiSuggestions({ ...aiSuggestions, [type]: analysis });
+  const handleCircuitChange = (charger: 'chargerA' | 'chargerB', circuitIndex: number, field: string, value: string | boolean) => {
+    setFormData(prevFormData => {
+      const updatedCircuits = [...prevFormData.dbBox.circuits[charger]];
+      updatedCircuits[circuitIndex] = { ...updatedCircuits[circuitIndex], [field]: value };
+      return {
+        ...prevFormData,
+        dbBox: {
+          ...prevFormData.dbBox,
+          circuits: {
+            ...prevFormData.dbBox.circuits,
+            [charger]: updatedCircuits
+          }
         }
-      });
-    }
-  };
-
-  const handleLocationUpdate = () => {
-    if (latitude && longitude) {
-      setFormData({
-        ...formData,
-        gpsCoordinates: `${latitude}, ${longitude}`,
-        address: address || formData.address
-      });
-      toast.success("Location updated successfully");
-    } else {
-      toast.error("Could not get location. Please try again.");
-    }
+      };
+    });
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const currentValue = formData[fieldName] as string || "";
-    const suggestion = await getSuggestion(fieldName, currentValue, "site");
+    const currentValue = (formData as any)[fieldName] as string || "";
+    const suggestion = await getSuggestion(fieldName, currentValue);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
   };
 
-  const handleEnhanceNotes = async () => {
-    if (formData.generalRemarks) {
-      const enhanced = await enhanceNotes(formData.generalRemarks, "survey");
-      setFormData({ ...formData, generalRemarks: enhanced });
-      toast.success("Notes enhanced with AI suggestions");
-    } else {
-      toast.error("Please add some notes first");
-    }
-  };
-  
-  const saveSurveyToSupabase = async (status: 'draft' | 'submitted' = 'draft') => {
-    setIsSaving(true);
-    
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...restOfFormData } = formData;
+      const restOfFormData = {
+        contactPersonName,
+        contactPersonNumber,
+        accessToSite,
+        siteAccessibilityComments,
+        networkAvailability,
+        existingNetworkInfrastructure,
+        routerLocation,
+        routerPowerAvailability,
+        routerRackMounting,
+        routerComments,
+        upsAvailability,
+        upsSpecifications,
+        upsComments,
+        dbBoxAvailability,
+        dbBox: formData.dbBox,
+        dbBoxComments,
+        earthingAvailability,
+        earthingQuality,
+        earthingComments,
+        lightningProtectionAvailability,
+        lightningProtectionType,
+        lightningProtectionComments,
+        surgeProtectionAvailability,
+        surgeProtectionType,
+        surgeProtectionComments,
+        poleAvailability,
+        poleType,
+        poleCondition,
+        poleHeight,
+        poleComments,
+        rooftopAccess,
+        rooftopType,
+        rooftopCondition,
+        rooftopHeight,
+        rooftopComments,
+        towerAvailability,
+        towerType,
+        towerCondition,
+        towerHeight,
+        towerComments,
+        additionalNotes,
+        fiberConnections: formData.fiberConnections
+      };
       
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Create a properly typed object that meets Supabase's expectations
       const surveyRecord = {
         site_name: siteName,
         region: region,
         date: date,
-        site_id: siteId,
         site_type: siteType,
+        site_id: siteId,
         address: address,
         gps_coordinates: gpsCoordinates,
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: restOfFormData as Json
+        survey_data: restOfFormData as unknown as Json
       };
       
-      let response;
-      
-      if (surveyId) {
-        response = await supabase
-          .from('site_surveys')
-          .update(surveyRecord)
-          .eq('id', surveyId);
+      const { data, error } = await supabase
+        .from('eskom_site_surveys')
+        .insert([surveyRecord]);
+
+      if (error) {
+        toast({
+          title: "Error submitting survey",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
-        response = await supabase
-          .from('site_surveys')
-          .insert(surveyRecord)
-          .select();
+        toast({
+          title: "Survey submitted successfully",
+          description: "Your survey has been saved.",
+        });
+        navigate("/eskom-surveys");
       }
-      
-      if (response.error) throw response.error;
-      
-      const newId = surveyId || (response.data && response.data[0]?.id);
-      
-      if (newId) {
-        if (status === 'submitted') {
-          toast.success("Survey submitted successfully!");
-          
-          if (draftName && savedDrafts[draftName]) {
-            const { [draftName]: _, ...remainingDrafts } = savedDrafts;
-            setSavedDrafts(remainingDrafts);
-          }
-          
-          setTimeout(() => navigate('/'), 2000);
-        } else {
-          toast.success("Survey saved to database");
-          
-          const url = new URL(window.location.href);
-          url.searchParams.set('id', newId);
-          window.history.replaceState({}, '', url.toString());
-        }
-      }
-    } catch (error) {
-      console.error('Error saving survey:', error);
-      toast.error("Failed to save survey. Please try again.");
-    } finally {
-      setIsSaving(false);
+    } catch (error: any) {
+      toast({
+        title: "Unexpected error",
+        description: error.message || "Failed to submit the survey. Please try again.",
+        variant: "destructive",
+      });
     }
   };
-  
-  const handleSaveDraft = async () => {
-    const saveName = draftName || `Draft_${new Date().toISOString().slice(0, 10)}_${Math.floor(Math.random() * 1000)}`;
-    
-    const updatedDrafts = { 
-      ...savedDrafts,
-      [saveName]: formData 
-    };
-    
-    setSavedDrafts(updatedDrafts);
-    setDraftName(saveName);
-    
-    await saveSurveyToSupabase('draft');
-    
-    const url = new URL(window.location.href);
-    url.searchParams.set('draftId', saveName);
-    window.history.replaceState({}, '', url.toString());
-  };
-
-  const handleLoadDraft = (draftId: string) => {
-    if (savedDrafts[draftId]) {
-      setFormData(savedDrafts[draftId]);
-      setDraftName(draftId);
-      toast.success(`Loaded draft: ${draftId}`);
-    } else {
-      toast.error(`Draft not found: ${draftId}`);
-    }
-  };
-
-  const handleSubmitForm = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const requiredFields = ['siteName', 'date', 'region'];
-    const missingFields = requiredFields.filter(field => !formData[field as keyof FormDataType]);
-    
-    if (missingFields.length > 0) {
-      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-      return;
-    }
-    
-    await saveSurveyToSupabase('submitted');
-    
-    onSubmit?.(formData);
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading survey data...</span>
-      </div>
-    );
-  }
 
   return (
-    <form onSubmit={handleSubmitForm} className="space-y-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-2xl font-bold text-bcx">ESKOM OT IP/MPLS NETWORK</h2>
-          <h3 className="text-xl font-semibold">SITE SURVEY REPORT</h3>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="relative">
-            <Input
-              placeholder="Draft name (optional)"
-              value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
-              className="w-48 text-sm"
-            />
-          </div>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={handleSaveDraft}
-            className="flex items-center gap-1"
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <Loader className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Save Draft
-          </Button>
-          <Switch
-            id="ai-mode-install"
-            checked={formData.useAIAssistance}
-            onCheckedChange={(checked) => 
-              setFormData({ ...formData, useAIAssistance: checked })
-            }
-          />
-          <Label htmlFor="ai-mode-install" className="text-sm">AI Assistance</Label>
-        </div>
-      </div>
+    <form onSubmit={handleSubmit} className="container mx-auto py-8">
+      <Tabs defaultValue="site-information" className="w-[100%]">
+        <TabsList className="mb-4">
+          <TabsTrigger value="site-information">
+            <MapPin className="mr-2 h-4 w-4" />
+            Site Information
+            {sectionCompletion["Site Information"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="contact-information">
+            <User className="mr-2 h-4 w-4" />
+            Contact Information
+            {sectionCompletion["Contact Information"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="network-infrastructure">
+            <Network className="mr-2 h-4 w-4" />
+            Network Infrastructure
+            {sectionCompletion["Network Infrastructure"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="router-details">
+            <Router className="mr-2 h-4 w-4" />
+            Router Details
+            {sectionCompletion["Router Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="ups-details">
+            <BatteryCharging className="mr-2 h-4 w-4" />
+            UPS Details
+            {sectionCompletion["UPS Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="db-box-details">
+            <Box className="mr-2 h-4 w-4" />
+            DB Box Details
+            {sectionCompletion["DB Box Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="earthing-details">
+            <Grounded className="mr-2 h-4 w-4" />
+            Earthing Details
+            {sectionCompletion["Earthing Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="lightning-protection">
+            <CloudLightning className="mr-2 h-4 w-4" />
+            Lightning Protection
+            {sectionCompletion["Lightning Protection"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="surge-protection">
+            <Zap className="mr-2 h-4 w-4" />
+            Surge Protection
+            {sectionCompletion["Surge Protection"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="pole-details">
+            <Columns className="mr-2 h-4 w-4" />
+            Pole Details
+            {sectionCompletion["Pole Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="rooftop-details">
+            <Home className="mr-2 h-4 w-4" />
+            Rooftop Details
+            {sectionCompletion["Rooftop Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="tower-details">
+            <Navigation className="mr-2 h-4 w-4" />
+            Tower Details
+            {sectionCompletion["Tower Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+          <TabsTrigger value="additional-notes">
+            <Edit className="mr-2 h-4 w-4" />
+            Additional Notes
+            {sectionCompletion["Additional Notes"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+          </TabsTrigger>
+        </TabsList>
 
-      <Card className="overflow-hidden shadow-md">
-        <CardContent className="p-0">
-          <Table>
-            <TableBody>
-              {isFieldActive('siteName') && (
-                <TableRow>
-                  <TableCell className="font-medium w-1/4 bg-gray-50">Site Name:</TableCell>
-                  <TableCell>
+        <TabsContent value="site-information">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Site Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="siteName">Site Name</Label>
+                  <div className="relative">
                     <Input
+                      type="text"
                       id="siteName"
                       name="siteName"
-                      value={formData.siteName}
+                      value={siteName}
                       onChange={handleInputChange}
                       placeholder="Enter site name"
                     />
-                  </TableCell>
-                </TableRow>
-              )}
-              {isFieldActive('region') && (
-                <TableRow>
-                  <TableCell className="font-medium w-1/4 bg-gray-50">Region:</TableCell>
-                  <TableCell>
-                    <Input
-                      id="region"
-                      name="region"
-                      value={formData.region}
-                      onChange={handleInputChange}
-                      placeholder="Enter region"
-                    />
-                  </TableCell>
-                </TableRow>
-              )}
-              {isFieldActive('date') && (
-                <TableRow>
-                  <TableCell className="font-medium w-1/4 bg-gray-50">Date:</TableCell>
-                  <TableCell>
-                    <Input
-                      id="date"
-                      name="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={handleInputChange}
-                    />
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {isFieldActive('buildingPhoto') && (
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Full front view photo of building where IP/MPLS equipment will be situated</h3>
-            <ImageCapture
-              label="Building Photo"
-              description="Take a photo of the building front view"
-              onCapture={(imageData) => handleImageCapture("buildingPhoto", imageData)}
-              capturedImage={formData.buildingPhoto}
-            />
-            {aiSuggestions['buildingPhoto'] && (
-              <div className="ai-suggestion mt-2">
-                <p><Check size={12} className="inline mr-1" /> {aiSuggestions['buildingPhoto']}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-6">
-          <TabsTrigger value="basic">Site Information</TabsTrigger>
-          <TabsTrigger value="attendees">Site Visit Attendees</TabsTrigger>
-          <TabsTrigger value="equipment">Equipment Details</TabsTrigger>
-          <TabsTrigger value="power">Power & Transport</TabsTrigger>
-          <TabsTrigger value="annexures">Annexures</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="basic" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">1. SITE INFORMATION & LOCATION</h3>
-              
-              <h4 className="text-md font-medium mb-2">1.1. Site Identification</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {isFieldActive('siteId') && (
-                  <div>
-                    <Label htmlFor="siteId">Site ID (WorkPlace ID)</Label>
-                    <Input
-                      id="siteId"
-                      name="siteId"
-                      value={formData.siteId}
-                      onChange={handleInputChange}
-                      placeholder="Enter site ID"
-                    />
-                  </div>
-                )}
-                
-                {isFieldActive('siteType') && (
-                  <div>
-                    <Label htmlFor="siteType">Site Type</Label>
-                    <Select
-                      value={formData.siteType}
-                      onValueChange={(value) => handleSelectChange("siteType", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select site type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="sub-tx">Sub-TX</SelectItem>
-                        <SelectItem value="rs">RS</SelectItem>
-                        <SelectItem value="ps-coal">PS-Coal</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                
-                {isFieldActive('address') && (
-                  <div className="md:col-span-2">
-                    <Label htmlFor="address">Address/Location Description</Label>
-                    <Textarea
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="Enter full address or location description"
-                      rows={3}
-                    />
-                  </div>
-                )}
-                
-                {isFieldActive('gpsCoordinates') && (
-                  <div className="md:col-span-2 relative">
-                    <Label htmlFor="gpsCoordinates">GPS coordinates WGS84 (Lat/Long)</Label>
-                    <div className="flex space-x-2">
-                      <Input
-                        id="gpsCoordinates"
-                        name="gpsCoordinates"
-                        value={formData.gpsCoordinates}
-                        onChange={handleInputChange}
-                        placeholder="Latitude, Longitude"
-                        className="flex-grow"
-                      />
-                      <Button 
-                        type="button" 
-                        size="icon"
-                        variant="outline" 
-                        onClick={handleLocationUpdate} 
-                        disabled={locationLoading}
-                        className="flex-shrink-0"
-                      >
-                        <MapPin size={18} />
-                      </Button>
-                    </div>
-                    {address && (
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {address}
-                      </p>
+                    {aiSuggestions.siteName && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                        <Sparkles className="h-5 w-5 text-akhanya cursor-pointer" onClick={() => setSiteName(aiSuggestions.siteName)} />
+                      </div>
                     )}
                   </div>
-                )}
+                </div>
+                <div>
+                  <Label htmlFor="region">Region</Label>
+                  <Select onValueChange={value => handleInputChange({ target: { name: "region", value } } as any)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Gauteng">Gauteng</SelectItem>
+                      <SelectItem value="Western Cape">Western Cape</SelectItem>
+                      <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
+                      <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
+                      <SelectItem value="Northern Cape">Northern Cape</SelectItem>
+                      <SelectItem value="Limpopo">Limpopo</SelectItem>
+                      <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
+                      <SelectItem value="North West">North West</SelectItem>
+                      <SelectItem value="Free State">Free State</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              
-              <h4 className="text-md font-medium mb-2">1.3. Equipment Location</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {isFieldActive('buildingName') && (
-                  <div>
-                    <Label htmlFor="buildingName">Building name</Label>
-                    <Input
-                      id="buildingName"
-                      name="buildingName"
-                      value={formData.buildingName}
-                      onChange={handleInputChange}
-                      placeholder="Enter building name"
-                    />
-                  </div>
-                )}
-                
-                {isFieldActive('buildingType') && (
-                  <div>
-                    <Label htmlFor="buildingType">Building type</Label>
-                    <Select
-                      value={formData.buildingType}
-                      onValueChange={(value) => handleSelectChange("buildingType", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select building type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="container">Container</SelectItem>
-                        <SelectItem value="brick">Brick</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                
-                {isFieldActive('floorLevel') && (
-                  <div>
-                    <Label htmlFor="floorLevel">Floor level</Label>
-                    <Input
-                      id="floorLevel"
-                      name="floorLevel"
-                      value={formData.floorLevel}
-                      onChange={handleInputChange}
-                      placeholder="Enter floor level"
-                    />
-                  </div>
-                )}
-                
-                {isFieldActive('roomNumber') && (
-                  <div>
-                    <Label htmlFor="roomNumber">Equipment Room number / name</Label>
-                    <Input
-                      id="roomNumber"
-                      name="roomNumber"
-                      value={formData.roomNumber}
-                      onChange={handleInputChange}
-                      placeholder="Enter room number or name"
-                    />
-                  </div>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={date}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="siteType">Site Type</Label>
+                  <Input
+                    type="text"
+                    id="siteType"
+                    name="siteType"
+                    value={siteType}
+                    onChange={handleInputChange}
+                    placeholder="Enter site type"
+                  />
+                </div>
               </div>
-              
-              <h4 className="text-md font-medium mb-2">1.4. Access Procedure</h4>
-              <div className="grid grid-cols-1 gap-4 mb-6">
-                {isFieldActive('accessRequirements') && (
-                  <div>
-                    <Label htmlFor="accessRequirements">Requirements for site access</Label>
-                    <Textarea
-                      id="accessRequirements"
-                      name="accessRequirements"
-                      value={formData.accessRequirements}
-                      onChange={handleInputChange}
-                      placeholder="Detail requirements for accessing the site"
-                      rows={2}
-                    />
-                  </div>
-                )}
-                
-                {isFieldActive('securityRequirements') && (
-                  <div>
-                    <Label htmlFor="securityRequirements">Site security requirements</Label>
-                    <Textarea
-                      id="securityRequirements"
-                      name="securityRequirements"
-                      value={formData.securityRequirements}
-                      onChange={handleInputChange}
-                      placeholder="Detail security requirements for the site"
-                      rows={2}
-                    />
-                  </div>
-                )}
-                
-                {isFieldActive('vehicleType') && (
-                  <div>
-                    <Label htmlFor="vehicleType">Vehicle type to reach site</Label>
-                    <Input
-                      id="vehicleType"
-                      name="vehicleType"
-                      value={formData.vehicleType}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 4x4, Sedan, etc."
-                    />
-                  </div>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="siteId">Site ID</Label>
+                  <Input
+                    type="text"
+                    id="siteId"
+                    name="siteId"
+                    value={siteId}
+                    onChange={handleInputChange}
+                    placeholder="Enter site ID"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={address}
+                    onChange={handleInputChange}
+                    placeholder="Enter address"
+                  />
+                </div>
               </div>
-              
-              {isFieldActive('siteOwnerContacts') && (
-                <>
-                  <h4 className="text-md font-medium mb-2">1.5. Eskom site owner contact details</h4>
-                  {formData.siteOwnerContacts.map((contact, index) => (
-                    <div key={`contact-${index}`} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-2 border rounded">
-                      <div>
-                        <Label htmlFor={`contactName-${index}`}>Contact name</Label>
-                        <Input
-                          id={`contactName-${index}`}
-                          value={contact.name}
-                          onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'name', e.target.value)}
-                          placeholder="Contact name"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor={`contactPhone-${index}`}>Cellphone number</Label>
-                        <Input
-                          id={`contactPhone-${index}`}
-                          value={contact.cellphone}
-                          onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'cellphone', e.target.value)}
-                          placeholder="Cellphone number"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor={`contactEmail-${index}`}>Email address</Label>
-                        <Input
-                          id={`contactEmail-${index}`}
-                          value={contact.email}
-                          onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'email', e.target.value)}
-                          placeholder="Email address"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => addArrayItem('siteOwnerContacts', { name: "", cellphone: "", email: "" })}
-                    >
-                      Add Contact
-                    </Button>
-                    {formData.siteOwnerContacts.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeArrayItem('siteOwnerContacts', formData.siteOwnerContacts.length - 1)}
-                      >
-                        Remove Last
-                      </Button>
-                    )}
-                  </div>
-                </>
-              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="gpsCoordinates">GPS Coordinates</Label>
+                  <Input
+                    type="text"
+                    id="gpsCoordinates"
+                    name="gpsCoordinates"
+                    value={gpsCoordinates}
+                    onChange={handleInputChange}
+                    placeholder="Enter GPS coordinates"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="buildingPhoto">Building Photo</Label>
+                  <Input
+                    type="text"
+                    id="buildingPhoto"
+                    name="buildingPhoto"
+                    value={buildingPhoto}
+                    onChange={handleInputChange}
+                    placeholder="Enter building photo URL"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Input
+                  type="text"
+                  id="status"
+                  name="status"
+                  value={status}
+                  onChange={handleInputChange}
+                  placeholder="Enter status"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="attendees" className="space-y-4">
-          {isFieldActive('attendees') && (
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-semibold mb-4">Site visit attendee's information</h3>
-                
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Company</TableHead>
-                        <TableHead>Department</TableHead>
-                        <TableHead>Cellphone</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {formData.attendees.map((attendee, index) => (
-                        <TableRow key={`attendee-${index}`}>
-                          <TableCell>
-                            <Input
-                              type="date"
-                              value={attendee.date}
-                              onChange={(e) => handleArrayItemChange('attendees', index, 'date', e.target.value)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={attendee.name}
-                              onChange={(e) => handleArrayItemChange('attendees', index, 'name', e.target.value)}
-                              placeholder="Name"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={attendee.company}
-                              onChange={(e) => handleArrayItemChange('attendees', index, 'company', e.target.value)}
-                              placeholder="Company"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={attendee.department}
-                              onChange={(e) => handleArrayItemChange('attendees', index, 'department', e.target.value)}
-                              placeholder="Department"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={attendee.cellphone}
-                              onChange={(e) => handleArrayItemChange('attendees', index, 'cellphone', e.target.value)}
-                              placeholder="Cellphone"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                
-                <div className="flex justify-end space-x-2 mt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addArrayItem('attendees', { date: "", name: "", company: "", department: "", cellphone: "" })}
-                  >
-                    Add Attendee
-                  </Button>
-                  {formData.attendees.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeArrayItem('attendees', formData.attendees.length - 1)}
-                    >
-                      Remove Last
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {isFieldActive('surveyOutcome') && (
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-semibold mb-4">Site survey outcome</h3>
-                
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="border rounded-md p-4">
-                    <h4 className="font-medium mb-3">OEM Contractor</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-                      <div>
-                        <Label htmlFor="oemContractorName">Name</Label>
-                        <Input
-                          id="oemContractorName"
-                          value={formData.surveyOutcome.oemContractor.name}
-                          onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, name: e.target.value})}
-                          placeholder="Name"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="oemContractorSignature">Signature</Label>
-                        <Input
-                          id="oemContractorSignature"
-                          value={formData.surveyOutcome.oemContractor.signature}
-                          onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, signature: e.target.value})}
-                          placeholder="Signature"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="oemContractorDate">Date</Label>
-                        <Input
-                          id="oemContractorDate"
-                          type="date"
-                          value={formData.surveyOutcome.oemContractor.date}
-                          onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, date: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-6 mb-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="oemContractorAccepted" 
-                          checked={formData.surveyOutcome.oemContractor.accepted}
-                          onCheckedChange={(checked) => 
-                            handleNestedInputChange('surveyOutcome', 'oemContractor', {
-                              ...formData.surveyOutcome.oemContractor, 
-                              accepted: checked === true
-                            })
-                          }
-                        />
-                        <Label htmlFor="oemContractorAccepted">Accepted</Label>
-                      </div>
-                    </div>
-                    <Textarea
-                      placeholder="Comments"
-                      value={formData.surveyOutcome.oemContractor.comments}
-                      onChange={(e) => 
-                        handleNestedInputChange('surveyOutcome', 'oemContractor', {
-                          ...formData.surveyOutcome.oemContractor, 
-                          comments: e.target.value
-                        })
-                      }
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="equipment" className="space-y-4">
+        <TabsContent value="contact-information">
           <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Equipment Details</h3>
-              <p className="text-muted-foreground">This tab would contain equipment details.</p>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Contact Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="contactPersonName">Contact Person Name</Label>
+                  <Input
+                    type="text"
+                    id="contactPersonName"
+                    name="contactPersonName"
+                    value={contactPersonName}
+                    onChange={handleInputChange}
+                    placeholder="Enter contact person name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contactPersonNumber">Contact Person Number</Label>
+                  <Input
+                    type="text"
+                    id="contactPersonNumber"
+                    name="contactPersonNumber"
+                    value={contactPersonNumber}
+                    onChange={handleInputChange}
+                    placeholder="Enter contact person number"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="accessToSite">Access to Site</Label>
+                <Textarea
+                  id="accessToSite"
+                  name="accessToSite"
+                  value={accessToSite}
+                  onChange={handleInputChange}
+                  placeholder="Describe access to site"
+                />
+              </div>
+              <div>
+                <Label htmlFor="siteAccessibilityComments">Site Accessibility Comments</Label>
+                <Textarea
+                  id="siteAccessibilityComments"
+                  name="siteAccessibilityComments"
+                  value={siteAccessibilityComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter site accessibility comments"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
-        
-        <TabsContent value="power" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Power & Transport Details</h3>
-              <p className="text-muted-foreground">This tab would contain power and transport platform details.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="annexures" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Annexures</h3>
-              <p className="text-muted-foreground">This tab would contain annexure information.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="flex justify-end space-x-4 pt-6">
-        <Button type="button" variant="outline" onClick={() => navigate('/')}>
-          Cancel
-        </Button>
-        <Button type="submit">
-          Submit Survey
-        </Button>
-      </div>
-    </form>
-  );
-};
 
-export default EskomSiteSurveyForm;
+        <TabsContent value="network-infrastructure">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Network Infrastructure</h2>
+              <div>
+                <Label htmlFor="networkAvailability">Network Availability</Label>
+                <Textarea
+                  id="networkAvailability"
+                  name="networkAvailability"
+                  value={networkAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Describe network availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="existingNetworkInfrastructure">Existing Network Infrastructure</Label>
+                <Textarea
+                  id="existingNetworkInfrastructure"
+                  name="existingNetworkInfrastructure"
+                  value={existingNetworkInfrastructure}
+                  onChange={handleInputChange}
+                  placeholder="Describe existing network infrastructure"
+                />
+              </div>
+              <div>
+                <Label>Fiber Connections</Label>
+                {formData.fiberConnections.map((fiber, fiberIndex) => (
+                  <div key={fiberIndex} className="mb-4 p-4 border rounded">
+                    <h3 className="text-md font-medium mb-2">Fiber Connection {fiberIndex + 1}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`direction-${fiberIndex}`}>Direction</Label>
+                        <Input
+                          type="text"
+                          id={`direction-${fiberIndex}`}
+                          name={`direction-${fiberIndex}`}
+                          value={fiber.direction}
+                          onChange={(e) => {
+                            const updatedFiberConnections = [...formData.fiberConnections];
+                            updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], direction: e.target.value };
+                            setFormData({ ...formData, fiberConnections: updatedFiberConnections });
+                          }}
+                          placeholder="Enter direction"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`connectionType-${fiberIndex}`}>Connection Type</Label>
+                        <Input
+                          type="text"
+                          id={`connectionType-${fiberIndex}`}
+                          name={`connectionType-${fiberIndex}`}
+                          value={fiber.connectionType}
+                          onChange={(e) => {
+                            const updatedFiberConnections = [...formData.fiberConnections];
+                            updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], connectionType: e.target.value };
+                            setFormData({ ...formData, fiberConnections: updatedFiberConnections });
+                          }}
+                          placeholder="Enter connection type"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`numberOfCores-${fiberIndex}`}>Number of Cores</Label>
+                        <Input
+                          type="text"
+                          id={`numberOfCores-${fiberIndex}`}
+                          name={`numberOfCores-${fiberIndex}`}
+                          value={fiber.numberOfCores}
+                          onChange={(e) => {
+                            const updatedFiberConnections = [...formData.fiberConnections];
+                            updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], numberOfCores: e.target.value };
+                            setFormData({ ...formData, fiberConnections: updatedFiberConnections });
+                          }}
+                          placeholder="Enter number of cores"
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <Label>Cores</Label>
+                      <div className="grid grid-cols-6 gap-2">
+                        {fiber.cores.map((core, coreIndex) => (
+                          <div key={coreIndex} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`core-${fiberIndex}-${coreIndex}`}
+                              checked={core.used}
+                              onCheckedChange={(checked) => handleFiberCoreChange(fiberIndex, coreIndex, checked || false)}
+                            />
+                            <Label htmlFor={`core-${fiberIndex}-${coreIndex}`}>{core.number}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>

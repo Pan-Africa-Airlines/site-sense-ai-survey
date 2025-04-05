@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,6 +23,7 @@ import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import EskomSurvey from "./pages/EskomSurvey";
 import EskomSurveys from "./pages/EskomSurveys";
 import AdminMap from "./pages/AdminMap";
+import MyAllocations from "./pages/MyAllocations";
 
 const queryClient = new QueryClient();
 
@@ -90,22 +92,23 @@ const App = () => {
                 />
 
                 <Route 
-                  path="/eskom-survey" 
+                  path="/my-allocations" 
                   element={
                     <ProtectedRoute>
                       <div className="flex flex-col min-h-screen">
-                        <EskomSurvey />
+                        <MyAllocations />
                         <Footer />
                       </div>
                     </ProtectedRoute>
                   } 
                 />
+
                 <Route 
-                  path="/eskom-surveys" 
+                  path="/eskom-survey" 
                   element={
                     <ProtectedRoute>
                       <div className="flex flex-col min-h-screen">
-                        <EskomSurveys />
+                        <EskomSurvey />
                         <Footer />
                       </div>
                     </ProtectedRoute>
