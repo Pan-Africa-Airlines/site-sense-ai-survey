@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,9 @@ import {
   MapPin, 
   Clock, 
   CalendarCheck, 
-  CircleAlert 
+  Navigation 
 } from "lucide-react";
+import NavigationPopup from "./NavigationPopup";
 
 interface Site {
   id: number;
@@ -33,9 +34,16 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
   onVehicleCheck
 }) => {
   const navigate = useNavigate();
+  const [navigationOpen, setNavigationOpen] = useState(false);
+  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
   const handleAssessment = (siteId: number) => {
     navigate(`/assessment?siteId=${siteId}`);
+  };
+
+  const handleStartRoute = (site: Site) => {
+    setSelectedSite(site);
+    setNavigationOpen(true);
   };
 
   const getPriorityBadge = (priority: string) => {
@@ -114,17 +122,37 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                         </div>
                       )}
                     </div>
-                    <Button
-                      onClick={() => handleAssessment(site.id)}
-                      className="bg-akhanya hover:bg-akhanya-dark"
-                    >
-                      Complete Assessment
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        onClick={() => handleStartRoute(site)}
+                        variant="outline"
+                        className="text-akhanya border-akhanya hover:bg-akhanya/10"
+                      >
+                        <Navigation className="mr-2 h-4 w-4" />
+                        Start Route
+                      </Button>
+                      <Button
+                        onClick={() => handleAssessment(site.id)}
+                        className="bg-akhanya hover:bg-akhanya-dark"
+                      >
+                        Complete Assessment
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+        )}
+
+        {selectedSite && (
+          <NavigationPopup
+            open={navigationOpen}
+            onOpenChange={setNavigationOpen}
+            siteName={selectedSite.name}
+            siteAddress={selectedSite.address || ""}
+            siteDistance={selectedSite.distance}
+          />
         )}
       </CardContent>
     </Card>
