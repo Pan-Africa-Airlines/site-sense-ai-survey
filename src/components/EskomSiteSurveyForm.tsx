@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Sparkles, ChevronDown, ChevronUp, AlertCircle, Calendar, MapPin, Check, 
-  MapIcon, User, Network, Router, BatteryCharging, Box, Grounded, 
+  MapIcon, User, Network, Router, BatteryCharging, Box, Shield, 
   CloudLightning, Zap, Columns, Home, Navigation, Edit
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -687,12 +687,12 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: restOfFormData as unknown as Json
+        survey_data: restOfFormData as Json
       };
       
       const { data, error } = await supabase
-        .from('eskom_site_surveys')
-        .insert([surveyRecord as any]);
+        .from('site_surveys')
+        .insert([surveyRecord]);
 
       if (error) {
         toast({
@@ -717,811 +717,813 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="container mx-auto py-8">
-      <Tabs defaultValue="site-information" className="w-[100%]">
-        <TabsList className="mb-4">
-          <TabsTrigger value="site-information">
-            <MapPin className="mr-2 h-4 w-4" />
-            Site Information
-            {sectionCompletion["Site Information"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="contact-information">
-            <User className="mr-2 h-4 w-4" />
-            Contact Information
-            {sectionCompletion["Contact Information"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="network-infrastructure">
-            <Network className="mr-2 h-4 w-4" />
-            Network Infrastructure
-            {sectionCompletion["Network Infrastructure"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="router-details">
-            <Router className="mr-2 h-4 w-4" />
-            Router Details
-            {sectionCompletion["Router Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="ups-details">
-            <BatteryCharging className="mr-2 h-4 w-4" />
-            UPS Details
-            {sectionCompletion["UPS Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="db-box-details">
-            <Box className="mr-2 h-4 w-4" />
-            DB Box Details
-            {sectionCompletion["DB Box Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="earthing-details">
-            <Grounded className="mr-2 h-4 w-4" />
-            Earthing Details
-            {sectionCompletion["Earthing Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="lightning-protection">
-            <CloudLightning className="mr-2 h-4 w-4" />
-            Lightning Protection
-            {sectionCompletion["Lightning Protection"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="surge-protection">
-            <Zap className="mr-2 h-4 w-4" />
-            Surge Protection
-            {sectionCompletion["Surge Protection"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="pole-details">
-            <Columns className="mr-2 h-4 w-4" />
-            Pole Details
-            {sectionCompletion["Pole Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="rooftop-details">
-            <Home className="mr-2 h-4 w-4" />
-            Rooftop Details
-            {sectionCompletion["Rooftop Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="tower-details">
-            <Navigation className="mr-2 h-4 w-4" />
-            Tower Details
-            {sectionCompletion["Tower Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-          <TabsTrigger value="additional-notes">
-            <Edit className="mr-2 h-4 w-4" />
-            Additional Notes
-            {sectionCompletion["Additional Notes"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
-          </TabsTrigger>
-        </TabsList>
+    <div className="container mx-auto py-8">
+      <form onSubmit={handleSubmit}>
+        <Tabs defaultValue="site-information" className="w-[100%]">
+          <TabsList className="mb-4">
+            <TabsTrigger value="site-information">
+              <MapPin className="mr-2 h-4 w-4" />
+              Site Information
+              {sectionCompletion["Site Information"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="contact-information">
+              <User className="mr-2 h-4 w-4" />
+              Contact Information
+              {sectionCompletion["Contact Information"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="network-infrastructure">
+              <Network className="mr-2 h-4 w-4" />
+              Network Infrastructure
+              {sectionCompletion["Network Infrastructure"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="router-details">
+              <Router className="mr-2 h-4 w-4" />
+              Router Details
+              {sectionCompletion["Router Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="ups-details">
+              <BatteryCharging className="mr-2 h-4 w-4" />
+              UPS Details
+              {sectionCompletion["UPS Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="db-box-details">
+              <Box className="mr-2 h-4 w-4" />
+              DB Box Details
+              {sectionCompletion["DB Box Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="earthing-details">
+              <Shield className="mr-2 h-4 w-4" />
+              Earthing Details
+              {sectionCompletion["Earthing Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="lightning-protection">
+              <CloudLightning className="mr-2 h-4 w-4" />
+              Lightning Protection
+              {sectionCompletion["Lightning Protection"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="surge-protection">
+              <Zap className="mr-2 h-4 w-4" />
+              Surge Protection
+              {sectionCompletion["Surge Protection"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="pole-details">
+              <Columns className="mr-2 h-4 w-4" />
+              Pole Details
+              {sectionCompletion["Pole Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="rooftop-details">
+              <Home className="mr-2 h-4 w-4" />
+              Rooftop Details
+              {sectionCompletion["Rooftop Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="tower-details">
+              <Navigation className="mr-2 h-4 w-4" />
+              Tower Details
+              {sectionCompletion["Tower Details"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+            <TabsTrigger value="additional-notes">
+              <Edit className="mr-2 h-4 w-4" />
+              Additional Notes
+              {sectionCompletion["Additional Notes"] ? <Check className="ml-2 h-4 w-4 text-green-500" /> : null}
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="site-information">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Site Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="siteName">Site Name</Label>
-                  <div className="relative">
+          <TabsContent value="site-information">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Site Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="siteName">Site Name</Label>
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        id="siteName"
+                        name="siteName"
+                        value={siteName}
+                        onChange={handleInputChange}
+                        placeholder="Enter site name"
+                      />
+                      {aiSuggestions.siteName && (
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                          <Sparkles className="h-5 w-5 text-akhanya cursor-pointer" onClick={() => setSiteName(aiSuggestions.siteName)} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="region">Region</Label>
+                    <Select onValueChange={value => handleInputChange({ target: { name: "region", value } } as any)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Gauteng">Gauteng</SelectItem>
+                        <SelectItem value="Western Cape">Western Cape</SelectItem>
+                        <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
+                        <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
+                        <SelectItem value="Northern Cape">Northern Cape</SelectItem>
+                        <SelectItem value="Limpopo">Limpopo</SelectItem>
+                        <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
+                        <SelectItem value="North West">North West</SelectItem>
+                        <SelectItem value="Free State">Free State</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      type="date"
+                      id="date"
+                      name="date"
+                      value={date}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="siteType">Site Type</Label>
                     <Input
                       type="text"
-                      id="siteName"
-                      name="siteName"
-                      value={siteName}
+                      id="siteType"
+                      name="siteType"
+                      value={siteType}
                       onChange={handleInputChange}
-                      placeholder="Enter site name"
+                      placeholder="Enter site type"
                     />
-                    {aiSuggestions.siteName && (
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                        <Sparkles className="h-5 w-5 text-akhanya cursor-pointer" onClick={() => setSiteName(aiSuggestions.siteName)} />
-                      </div>
-                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="siteId">Site ID</Label>
+                    <Input
+                      type="text"
+                      id="siteId"
+                      name="siteId"
+                      value={siteId}
+                      onChange={handleInputChange}
+                      placeholder="Enter site ID"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      type="text"
+                      id="address"
+                      name="address"
+                      value={address}
+                      onChange={handleInputChange}
+                      placeholder="Enter address"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="gpsCoordinates">GPS Coordinates</Label>
+                    <Input
+                      type="text"
+                      id="gpsCoordinates"
+                      name="gpsCoordinates"
+                      value={gpsCoordinates}
+                      onChange={handleInputChange}
+                      placeholder="Enter GPS coordinates"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="buildingPhoto">Building Photo</Label>
+                    <Input
+                      type="text"
+                      id="buildingPhoto"
+                      name="buildingPhoto"
+                      value={buildingPhoto}
+                      onChange={handleInputChange}
+                      placeholder="Enter building photo URL"
+                    />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="region">Region</Label>
-                  <Select onValueChange={value => handleInputChange({ target: { name: "region", value } } as any)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a region" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Gauteng">Gauteng</SelectItem>
-                      <SelectItem value="Western Cape">Western Cape</SelectItem>
-                      <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
-                      <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
-                      <SelectItem value="Northern Cape">Northern Cape</SelectItem>
-                      <SelectItem value="Limpopo">Limpopo</SelectItem>
-                      <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
-                      <SelectItem value="North West">North West</SelectItem>
-                      <SelectItem value="Free State">Free State</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={date}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="siteType">Site Type</Label>
+                  <Label htmlFor="status">Status</Label>
                   <Input
                     type="text"
-                    id="siteType"
-                    name="siteType"
-                    value={siteType}
+                    id="status"
+                    name="status"
+                    value={status}
                     onChange={handleInputChange}
-                    placeholder="Enter site type"
+                    placeholder="Enter status"
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="siteId">Site ID</Label>
-                  <Input
-                    type="text"
-                    id="siteId"
-                    name="siteId"
-                    value={siteId}
-                    onChange={handleInputChange}
-                    placeholder="Enter site ID"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={address}
-                    onChange={handleInputChange}
-                    placeholder="Enter address"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="gpsCoordinates">GPS Coordinates</Label>
-                  <Input
-                    type="text"
-                    id="gpsCoordinates"
-                    name="gpsCoordinates"
-                    value={gpsCoordinates}
-                    onChange={handleInputChange}
-                    placeholder="Enter GPS coordinates"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="buildingPhoto">Building Photo</Label>
-                  <Input
-                    type="text"
-                    id="buildingPhoto"
-                    name="buildingPhoto"
-                    value={buildingPhoto}
-                    onChange={handleInputChange}
-                    placeholder="Enter building photo URL"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Input
-                  type="text"
-                  id="status"
-                  name="status"
-                  value={status}
-                  onChange={handleInputChange}
-                  placeholder="Enter status"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="contact-information">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Contact Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="contactPersonName">Contact Person Name</Label>
-                  <Input
-                    type="text"
-                    id="contactPersonName"
-                    name="contactPersonName"
-                    value={contactPersonName}
-                    onChange={handleInputChange}
-                    placeholder="Enter contact person name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contactPersonNumber">Contact Person Number</Label>
-                  <Input
-                    type="text"
-                    id="contactPersonNumber"
-                    name="contactPersonNumber"
-                    value={contactPersonNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter contact person number"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="accessToSite">Access to Site</Label>
-                <Textarea
-                  id="accessToSite"
-                  name="accessToSite"
-                  value={accessToSite}
-                  onChange={handleInputChange}
-                  placeholder="Describe access to site"
-                />
-              </div>
-              <div>
-                <Label htmlFor="siteAccessibilityComments">Site Accessibility Comments</Label>
-                <Textarea
-                  id="siteAccessibilityComments"
-                  name="siteAccessibilityComments"
-                  value={siteAccessibilityComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter site accessibility comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="network-infrastructure">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Network Infrastructure</h2>
-              <div>
-                <Label htmlFor="networkAvailability">Network Availability</Label>
-                <Textarea
-                  id="networkAvailability"
-                  name="networkAvailability"
-                  value={networkAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Describe network availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="existingNetworkInfrastructure">Existing Network Infrastructure</Label>
-                <Textarea
-                  id="existingNetworkInfrastructure"
-                  name="existingNetworkInfrastructure"
-                  value={existingNetworkInfrastructure}
-                  onChange={handleInputChange}
-                  placeholder="Describe existing network infrastructure"
-                />
-              </div>
-              <div>
-                <Label>Fiber Connections</Label>
-                {formData.fiberConnections.map((fiber, fiberIndex) => (
-                  <div key={fiberIndex} className="mb-4 p-4 border rounded">
-                    <h3 className="text-md font-medium mb-2">Fiber Connection {fiberIndex + 1}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor={`direction-${fiberIndex}`}>Direction</Label>
-                        <Input
-                          type="text"
-                          id={`direction-${fiberIndex}`}
-                          name={`direction-${fiberIndex}`}
-                          value={fiber.direction}
-                          onChange={(e) => {
-                            const updatedFiberConnections = [...formData.fiberConnections];
-                            updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], direction: e.target.value };
-                            setFormData({ ...formData, fiberConnections: updatedFiberConnections });
-                          }}
-                          placeholder="Enter direction"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={`connectionType-${fiberIndex}`}>Connection Type</Label>
-                        <Input
-                          type="text"
-                          id={`connectionType-${fiberIndex}`}
-                          name={`connectionType-${fiberIndex}`}
-                          value={fiber.connectionType}
-                          onChange={(e) => {
-                            const updatedFiberConnections = [...formData.fiberConnections];
-                            updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], connectionType: e.target.value };
-                            setFormData({ ...formData, fiberConnections: updatedFiberConnections });
-                          }}
-                          placeholder="Enter connection type"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={`numberOfCores-${fiberIndex}`}>Number of Cores</Label>
-                        <Input
-                          type="text"
-                          id={`numberOfCores-${fiberIndex}`}
-                          name={`numberOfCores-${fiberIndex}`}
-                          value={fiber.numberOfCores}
-                          onChange={(e) => {
-                            const updatedFiberConnections = [...formData.fiberConnections];
-                            updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], numberOfCores: e.target.value };
-                            setFormData({ ...formData, fiberConnections: updatedFiberConnections });
-                          }}
-                          placeholder="Enter number of cores"
-                        />
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <Label>Cores</Label>
-                      <div className="grid grid-cols-6 gap-2">
-                        {fiber.cores.map((core, coreIndex) => (
-                          <div key={coreIndex} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`core-${fiberIndex}-${coreIndex}`}
-                              checked={core.used}
-                              onCheckedChange={(checked) => handleFiberCoreChange(fiberIndex, coreIndex, checked || false)}
-                            />
-                            <Label htmlFor={`core-${fiberIndex}-${coreIndex}`}>{core.number}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+          <TabsContent value="contact-information">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Contact Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="contactPersonName">Contact Person Name</Label>
+                    <Input
+                      type="text"
+                      id="contactPersonName"
+                      name="contactPersonName"
+                      value={contactPersonName}
+                      onChange={handleInputChange}
+                      placeholder="Enter contact person name"
+                    />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <div>
+                    <Label htmlFor="contactPersonNumber">Contact Person Number</Label>
+                    <Input
+                      type="text"
+                      id="contactPersonNumber"
+                      name="contactPersonNumber"
+                      value={contactPersonNumber}
+                      onChange={handleInputChange}
+                      placeholder="Enter contact person number"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="accessToSite">Access to Site</Label>
+                  <Textarea
+                    id="accessToSite"
+                    name="accessToSite"
+                    value={accessToSite}
+                    onChange={handleInputChange}
+                    placeholder="Describe access to site"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="siteAccessibilityComments">Site Accessibility Comments</Label>
+                  <Textarea
+                    id="siteAccessibilityComments"
+                    name="siteAccessibilityComments"
+                    value={siteAccessibilityComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter site accessibility comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="router-details">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Router Details</h2>
-              <div>
-                <Label htmlFor="routerLocation">Router Location</Label>
-                <Input
-                  type="text"
-                  id="routerLocation"
-                  name="routerLocation"
-                  value={routerLocation}
-                  onChange={handleInputChange}
-                  placeholder="Enter router location"
-                />
-              </div>
-              <div>
-                <Label htmlFor="routerPowerAvailability">Router Power Availability</Label>
-                <Input
-                  type="text"
-                  id="routerPowerAvailability"
-                  name="routerPowerAvailability"
-                  value={routerPowerAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter router power availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="routerRackMounting">Router Rack Mounting</Label>
-                <Input
-                  type="text"
-                  id="routerRackMounting"
-                  name="routerRackMounting"
-                  value={routerRackMounting}
-                  onChange={handleInputChange}
-                  placeholder="Enter router rack mounting"
-                />
-              </div>
-              <div>
-                <Label htmlFor="routerComments">Router Comments</Label>
-                <Textarea
-                  id="routerComments"
-                  name="routerComments"
-                  value={routerComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter router comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="network-infrastructure">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Network Infrastructure</h2>
+                <div>
+                  <Label htmlFor="networkAvailability">Network Availability</Label>
+                  <Textarea
+                    id="networkAvailability"
+                    name="networkAvailability"
+                    value={networkAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Describe network availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="existingNetworkInfrastructure">Existing Network Infrastructure</Label>
+                  <Textarea
+                    id="existingNetworkInfrastructure"
+                    name="existingNetworkInfrastructure"
+                    value={existingNetworkInfrastructure}
+                    onChange={handleInputChange}
+                    placeholder="Describe existing network infrastructure"
+                  />
+                </div>
+                <div>
+                  <Label>Fiber Connections</Label>
+                  {formData.fiberConnections.map((fiber, fiberIndex) => (
+                    <div key={fiberIndex} className="mb-4 p-4 border rounded">
+                      <h3 className="text-md font-medium mb-2">Fiber Connection {fiberIndex + 1}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor={`direction-${fiberIndex}`}>Direction</Label>
+                          <Input
+                            type="text"
+                            id={`direction-${fiberIndex}`}
+                            name={`direction-${fiberIndex}`}
+                            value={fiber.direction}
+                            onChange={(e) => {
+                              const updatedFiberConnections = [...formData.fiberConnections];
+                              updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], direction: e.target.value };
+                              setFormData({ ...formData, fiberConnections: updatedFiberConnections });
+                            }}
+                            placeholder="Enter direction"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`connectionType-${fiberIndex}`}>Connection Type</Label>
+                          <Input
+                            type="text"
+                            id={`connectionType-${fiberIndex}`}
+                            name={`connectionType-${fiberIndex}`}
+                            value={fiber.connectionType}
+                            onChange={(e) => {
+                              const updatedFiberConnections = [...formData.fiberConnections];
+                              updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], connectionType: e.target.value };
+                              setFormData({ ...formData, fiberConnections: updatedFiberConnections });
+                            }}
+                            placeholder="Enter connection type"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`numberOfCores-${fiberIndex}`}>Number of Cores</Label>
+                          <Input
+                            type="text"
+                            id={`numberOfCores-${fiberIndex}`}
+                            name={`numberOfCores-${fiberIndex}`}
+                            value={fiber.numberOfCores}
+                            onChange={(e) => {
+                              const updatedFiberConnections = [...formData.fiberConnections];
+                              updatedFiberConnections[fiberIndex] = { ...updatedFiberConnections[fiberIndex], numberOfCores: e.target.value };
+                              setFormData({ ...formData, fiberConnections: updatedFiberConnections });
+                            }}
+                            placeholder="Enter number of cores"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <Label>Cores</Label>
+                        <div className="grid grid-cols-6 gap-2">
+                          {fiber.cores.map((core, coreIndex) => (
+                            <div key={coreIndex} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`core-${fiberIndex}-${coreIndex}`}
+                                checked={core.used}
+                                onCheckedChange={(checked) => handleFiberCoreChange(fiberIndex, coreIndex, checked || false)}
+                              />
+                              <Label htmlFor={`core-${fiberIndex}-${coreIndex}`}>{core.number}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="ups-details">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">UPS Details</h2>
-              <div>
-                <Label htmlFor="upsAvailability">UPS Availability</Label>
-                <Input
-                  type="text"
-                  id="upsAvailability"
-                  name="upsAvailability"
-                  value={upsAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter UPS availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="upsSpecifications">UPS Specifications</Label>
-                <Input
-                  type="text"
-                  id="upsSpecifications"
-                  name="upsSpecifications"
-                  value={upsSpecifications}
-                  onChange={handleInputChange}
-                  placeholder="Enter UPS specifications"
-                />
-              </div>
-              <div>
-                <Label htmlFor="upsComments">UPS Comments</Label>
-                <Textarea
-                  id="upsComments"
-                  name="upsComments"
-                  value={upsComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter UPS comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="router-details">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Router Details</h2>
+                <div>
+                  <Label htmlFor="routerLocation">Router Location</Label>
+                  <Input
+                    type="text"
+                    id="routerLocation"
+                    name="routerLocation"
+                    value={routerLocation}
+                    onChange={handleInputChange}
+                    placeholder="Enter router location"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="routerPowerAvailability">Router Power Availability</Label>
+                  <Input
+                    type="text"
+                    id="routerPowerAvailability"
+                    name="routerPowerAvailability"
+                    value={routerPowerAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter router power availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="routerRackMounting">Router Rack Mounting</Label>
+                  <Input
+                    type="text"
+                    id="routerRackMounting"
+                    name="routerRackMounting"
+                    value={routerRackMounting}
+                    onChange={handleInputChange}
+                    placeholder="Enter router rack mounting"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="routerComments">Router Comments</Label>
+                  <Textarea
+                    id="routerComments"
+                    name="routerComments"
+                    value={routerComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter router comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="db-box-details">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">DB Box Details</h2>
-              <div>
-                <Label htmlFor="dbBoxAvailability">DB Box Availability</Label>
-                <Input
-                  type="text"
-                  id="dbBoxAvailability"
-                  name="dbBoxAvailability"
-                  value={dbBoxAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter DB Box availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="dbBox.chargerLabel">DB Box Charger Label</Label>
-                <Input
-                  type="text"
-                  id="dbBox.chargerLabel"
-                  name="dbBox.chargerLabel"
-                  value={formData.dbBox.chargerLabel}
-                  onChange={handleInputChange}
-                  placeholder="Enter DB Box charger label"
-                />
-              </div>
-              <div>
-                <Label htmlFor="dbBoxComments">DB Box Comments</Label>
-                <Textarea
-                  id="dbBoxComments"
-                  name="dbBoxComments"
-                  value={dbBoxComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter DB Box comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="ups-details">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">UPS Details</h2>
+                <div>
+                  <Label htmlFor="upsAvailability">UPS Availability</Label>
+                  <Input
+                    type="text"
+                    id="upsAvailability"
+                    name="upsAvailability"
+                    value={upsAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter UPS availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="upsSpecifications">UPS Specifications</Label>
+                  <Input
+                    type="text"
+                    id="upsSpecifications"
+                    name="upsSpecifications"
+                    value={upsSpecifications}
+                    onChange={handleInputChange}
+                    placeholder="Enter UPS specifications"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="upsComments">UPS Comments</Label>
+                  <Textarea
+                    id="upsComments"
+                    name="upsComments"
+                    value={upsComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter UPS comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="earthing-details">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Earthing Details</h2>
-              <div>
-                <Label htmlFor="earthingAvailability">Earthing Availability</Label>
-                <Input
-                  type="text"
-                  id="earthingAvailability"
-                  name="earthingAvailability"
-                  value={earthingAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter earthing availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="earthingQuality">Earthing Quality</Label>
-                <Input
-                  type="text"
-                  id="earthingQuality"
-                  name="earthingQuality"
-                  value={earthingQuality}
-                  onChange={handleInputChange}
-                  placeholder="Enter earthing quality"
-                />
-              </div>
-              <div>
-                <Label htmlFor="earthingComments">Earthing Comments</Label>
-                <Textarea
-                  id="earthingComments"
-                  name="earthingComments"
-                  value={earthingComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter earthing comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="db-box-details">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">DB Box Details</h2>
+                <div>
+                  <Label htmlFor="dbBoxAvailability">DB Box Availability</Label>
+                  <Input
+                    type="text"
+                    id="dbBoxAvailability"
+                    name="dbBoxAvailability"
+                    value={dbBoxAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter DB Box availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dbBox.chargerLabel">DB Box Charger Label</Label>
+                  <Input
+                    type="text"
+                    id="dbBox.chargerLabel"
+                    name="dbBox.chargerLabel"
+                    value={formData.dbBox.chargerLabel}
+                    onChange={handleInputChange}
+                    placeholder="Enter DB Box charger label"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dbBoxComments">DB Box Comments</Label>
+                  <Textarea
+                    id="dbBoxComments"
+                    name="dbBoxComments"
+                    value={dbBoxComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter DB Box comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="lightning-protection">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Lightning Protection</h2>
-              <div>
-                <Label htmlFor="lightningProtectionAvailability">Lightning Protection Availability</Label>
-                <Input
-                  type="text"
-                  id="lightningProtectionAvailability"
-                  name="lightningProtectionAvailability"
-                  value={lightningProtectionAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter lightning protection availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="lightningProtectionType">Lightning Protection Type</Label>
-                <Input
-                  type="text"
-                  id="lightningProtectionType"
-                  name="lightningProtectionType"
-                  value={lightningProtectionType}
-                  onChange={handleInputChange}
-                  placeholder="Enter lightning protection type"
-                />
-              </div>
-              <div>
-                <Label htmlFor="lightningProtectionComments">Lightning Protection Comments</Label>
-                <Textarea
-                  id="lightningProtectionComments"
-                  name="lightningProtectionComments"
-                  value={lightningProtectionComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter lightning protection comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="earthing-details">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Earthing Details</h2>
+                <div>
+                  <Label htmlFor="earthingAvailability">Earthing Availability</Label>
+                  <Input
+                    type="text"
+                    id="earthingAvailability"
+                    name="earthingAvailability"
+                    value={earthingAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter earthing availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="earthingQuality">Earthing Quality</Label>
+                  <Input
+                    type="text"
+                    id="earthingQuality"
+                    name="earthingQuality"
+                    value={earthingQuality}
+                    onChange={handleInputChange}
+                    placeholder="Enter earthing quality"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="earthingComments">Earthing Comments</Label>
+                  <Textarea
+                    id="earthingComments"
+                    name="earthingComments"
+                    value={earthingComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter earthing comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="surge-protection">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Surge Protection</h2>
-              <div>
-                <Label htmlFor="surgeProtectionAvailability">Surge Protection Availability</Label>
-                <Input
-                  type="text"
-                  id="surgeProtectionAvailability"
-                  name="surgeProtectionAvailability"
-                  value={surgeProtectionAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter surge protection availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="surgeProtectionType">Surge Protection Type</Label>
-                <Input
-                  type="text"
-                  id="surgeProtectionType"
-                  name="surgeProtectionType"
-                  value={surgeProtectionType}
-                  onChange={handleInputChange}
-                  placeholder="Enter surge protection type"
-                />
-              </div>
-              <div>
-                <Label htmlFor="surgeProtectionComments">Surge Protection Comments</Label>
-                <Textarea
-                  id="surgeProtectionComments"
-                  name="surgeProtectionComments"
-                  value={surgeProtectionComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter surge protection comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="lightning-protection">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Lightning Protection</h2>
+                <div>
+                  <Label htmlFor="lightningProtectionAvailability">Lightning Protection Availability</Label>
+                  <Input
+                    type="text"
+                    id="lightningProtectionAvailability"
+                    name="lightningProtectionAvailability"
+                    value={lightningProtectionAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter lightning protection availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lightningProtectionType">Lightning Protection Type</Label>
+                  <Input
+                    type="text"
+                    id="lightningProtectionType"
+                    name="lightningProtectionType"
+                    value={lightningProtectionType}
+                    onChange={handleInputChange}
+                    placeholder="Enter lightning protection type"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lightningProtectionComments">Lightning Protection Comments</Label>
+                  <Textarea
+                    id="lightningProtectionComments"
+                    name="lightningProtectionComments"
+                    value={lightningProtectionComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter lightning protection comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="pole-details">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Pole Details</h2>
-              <div>
-                <Label htmlFor="poleAvailability">Pole Availability</Label>
-                <Input
-                  type="text"
-                  id="poleAvailability"
-                  name="poleAvailability"
-                  value={poleAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter pole availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="poleType">Pole Type</Label>
-                <Input
-                  type="text"
-                  id="poleType"
-                  name="poleType"
-                  value={poleType}
-                  onChange={handleInputChange}
-                  placeholder="Enter pole type"
-                />
-              </div>
-              <div>
-                <Label htmlFor="poleCondition">Pole Condition</Label>
-                <Input
-                  type="text"
-                  id="poleCondition"
-                  name="poleCondition"
-                  value={poleCondition}
-                  onChange={handleInputChange}
-                  placeholder="Enter pole condition"
-                />
-              </div>
-              <div>
-                <Label htmlFor="poleHeight">Pole Height</Label>
-                <Input
-                  type="text"
-                  id="poleHeight"
-                  name="poleHeight"
-                  value={poleHeight}
-                  onChange={handleInputChange}
-                  placeholder="Enter pole height"
-                />
-              </div>
-              <div>
-                <Label htmlFor="poleComments">Pole Comments</Label>
-                <Textarea
-                  id="poleComments"
-                  name="poleComments"
-                  value={poleComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter pole comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="surge-protection">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Surge Protection</h2>
+                <div>
+                  <Label htmlFor="surgeProtectionAvailability">Surge Protection Availability</Label>
+                  <Input
+                    type="text"
+                    id="surgeProtectionAvailability"
+                    name="surgeProtectionAvailability"
+                    value={surgeProtectionAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter surge protection availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="surgeProtectionType">Surge Protection Type</Label>
+                  <Input
+                    type="text"
+                    id="surgeProtectionType"
+                    name="surgeProtectionType"
+                    value={surgeProtectionType}
+                    onChange={handleInputChange}
+                    placeholder="Enter surge protection type"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="surgeProtectionComments">Surge Protection Comments</Label>
+                  <Textarea
+                    id="surgeProtectionComments"
+                    name="surgeProtectionComments"
+                    value={surgeProtectionComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter surge protection comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="rooftop-details">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Rooftop Details</h2>
-              <div>
-                <Label htmlFor="rooftopAccess">Rooftop Access</Label>
-                <Input
-                  type="text"
-                  id="rooftopAccess"
-                  name="rooftopAccess"
-                  value={rooftopAccess}
-                  onChange={handleInputChange}
-                  placeholder="Enter rooftop access"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rooftopType">Rooftop Type</Label>
-                <Input
-                  type="text"
-                  id="rooftopType"
-                  name="rooftopType"
-                  value={rooftopType}
-                  onChange={handleInputChange}
-                  placeholder="Enter rooftop type"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rooftopCondition">Rooftop Condition</Label>
-                <Input
-                  type="text"
-                  id="rooftopCondition"
-                  name="rooftopCondition"
-                  value={rooftopCondition}
-                  onChange={handleInputChange}
-                  placeholder="Enter rooftop condition"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rooftopHeight">Rooftop Height</Label>
-                <Input
-                  type="text"
-                  id="rooftopHeight"
-                  name="rooftopHeight"
-                  value={rooftopHeight}
-                  onChange={handleInputChange}
-                  placeholder="Enter rooftop height"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rooftopComments">Rooftop Comments</Label>
-                <Textarea
-                  id="rooftopComments"
-                  name="rooftopComments"
-                  value={rooftopComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter rooftop comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="pole-details">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Pole Details</h2>
+                <div>
+                  <Label htmlFor="poleAvailability">Pole Availability</Label>
+                  <Input
+                    type="text"
+                    id="poleAvailability"
+                    name="poleAvailability"
+                    value={poleAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter pole availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="poleType">Pole Type</Label>
+                  <Input
+                    type="text"
+                    id="poleType"
+                    name="poleType"
+                    value={poleType}
+                    onChange={handleInputChange}
+                    placeholder="Enter pole type"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="poleCondition">Pole Condition</Label>
+                  <Input
+                    type="text"
+                    id="poleCondition"
+                    name="poleCondition"
+                    value={poleCondition}
+                    onChange={handleInputChange}
+                    placeholder="Enter pole condition"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="poleHeight">Pole Height</Label>
+                  <Input
+                    type="text"
+                    id="poleHeight"
+                    name="poleHeight"
+                    value={poleHeight}
+                    onChange={handleInputChange}
+                    placeholder="Enter pole height"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="poleComments">Pole Comments</Label>
+                  <Textarea
+                    id="poleComments"
+                    name="poleComments"
+                    value={poleComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter pole comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="tower-details">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Tower Details</h2>
-              <div>
-                <Label htmlFor="towerAvailability">Tower Availability</Label>
-                <Input
-                  type="text"
-                  id="towerAvailability"
-                  name="towerAvailability"
-                  value={towerAvailability}
-                  onChange={handleInputChange}
-                  placeholder="Enter tower availability"
-                />
-              </div>
-              <div>
-                <Label htmlFor="towerType">Tower Type</Label>
-                <Input
-                  type="text"
-                  id="towerType"
-                  name="towerType"
-                  value={towerType}
-                  onChange={handleInputChange}
-                  placeholder="Enter tower type"
-                />
-              </div>
-              <div>
-                <Label htmlFor="towerCondition">Tower Condition</Label>
-                <Input
-                  type="text"
-                  id="towerCondition"
-                  name="towerCondition"
-                  value={towerCondition}
-                  onChange={handleInputChange}
-                  placeholder="Enter tower condition"
-                />
-              </div>
-              <div>
-                <Label htmlFor="towerHeight">Tower Height</Label>
-                <Input
-                  type="text"
-                  id="towerHeight"
-                  name="towerHeight"
-                  value={towerHeight}
-                  onChange={handleInputChange}
-                  placeholder="Enter tower height"
-                />
-              </div>
-              <div>
-                <Label htmlFor="towerComments">Tower Comments</Label>
-                <Textarea
-                  id="towerComments"
-                  name="towerComments"
-                  value={towerComments}
-                  onChange={handleInputChange}
-                  placeholder="Enter tower comments"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="rooftop-details">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Rooftop Details</h2>
+                <div>
+                  <Label htmlFor="rooftopAccess">Rooftop Access</Label>
+                  <Input
+                    type="text"
+                    id="rooftopAccess"
+                    name="rooftopAccess"
+                    value={rooftopAccess}
+                    onChange={handleInputChange}
+                    placeholder="Enter rooftop access"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="rooftopType">Rooftop Type</Label>
+                  <Input
+                    type="text"
+                    id="rooftopType"
+                    name="rooftopType"
+                    value={rooftopType}
+                    onChange={handleInputChange}
+                    placeholder="Enter rooftop type"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="rooftopCondition">Rooftop Condition</Label>
+                  <Input
+                    type="text"
+                    id="rooftopCondition"
+                    name="rooftopCondition"
+                    value={rooftopCondition}
+                    onChange={handleInputChange}
+                    placeholder="Enter rooftop condition"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="rooftopHeight">Rooftop Height</Label>
+                  <Input
+                    type="text"
+                    id="rooftopHeight"
+                    name="rooftopHeight"
+                    value={rooftopHeight}
+                    onChange={handleInputChange}
+                    placeholder="Enter rooftop height"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="rooftopComments">Rooftop Comments</Label>
+                  <Textarea
+                    id="rooftopComments"
+                    name="rooftopComments"
+                    value={rooftopComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter rooftop comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="additional-notes">
-          <Card>
-            <CardContent className="grid gap-4">
-              <h2 className="text-lg font-medium">Additional Notes</h2>
-              <div>
-                <Label htmlFor="additionalNotes">Additional Notes</Label>
-                <Textarea
-                  id="additionalNotes"
-                  name="additionalNotes"
-                  value={additionalNotes}
-                  onChange={handleInputChange}
-                  placeholder="Enter additional notes"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </form>
+          <TabsContent value="tower-details">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Tower Details</h2>
+                <div>
+                  <Label htmlFor="towerAvailability">Tower Availability</Label>
+                  <Input
+                    type="text"
+                    id="towerAvailability"
+                    name="towerAvailability"
+                    value={towerAvailability}
+                    onChange={handleInputChange}
+                    placeholder="Enter tower availability"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="towerType">Tower Type</Label>
+                  <Input
+                    type="text"
+                    id="towerType"
+                    name="towerType"
+                    value={towerType}
+                    onChange={handleInputChange}
+                    placeholder="Enter tower type"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="towerCondition">Tower Condition</Label>
+                  <Input
+                    type="text"
+                    id="towerCondition"
+                    name="towerCondition"
+                    value={towerCondition}
+                    onChange={handleInputChange}
+                    placeholder="Enter tower condition"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="towerHeight">Tower Height</Label>
+                  <Input
+                    type="text"
+                    id="towerHeight"
+                    name="towerHeight"
+                    value={towerHeight}
+                    onChange={handleInputChange}
+                    placeholder="Enter tower height"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="towerComments">Tower Comments</Label>
+                  <Textarea
+                    id="towerComments"
+                    name="towerComments"
+                    value={towerComments}
+                    onChange={handleInputChange}
+                    placeholder="Enter tower comments"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="additional-notes">
+            <Card>
+              <CardContent className="grid gap-4">
+                <h2 className="text-lg font-medium">Additional Notes</h2>
+                <div>
+                  <Label htmlFor="additionalNotes">Additional Notes</Label>
+                  <Textarea
+                    id="additionalNotes"
+                    name="additionalNotes"
+                    value={additionalNotes}
+                    onChange={handleInputChange}
+                    placeholder="Enter additional notes"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </form>
+    </div>
   );
 };
 
