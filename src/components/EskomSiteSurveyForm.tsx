@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -581,10 +580,10 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     setFormData(prevFormData => {
       const newFormData = { ...prevFormData };
       if (section in newFormData) {
-        const sectionObj = { ...newFormData[section as keyof EskomSurveyFormData] };
-        if (typeof sectionObj === 'object' && sectionObj !== null) {
-          const newSectionObj = { ...sectionObj, [field]: value };
-          newFormData[section as keyof EskomSurveyFormData] = newSectionObj as any;
+        const sectionData = newFormData[section as keyof EskomSurveyFormData];
+        if (typeof sectionData === 'object' && sectionData !== null) {
+          const updatedSectionData = { ...sectionData as object, [field]: value };
+          (newFormData as any)[section] = updatedSectionData;
         }
       }
       return newFormData;
@@ -688,7 +687,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: restOfFormData as Json
+        survey_data: restOfFormData as unknown as Json
       };
       
       const { data, error } = await supabase
