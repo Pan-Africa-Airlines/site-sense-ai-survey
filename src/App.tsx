@@ -16,6 +16,7 @@ import Footer from "./components/Footer";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAssessments from "./pages/AdminAssessments";
 import AdminUsers from "./pages/AdminUsers";
+import AdminInstallations from "./pages/AdminInstallations";
 import AdminLogin from "./pages/AdminLogin";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import { useEffect, useState } from "react";
@@ -158,6 +159,14 @@ const App = () => {
                   element={
                     <AdminProtectedRoute>
                       <AdminUsers />
+                    </AdminProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/installations" 
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminInstallations />
                     </AdminProtectedRoute>
                   } 
                 />

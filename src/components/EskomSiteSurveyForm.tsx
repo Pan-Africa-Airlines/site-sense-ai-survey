@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -233,7 +232,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     });
 
     if (formData.useAIAssistance && imageData) {
-      // Fix error on line 132 - provide required parameters to analyzeImage
       analyzeImage(imageData, type, "Analyze this image").then(analysis => {
         if (analysis) {
           setAiSuggestions({ ...aiSuggestions, [type]: analysis });
@@ -256,7 +254,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    // Fix error on line 143 - provide required parameter to getSuggestion
     const suggestion = await getSuggestion(fieldName, formData);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
@@ -265,7 +262,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.generalRemarks) {
-      // Fix error on line 149 - provide required parameters to enhanceNotes
       const enhanced = await enhanceNotes(formData.generalRemarks, "Enhance these notes");
       setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
@@ -313,7 +309,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       return;
     }
     
-    // Fix error on line 235 - remove the third argument as the function expects only 2
     onSubmit?.(formData);
     toast.success("Site survey report submitted successfully!");
     
