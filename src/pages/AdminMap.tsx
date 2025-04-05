@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import AdminNavBar from "@/components/AdminNavBar";
 import { useGeolocation } from "@/hooks/useGeolocation";
@@ -10,20 +9,20 @@ import { MapPin, Navigation, Truck, User } from "lucide-react";
 import EngineerAllocationDialog from "@/components/EngineerAllocationDialog";
 import MapView from "@/components/MapView";
 
-// Mock data for engineers
+// Mock data for engineers in South Africa
 const MOCK_ENGINEERS = [
   { id: 1, name: "John Doe", lat: -26.2041, lng: 28.0473, status: "available", vehicle: "Toyota Hilux", lastUpdate: "2 min ago" },
   { id: 2, name: "Jane Smith", lat: -26.1052, lng: 28.0560, status: "on-site", vehicle: "Ford Ranger", lastUpdate: "5 min ago" },
-  { id: 3, name: "Steve Johnson", lat: -26.1241, lng: 28.0412, status: "en-route", vehicle: "Nissan Navara", lastUpdate: "1 min ago" },
-  { id: 4, name: "Mary Williams", lat: -26.0765, lng: 28.0835, status: "available", vehicle: "Toyota Land Cruiser", lastUpdate: "3 min ago" },
+  { id: 3, name: "Steve Johnson", lat: -25.7461, lng: 28.1881, status: "en-route", vehicle: "Nissan Navara", lastUpdate: "1 min ago" },
+  { id: 4, name: "Mary Williams", lat: -29.8587, lng: 31.0218, status: "available", vehicle: "Toyota Land Cruiser", lastUpdate: "3 min ago" },
 ];
 
-// Mock data for sites
+// Mock data for sites in South Africa
 const MOCK_SITES = [
-  { id: 1, name: "Eskom Substation A", lat: -26.2141, lng: 28.0373, priority: "high", engineer: null },
-  { id: 2, name: "Power Station B", lat: -26.1152, lng: 28.0460, priority: "medium", engineer: 2 },
-  { id: 3, name: "Transmission Tower C", lat: -26.1341, lng: 28.0312, priority: "low", engineer: null },
-  { id: 4, name: "Distribution Center D", lat: -26.0865, lng: 28.0735, priority: "high", engineer: 3 },
+  { id: 1, name: "Eskom Substation A", lat: -26.2741, lng: 27.9073, priority: "high", engineer: null },
+  { id: 2, name: "Power Station B", lat: -26.1852, lng: 27.9960, priority: "medium", engineer: 2 },
+  { id: 3, name: "Transmission Tower C", lat: -25.7861, lng: 28.2881, priority: "low", engineer: null },
+  { id: 4, name: "Distribution Center D", lat: -29.8987, lng: 30.9618, priority: "high", engineer: 3 },
 ];
 
 const AdminMap = () => {
@@ -39,8 +38,8 @@ const AdminMap = () => {
   const [optimizedRoutes, setOptimizedRoutes] = useState<Record<number, any>>({});
   
   const centerLocation = {
-    lat: -26.2041, 
-    lng: 28.0473
+    lat: -29.0000, 
+    lng: 25.0000
   };
 
   const handleSelectEngineer = (engineerId: number) => {
@@ -166,7 +165,7 @@ const AdminMap = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Field Engineer Map</h1>
-            <p className="text-gray-600">Real-time location and site allocation</p>
+            <p className="text-gray-600">South Africa - Real-time location and site allocation</p>
           </div>
           
           <div className="flex gap-4">
@@ -319,7 +318,7 @@ const AdminMap = () => {
           sites={sites}
           selectedSites={selectedSites}
           onToggleSite={handleSiteSelection}
-          isProcessing={isProcessing}
+          isProcessing={false}
         />
       )}
     </div>

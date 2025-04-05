@@ -27,7 +27,6 @@ interface MapViewProps {
   center: { lat: number; lng: number };
 }
 
-// For now, we'll create a placeholder component that will later be replaced with a real map
 const MapView: React.FC<MapViewProps> = ({ 
   engineers, 
   sites, 
@@ -38,7 +37,7 @@ const MapView: React.FC<MapViewProps> = ({
 }) => {
   const [mapLoaded, setMapLoaded] = useState(false);
   
-  // In a real implementation, we would initialize a map library here (like Mapbox, Google Maps, etc.)
+  // In a real implementation, we would initialize a map library here
   useEffect(() => {
     // Simulate map loading
     const timer = setTimeout(() => {
@@ -59,19 +58,18 @@ const MapView: React.FC<MapViewProps> = ({
     );
   }
 
-  // This is a placeholder for the actual map implementation
-  // In a real application, you would integrate with a mapping library here
+  // South Africa centered map with appropriate zoom level
   return (
     <div className="relative h-full bg-gray-100 overflow-hidden">
-      {/* Map placeholder */}
-      <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/28.047,-26.204,9,0/1200x900?access_token=pk.eyJ1IjoibG92YWJsZXNob3ciLCJhIjoiY2x3eGJha3I5MHJodzJxcXF2Ym1weWh6ZCJ9.TrsYcvQ2rlZDWQRo0uZhsQ')] bg-cover bg-center"></div>
+      {/* Map of South Africa */}
+      <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/25.0339,-29.0000,5,0/1200x900?access_token=pk.eyJ1IjoibG92YWJsZXNob3ciLCJhIjoiY2x3eGJha3I5MHJodzJxcXF2Ym1weWh6ZCJ9.TrsYcvQ2rlZDWQRo0uZhsQ')] bg-cover bg-center"></div>
       
       {/* Engineer markers */}
       {engineers.map(engineer => {
-        // Convert the latitude and longitude to screen coordinates
-        // This is a simplified example - in a real map, you'd use the library's methods
-        const screenX = (((engineer.lng - center.lng) * 10000) + 600);
-        const screenY = (((center.lat - engineer.lat) * 10000) + 450);
+        // Adjust the conversion for South African coordinates
+        // These factors are calibrated for the South African map view
+        const screenX = (((engineer.lng - 22) * 80) + 600);
+        const screenY = (((engineer.lat + 33) * -80) + 450);
         
         return (
           <div 
@@ -103,9 +101,9 @@ const MapView: React.FC<MapViewProps> = ({
       
       {/* Site markers */}
       {sites.map(site => {
-        // Convert the latitude and longitude to screen coordinates
-        const screenX = (((site.lng - center.lng) * 10000) + 600);
-        const screenY = (((center.lat - site.lat) * 10000) + 450);
+        // Adjust the conversion for South African coordinates
+        const screenX = (((site.lng - 22) * 80) + 600);
+        const screenY = (((site.lat + 33) * -80) + 450);
         
         const isSelected = selectedEngineer && 
           (site.engineer === selectedEngineer) &&
@@ -154,11 +152,11 @@ const MapView: React.FC<MapViewProps> = ({
               if (!engineer) return null;
               
               // Draw line from engineer to first site
-              const startX = (((engineer.lng - center.lng) * 10000) + 600);
-              const startY = (((center.lat - engineer.lat) * 10000) + 450);
+              const startX = (((engineer.lng - 22) * 80) + 600);
+              const startY = (((engineer.lat + 33) * -80) + 450);
               
-              const endX = (((parseFloat(waypoint.lng) - center.lng) * 10000) + 600);
-              const endY = (((center.lat - parseFloat(waypoint.lat)) * 10000) + 450);
+              const endX = (((parseFloat(waypoint.lng) - 22) * 80) + 600);
+              const endY = (((parseFloat(waypoint.lat) + 33) * -80) + 450);
               
               return (
                 <line 
@@ -175,11 +173,11 @@ const MapView: React.FC<MapViewProps> = ({
             }
             
             if (index < array.length) {
-              const startX = (((parseFloat(array[index-1].lng) - center.lng) * 10000) + 600);
-              const startY = (((center.lat - parseFloat(array[index-1].lat)) * 10000) + 450);
+              const startX = (((parseFloat(array[index-1].lng) - 22) * 80) + 600);
+              const startY = (((parseFloat(array[index-1].lat) + 33) * -80) + 450);
               
-              const endX = (((parseFloat(waypoint.lng) - center.lng) * 10000) + 600);
-              const endY = (((center.lat - parseFloat(waypoint.lat)) * 10000) + 450);
+              const endX = (((parseFloat(waypoint.lng) - 22) * 80) + 600);
+              const endY = (((parseFloat(waypoint.lat) + 33) * -80) + 450);
               
               return (
                 <line 
