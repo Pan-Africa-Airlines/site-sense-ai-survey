@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,11 +16,16 @@ import { MapPin, Info, Check } from "lucide-react";
 import ImageCapture from "./ImageCapture";
 
 interface SiteInstallationFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit?: (data: any) => void;
   assessmentData?: any; // Optional assessment data to pre-fill fields
+  showAIRecommendations?: boolean;
 }
 
-const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({ onSubmit, assessmentData }) => {
+const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({ 
+  onSubmit, 
+  assessmentData, 
+  showAIRecommendations = false 
+}) => {
   const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
   const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
   

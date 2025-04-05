@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Car, Fuel, BarChart, Tool } from "lucide-react";
+import { Sparkles, Car, Fuel, BarChart, Wrench } from "lucide-react";
 
 const CarCheckup = () => {
   const [tab, setTab] = useState("vehicle");
@@ -69,7 +69,7 @@ const CarCheckup = () => {
                   <Fuel className="w-4 h-4 mr-2" /> Fuel Efficiency
                 </TabsTrigger>
                 <TabsTrigger value="maintenance" className="text-akhanya">
-                  <Tool className="w-4 h-4 mr-2" /> Maintenance
+                  <Wrench className="w-4 h-4 mr-2" /> Maintenance
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="vehicle" className="space-y-4">

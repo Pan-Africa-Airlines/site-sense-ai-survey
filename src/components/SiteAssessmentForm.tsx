@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,10 +16,11 @@ import { MapPin, Search, Info, Check } from "lucide-react";
 import ImageCapture from "./ImageCapture";
 
 interface SiteAssessmentFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit?: (data: any) => void;
+  showAIRecommendations?: boolean;
 }
 
-const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit }) => {
+const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showAIRecommendations = false }) => {
   const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
   const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
   
