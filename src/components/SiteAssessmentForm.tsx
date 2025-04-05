@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,13 +13,46 @@ import { useAI } from "@/contexts/AIContext";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MapPin, Search, Info, Check } from "lucide-react";
+import { MapPin, Search, Info, Check, Building, Network, Home, Image, Power, Camera } from "lucide-react";
 import ImageCapture from "./ImageCapture";
 
 interface SiteAssessmentFormProps {
   onSubmit?: (data: any) => void;
   showAIRecommendations?: boolean;
 }
+
+// South African provinces with municipalities
+const saProvinces = {
+  "Eastern Cape": [
+    "Buffalo City", "Nelson Mandela Bay", "Amathole", "Chris Hani", "Joe Gqabi", 
+    "OR Tambo", "Sarah Baartman", "Alfred Nzo"
+  ],
+  "Free State": [
+    "Mangaung", "Fezile Dabi", "Lejweleputswa", "Thabo Mofutsanyana", "Xhariep"
+  ],
+  "Gauteng": [
+    "City of Johannesburg", "City of Tshwane", "Ekurhuleni", "Sedibeng", "West Rand"
+  ],
+  "KwaZulu-Natal": [
+    "eThekwini", "Amajuba", "Harry Gwala", "iLembe", "King Cetshwayo", 
+    "Ugu", "uMgungundlovu", "uMkhanyakude", "uMzinyathi", "uThukela", "Zululand"
+  ],
+  "Limpopo": [
+    "Capricorn", "Mopani", "Sekhukhune", "Vhembe", "Waterberg"
+  ],
+  "Mpumalanga": [
+    "Ehlanzeni", "Gert Sibande", "Nkangala"
+  ],
+  "North West": [
+    "Bojanala Platinum", "Dr Kenneth Kaunda", "Dr Ruth Segomotsi Mompati", "Ngaka Modiri Molema"
+  ],
+  "Northern Cape": [
+    "Frances Baard", "John Taolo Gaetsewe", "Namakwa", "Pixley Ka Seme", "ZF Mgcawu"
+  ],
+  "Western Cape": [
+    "City of Cape Town", "Cape Winelands", "Central Karoo", "Garden Route", "Overberg", "West Coast"
+  ]
+};
 
 const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showAIRecommendations = false }) => {
   const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
@@ -36,6 +70,8 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
     siteAddress: "",
     siteCoordinates: "",
     siteType: "",
+    siteProvince: "",
+    siteMunicipality: "",
     siteAccessRequirements: "",
     
     // Building Information
@@ -73,6 +109,10 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
       serverRoom: "",
       networkCabinet: "",
       powerSource: "",
+      buildingFront: "",
+      buildingInterior: "",
+      networkEquipment: "",
+      infrastructureElements: "",
     },
     useAIAssistance: true,
     
@@ -84,6 +124,14 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
   
   const [aiSuggestions, setAiSuggestions] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("customer");
+  const [availableMunicipalities, setAvailableMunicipalities] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (formData.siteProvince) {
+      setAvailableMunicipalities(saProvinces[formData.siteProvince as keyof typeof saProvinces] || []);
+      setFormData(prev => ({...prev, siteMunicipality: ""}));
+    }
+  }, [formData.siteProvince]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -179,12 +227,30 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid grid-cols-6 mb-6">
-          <TabsTrigger value="customer">Customer</TabsTrigger>
-          <TabsTrigger value="site">Site</TabsTrigger>
-          <TabsTrigger value="building">Building</TabsTrigger>
-          <TabsTrigger value="network">Network</TabsTrigger>
-          <TabsTrigger value="infrastructure">Infrastructure</TabsTrigger>
-          <TabsTrigger value="photos">Photos</TabsTrigger>
+          <TabsTrigger value="customer" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full">1</div>
+            <span>Customer</span>
+          </TabsTrigger>
+          <TabsTrigger value="site" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full">2</div>
+            <span>Site</span>
+          </TabsTrigger>
+          <TabsTrigger value="building" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full">3</div>
+            <span>Building</span>
+          </TabsTrigger>
+          <TabsTrigger value="network" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full">4</div>
+            <span>Network</span>
+          </TabsTrigger>
+          <TabsTrigger value="infrastructure" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full">5</div>
+            <span>Infrastructure</span>
+          </TabsTrigger>
+          <TabsTrigger value="photos" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full">6</div>
+            <span>Photos</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="customer" className="space-y-4">
@@ -326,6 +392,42 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
               </div>
               
               <div className="field-row">
+                <div>
+                  <Label htmlFor="siteProvince">Province</Label>
+                  <Select
+                    value={formData.siteProvince}
+                    onValueChange={(value) => handleSelectChange("siteProvince", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select province" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(saProvinces).map((province) => (
+                        <SelectItem key={province} value={province}>{province}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="siteMunicipality">Municipality</Label>
+                  <Select
+                    value={formData.siteMunicipality}
+                    onValueChange={(value) => handleSelectChange("siteMunicipality", value)}
+                    disabled={!formData.siteProvince}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={formData.siteProvince ? "Select municipality" : "Select province first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableMunicipalities.map((municipality) => (
+                        <SelectItem key={municipality} value={municipality}>{municipality}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="field-row">
                 <div className="relative">
                   <Label htmlFor="siteAddress" className="required">Site Address</Label>
                   <Input
@@ -378,6 +480,23 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
                     placeholder="Details about site access requirements, security, etc."
                     rows={3}
                   />
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-2">Site Photos</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageCapture
+                    label="Building Site"
+                    description="Capture the exterior of the building site"
+                    onCapture={(imageData) => handleImageCapture("buildingFront", imageData)}
+                    capturedImage={formData.sitePhotos.buildingFront}
+                  />
+                  {aiSuggestions['buildingFront'] && (
+                    <div className="ai-suggestion mt-2">
+                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['buildingFront']}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -473,6 +592,23 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
                     onChange={handleInputChange}
                     placeholder="e.g. 5m x 8m"
                   />
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-2">Building Photos</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageCapture
+                    label="Building Interior"
+                    description="Capture the interior of the building"
+                    onCapture={(imageData) => handleImageCapture("buildingInterior", imageData)}
+                    capturedImage={formData.sitePhotos.buildingInterior}
+                  />
+                  {aiSuggestions['buildingInterior'] && (
+                    <div className="ai-suggestion mt-2">
+                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['buildingInterior']}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -594,6 +730,23 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
                   {aiSuggestions['networkAvailability'] && (
                     <div className="ai-suggestion">
                       <p><Check size={12} className="inline mr-1" /> {aiSuggestions['networkAvailability']}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-2">Network Equipment Photos</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageCapture
+                    label="Network Equipment"
+                    description="Capture existing network equipment"
+                    onCapture={(imageData) => handleImageCapture("networkEquipment", imageData)}
+                    capturedImage={formData.sitePhotos.networkEquipment}
+                  />
+                  {aiSuggestions['networkEquipment'] && (
+                    <div className="ai-suggestion mt-2">
+                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['networkEquipment']}</p>
                     </div>
                   )}
                 </div>
@@ -782,6 +935,23 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
                   />
                 </div>
               </div>
+              
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-2">Infrastructure Photos</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageCapture
+                    label="Infrastructure Elements"
+                    description="Capture infrastructure elements (power, cooling, etc.)"
+                    onCapture={(imageData) => handleImageCapture("infrastructureElements", imageData)}
+                    capturedImage={formData.sitePhotos.infrastructureElements}
+                  />
+                  {aiSuggestions['infrastructureElements'] && (
+                    <div className="ai-suggestion mt-2">
+                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['infrastructureElements']}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
           
@@ -910,3 +1080,4 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
 };
 
 export default SiteAssessmentForm;
+
