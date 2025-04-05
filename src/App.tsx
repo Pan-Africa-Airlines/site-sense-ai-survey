@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,7 +35,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, []);
   
   if (isLoggedIn === null) {
-    // Still loading auth state
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
@@ -48,7 +46,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  // Apply the saved theme on initial render
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
@@ -60,7 +57,6 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Move AIProvider outside of TooltipProvider */}
       <AIProvider>
         <BrowserRouter>
           <TooltipProvider>
@@ -68,7 +64,6 @@ const App = () => {
             <Sonner />
             <div className="flex flex-col min-h-screen">
               <Routes>
-                {/* Login route */}
                 <Route path="/login" element={
                   <>
                     <Login />
@@ -76,7 +71,6 @@ const App = () => {
                   </>
                 } />
                 
-                {/* Admin login route */}
                 <Route path="/admin/login" element={
                   <>
                     <AdminLogin />
@@ -84,7 +78,6 @@ const App = () => {
                   </>
                 } />
                 
-                {/* Regular user routes */}
                 <Route 
                   path="/" 
                   element={
@@ -97,7 +90,6 @@ const App = () => {
                   } 
                 />
 
-                {/* Eskom Survey Routes */}
                 <Route 
                   path="/eskom-survey" 
                   element={
@@ -158,15 +150,11 @@ const App = () => {
                   path="/configuration" 
                   element={
                     <AdminProtectedRoute>
-                      <div className="flex flex-col min-h-screen">
-                        <Configuration />
-                        <Footer />
-                      </div>
+                      <Configuration />
                     </AdminProtectedRoute>
                   } 
                 />
                 
-                {/* Admin routes */}
                 <Route 
                   path="/admin/dashboard" 
                   element={
@@ -208,7 +196,6 @@ const App = () => {
                   } 
                 />
                 
-                {/* Not found route */}
                 <Route path="*" element={
                   <div className="flex flex-col min-h-screen">
                     <NotFound />

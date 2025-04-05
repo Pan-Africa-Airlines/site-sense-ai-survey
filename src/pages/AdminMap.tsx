@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import AdminNavBar from "@/components/AdminNavBar";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -27,7 +25,6 @@ const MOCK_SITES = [
 
 const AdminMap = () => {
   const { toast } = useToast();
-  const geoLocation = useGeolocation();
   const { optimizeRoute, predictETAs, isProcessing } = useAI();
   
   const [engineers, setEngineers] = useState(MOCK_ENGINEERS);
@@ -158,154 +155,150 @@ const AdminMap = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AdminNavBar />
-      
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Field Engineer Map</h1>
-            <p className="text-gray-600">South Africa - Real-time location and site allocation</p>
-          </div>
-          
-          <div className="flex gap-4">
-            <Button 
-              onClick={handleShowAllocationDialog}
-              className="bg-akhanya hover:bg-akhanya-dark"
-              disabled={!selectedEngineer}
-            >
-              <MapPin className="mr-2 h-4 w-4" /> Allocate Sites
-            </Button>
-          </div>
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Field Engineer Map</h1>
+          <p className="text-gray-600">South Africa - Real-time location and site allocation</p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1">
-            <Card>
+        <div className="flex gap-4">
+          <Button 
+            onClick={handleShowAllocationDialog}
+            className="bg-akhanya hover:bg-akhanya-dark"
+            disabled={!selectedEngineer}
+          >
+            <MapPin className="mr-2 h-4 w-4" /> Allocate Sites
+          </Button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Engineers</CardTitle>
+              <CardDescription>Select an engineer to view or allocate sites</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {engineers.map((engineer) => (
+                  <div 
+                    key={engineer.id}
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedEngineer === engineer.id ? 'bg-akhanya text-white' : 'bg-white hover:bg-gray-50'
+                    }`}
+                    onClick={() => handleSelectEngineer(engineer.id)}
+                  >
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 mr-3">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <User className={`h-6 w-6 ${selectedEngineer === engineer.id ? 'text-white' : 'text-gray-600'}`} />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className={`font-medium ${selectedEngineer === engineer.id ? 'text-white' : 'text-gray-900'}`}>
+                          {engineer.name}
+                        </h3>
+                        <div className="flex items-center">
+                          <span className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                            engineer.status === 'available' ? 'bg-green-500' : 
+                            engineer.status === 'on-site' ? 'bg-blue-500' : 'bg-amber-500'
+                          }`}></span>
+                          <p className={`text-sm ${selectedEngineer === engineer.id ? 'text-gray-100' : 'text-gray-500'}`}>
+                            {engineer.status === 'available' ? 'Available' : 
+                             engineer.status === 'on-site' ? 'On-site' : 'En-route'}
+                          </p>
+                        </div>
+                        <div className="flex items-center mt-1">
+                          <Truck className={`h-3 w-3 mr-1 ${selectedEngineer === engineer.id ? 'text-gray-100' : 'text-gray-400'}`} />
+                          <p className={`text-xs ${selectedEngineer === engineer.id ? 'text-gray-100' : 'text-gray-400'}`}>
+                            {engineer.vehicle}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {selectedEngineer && (
+            <Card className="mt-4">
               <CardHeader>
-                <CardTitle>Engineers</CardTitle>
-                <CardDescription>Select an engineer to view or allocate sites</CardDescription>
+                <CardTitle>Assigned Sites</CardTitle>
+                <CardDescription>
+                  Sites assigned to {engineers.find(e => e.id === selectedEngineer)?.name}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {engineers.map((engineer) => (
-                    <div 
-                      key={engineer.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        selectedEngineer === engineer.id ? 'bg-akhanya text-white' : 'bg-white hover:bg-gray-50'
-                      }`}
-                      onClick={() => handleSelectEngineer(engineer.id)}
-                    >
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 mr-3">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <User className={`h-6 w-6 ${selectedEngineer === engineer.id ? 'text-white' : 'text-gray-600'}`} />
-                          </div>
-                        </div>
-                        <div>
-                          <h3 className={`font-medium ${selectedEngineer === engineer.id ? 'text-white' : 'text-gray-900'}`}>
-                            {engineer.name}
-                          </h3>
-                          <div className="flex items-center">
-                            <span className={`inline-block h-2 w-2 rounded-full mr-2 ${
-                              engineer.status === 'available' ? 'bg-green-500' : 
-                              engineer.status === 'on-site' ? 'bg-blue-500' : 'bg-amber-500'
-                            }`}></span>
-                            <p className={`text-sm ${selectedEngineer === engineer.id ? 'text-gray-100' : 'text-gray-500'}`}>
-                              {engineer.status === 'available' ? 'Available' : 
-                               engineer.status === 'on-site' ? 'On-site' : 'En-route'}
-                            </p>
-                          </div>
-                          <div className="flex items-center mt-1">
-                            <Truck className={`h-3 w-3 mr-1 ${selectedEngineer === engineer.id ? 'text-gray-100' : 'text-gray-400'}`} />
-                            <p className={`text-xs ${selectedEngineer === engineer.id ? 'text-gray-100' : 'text-gray-400'}`}>
-                              {engineer.vehicle}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            
-            {selectedEngineer && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Assigned Sites</CardTitle>
-                  <CardDescription>
-                    Sites assigned to {engineers.find(e => e.id === selectedEngineer)?.name}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {sites.filter(site => site.engineer === selectedEngineer).length > 0 ? (
-                      sites
-                        .filter(site => site.engineer === selectedEngineer)
-                        .map((site) => (
-                          <div key={site.id} className="p-2 border rounded-md bg-gray-50">
-                            <p className="font-medium">{site.name}</p>
-                            <div className="flex justify-between text-sm">
-                              <span className={`px-2 py-0.5 rounded text-xs ${
-                                site.priority === 'high' ? 'bg-red-100 text-red-800' : 
-                                site.priority === 'medium' ? 'bg-amber-100 text-amber-800' : 
-                                'bg-green-100 text-green-800'
-                              }`}>
-                                {site.priority} priority
+                <div className="space-y-2">
+                  {sites.filter(site => site.engineer === selectedEngineer).length > 0 ? (
+                    sites
+                      .filter(site => site.engineer === selectedEngineer)
+                      .map((site) => (
+                        <div key={site.id} className="p-2 border rounded-md bg-gray-50">
+                          <p className="font-medium">{site.name}</p>
+                          <div className="flex justify-between text-sm">
+                            <span className={`px-2 py-0.5 rounded text-xs ${
+                              site.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                              site.priority === 'medium' ? 'bg-amber-100 text-amber-800' : 
+                              'bg-green-100 text-green-800'
+                            }`}>
+                              {site.priority} priority
+                            </span>
+                            {optimizedRoutes[selectedEngineer]?.route?.findIndex((r: any) => 
+                              parseInt(r.siteId) === site.id
+                            ) >= 0 && (
+                              <span className="text-xs text-gray-500">
+                                Stop #{optimizedRoutes[selectedEngineer].route.findIndex((r: any) => 
+                                  parseInt(r.siteId) === site.id
+                                ) + 1}
                               </span>
-                              {optimizedRoutes[selectedEngineer]?.route?.findIndex((r: any) => 
-                                parseInt(r.siteId) === site.id
-                              ) >= 0 && (
-                                <span className="text-xs text-gray-500">
-                                  Stop #{optimizedRoutes[selectedEngineer].route.findIndex((r: any) => 
-                                    parseInt(r.siteId) === site.id
-                                  ) + 1}
-                                </span>
-                              )}
-                            </div>
+                            )}
                           </div>
-                        ))
-                    ) : (
-                      <p className="text-gray-500 text-sm">No sites assigned yet</p>
-                    )}
-                  </div>
-                  
-                  {optimizedRoutes[selectedEngineer] && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-                      <div className="flex items-center mb-2">
-                        <Navigation className="h-4 w-4 text-blue-500 mr-2" />
-                        <h4 className="font-medium text-blue-700">Optimized Route</h4>
-                      </div>
-                      <p className="text-sm text-blue-600">
-                        Route optimized for efficiency with {optimizedRoutes[selectedEngineer].route.length} stops.
-                      </p>
-                      <div className="mt-2 text-xs text-gray-500">
-                        {optimizedRoutes[selectedEngineer].eta.some((t: number) => t > 0) && (
-                          <p>Estimated total time: {optimizedRoutes[selectedEngineer].eta.reduce((a: number, b: number) => a + b, 0)} minutes</p>
-                        )}
-                      </div>
-                    </div>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">No sites assigned yet</p>
                   )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-          
-          <div className="lg:col-span-3 h-[700px]">
-            <Card className="h-full">
-              <CardContent className="p-0 h-full">
-                <MapView 
-                  engineers={engineers} 
-                  sites={sites}
-                  selectedEngineer={selectedEngineer}
-                  optimizedRoutes={optimizedRoutes}
-                  onSiteClick={handleSiteSelection}
-                  center={centerLocation}
-                />
+                </div>
+                
+                {optimizedRoutes[selectedEngineer] && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                    <div className="flex items-center mb-2">
+                      <Navigation className="h-4 w-4 text-blue-500 mr-2" />
+                      <h4 className="font-medium text-blue-700">Optimized Route</h4>
+                    </div>
+                    <p className="text-sm text-blue-600">
+                      Route optimized for efficiency with {optimizedRoutes[selectedEngineer].route.length} stops.
+                    </p>
+                    <div className="mt-2 text-xs text-gray-500">
+                      {optimizedRoutes[selectedEngineer].eta.some((t: number) => t > 0) && (
+                        <p>Estimated total time: {optimizedRoutes[selectedEngineer].eta.reduce((a: number, b: number) => a + b, 0)} minutes</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          </div>
+          )}
+        </div>
+        
+        <div className="lg:col-span-3 h-[700px]">
+          <Card className="h-full">
+            <CardContent className="p-0 h-full">
+              <MapView 
+                engineers={engineers} 
+                sites={sites}
+                selectedEngineer={selectedEngineer}
+                optimizedRoutes={optimizedRoutes}
+                onSiteClick={handleSiteSelection}
+                center={centerLocation}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
       
