@@ -10,6 +10,12 @@ import { Server, Wifi, Cable, Router, Brain, Sparkles, Lock, Sun, Moon } from "l
 import { Switch } from "@/components/ui/switch";
 import NetworkingBanner from "@/components/NetworkingBanner";
 
+// Admin credentials
+const ADMIN_CREDENTIALS = [
+  { username: "admin@akhanya.co.za", password: "admin123" },
+  { username: "supervisor@akhanya.co.za", password: "super123" }
+];
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,9 +49,30 @@ const Login = () => {
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    if (email && password) {
+    // Check if admin login
+    const isAdmin = ADMIN_CREDENTIALS.some(
+      admin => admin.username === email && admin.password === password
+    );
+
+    if (isAdmin) {
+      // Admin login
+      localStorage.setItem("adminLoggedIn", "true");
+      localStorage.setItem("adminUsername", email);
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("userEmail", email);
+      
+      toast({
+        title: "Admin login successful",
+        description: `Welcome, ${email}!`,
+      });
+      navigate("/admin/dashboard");
+    } else if (email && password) {
+      // Regular user login
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail", email);
+      localStorage.setItem("adminLoggedIn", "false");
+      localStorage.removeItem("adminUsername");
+      
       toast({
         title: "Login successful",
         description: `Welcome, ${email}!`,
@@ -146,7 +173,13 @@ const Login = () => {
                 </div>
                 <div className="text-center space-y-1.5">
                   <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100">Sign in to your account</CardTitle>
-                  <CardDescription className="text-gray-500 dark:text-gray-400">Enter your credentials to access the platform</CardDescription>
+                  <CardDescription className="text-gray-500 dark:text-gray-400">
+                    Enter your credentials to access the platform
+                    {/* Admin login hint */}
+                    <div className="mt-1 text-xs">
+                      Use <span className="font-semibold">admin@akhanya.co.za</span> for admin access
+                    </div>
+                  </CardDescription>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-4 mt-2">
                   <div className="space-y-2">
@@ -190,7 +223,8 @@ const Login = () => {
             </CardContent>
             <CardFooter className="flex justify-center border-t border-gray-100 dark:border-gray-800 pt-4 pb-6 px-8">
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                For demo purposes, use any email and password
+                For demo: Use <span className="font-medium">admin@akhanya.co.za / admin123</span> for admin access 
+                or any email/password for engineers
               </p>
             </CardFooter>
           </Card>

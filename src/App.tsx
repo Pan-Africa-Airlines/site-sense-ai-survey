@@ -13,7 +13,6 @@ import Configuration from "./pages/Configuration";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Footer from "./components/Footer";
-import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAssessments from "./pages/AdminAssessments";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
@@ -62,13 +61,15 @@ const App = () => {
           <BrowserRouter>
             <div className="flex flex-col min-h-screen">
               <Routes>
-                {/* Regular user routes */}
+                {/* Login route */}
                 <Route path="/login" element={
                   <>
                     <Login />
                     <Footer />
                   </>
                 } />
+                
+                {/* Regular user routes */}
                 <Route 
                   path="/" 
                   element={
@@ -116,17 +117,16 @@ const App = () => {
                 <Route 
                   path="/configuration" 
                   element={
-                    <ProtectedRoute>
+                    <AdminProtectedRoute>
                       <div className="flex flex-col min-h-screen">
                         <Configuration />
                         <Footer />
                       </div>
-                    </ProtectedRoute>
+                    </AdminProtectedRoute>
                   } 
                 />
                 
                 {/* Admin routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route 
                   path="/admin/dashboard" 
                   element={

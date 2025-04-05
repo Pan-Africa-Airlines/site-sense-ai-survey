@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash, MoveUp, MoveDown, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ export interface FormField {
   options?: string[]; // For select fields
   section?: string;
   order: number;
+  active?: boolean; // New field to control visibility
 }
 
 export interface FormConfig {
@@ -50,7 +51,8 @@ const defaultConfig: FormConfig = {
         placeholder: "Enter site name",
         required: true,
         section: "Basic Information",
-        order: 0
+        order: 0,
+        active: true
       },
       {
         id: "siteLocation",
@@ -59,7 +61,8 @@ const defaultConfig: FormConfig = {
         placeholder: "Enter site location",
         required: true,
         section: "Basic Information",
-        order: 1
+        order: 1,
+        active: true
       }
     ]
   },
@@ -72,7 +75,8 @@ const defaultConfig: FormConfig = {
         label: "Installation Date",
         required: true,
         section: "Basic Information",
-        order: 0
+        order: 0,
+        active: true
       },
       {
         id: "equipmentType",
@@ -81,7 +85,8 @@ const defaultConfig: FormConfig = {
         required: true,
         options: ["Router", "Switch", "Firewall", "Other"],
         section: "Equipment",
-        order: 0
+        order: 0,
+        active: true
       }
     ]
   },
@@ -95,7 +100,8 @@ const defaultConfig: FormConfig = {
         placeholder: "Enter site name",
         required: true,
         section: "Site Information",
-        order: 0
+        order: 0,
+        active: true
       },
       {
         id: "region",
@@ -104,7 +110,8 @@ const defaultConfig: FormConfig = {
         placeholder: "Enter region",
         required: true,
         section: "Site Information",
-        order: 1
+        order: 1,
+        active: true
       }
     ]
   }
@@ -153,7 +160,8 @@ const FormFieldsConfiguration = () => {
       placeholder: `Enter ${newFieldName.toLowerCase()}`,
       required: newFieldRequired,
       section: activeSection,
-      order: sectionFields.length
+      order: sectionFields.length,
+      active: true // Default to active
     };
 
     setFormConfig({
@@ -251,6 +259,20 @@ const FormFieldsConfiguration = () => {
     });
     setEditingField(null);
     toast.success("Field updated successfully");
+  };
+
+  // Toggle field active status
+  const handleToggleActive = (fieldId: string, active: boolean) => {
+    setFormConfig({
+      ...formConfig,
+      [activeTab]: {
+        ...formConfig[activeTab],
+        fields: formConfig[activeTab].fields.map(field => 
+          field.id === fieldId ? { ...field, active } : field
+        )
+      }
+    });
+    toast.success(`Field ${active ? 'activated' : 'deactivated'} successfully`);
   };
 
   // Move field up in order
@@ -357,6 +379,7 @@ const FormFieldsConfiguration = () => {
             onMoveFieldUp={handleMoveFieldUp}
             onMoveFieldDown={handleMoveFieldDown}
             onEditField={(field) => setEditingField(field)}
+            onToggleActive={handleToggleActive}
           />
         </TabsContent>
 
@@ -372,6 +395,7 @@ const FormFieldsConfiguration = () => {
             onMoveFieldUp={handleMoveFieldUp}
             onMoveFieldDown={handleMoveFieldDown}
             onEditField={(field) => setEditingField(field)}
+            onToggleActive={handleToggleActive}
           />
         </TabsContent>
 
@@ -387,6 +411,7 @@ const FormFieldsConfiguration = () => {
             onMoveFieldUp={handleMoveFieldUp}
             onMoveFieldDown={handleMoveFieldDown}
             onEditField={(field) => setEditingField(field)}
+            onToggleActive={handleToggleActive}
           />
         </TabsContent>
       </Tabs>
@@ -500,6 +525,7 @@ interface SectionAndFieldsEditorProps {
   onMoveFieldUp: (fieldId: string) => void;
   onMoveFieldDown: (fieldId: string) => void;
   onEditField: (field: FormField) => void;
+  onToggleActive: (fieldId: string, active: boolean) => void;
 }
 
 const SectionAndFieldsEditor: React.FC<SectionAndFieldsEditorProps> = ({
@@ -512,7 +538,8 @@ const SectionAndFieldsEditor: React.FC<SectionAndFieldsEditorProps> = ({
   onDeleteField,
   onMoveFieldUp,
   onMoveFieldDown,
-  onEditField
+  onEditField,
+  onToggleActive
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -567,6 +594,7 @@ const SectionAndFieldsEditor: React.FC<SectionAndFieldsEditorProps> = ({
                     onMoveUp={() => onMoveFieldUp(field.id)}
                     onMoveDown={() => onMoveFieldDown(field.id)}
                     onEdit={() => onEditField(field)}
+                    onToggleActive={(active) => onToggleActive(field.id, active)}
                     isFirst={field.order === 0}
                     isLast={field.order === sectionFields.length - 1}
                   />
