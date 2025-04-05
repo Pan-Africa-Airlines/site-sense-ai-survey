@@ -1,13 +1,13 @@
 
 import React from "react";
-import NavigationBar from "@/components/NavigationBar";
+import DynamicHeader from "@/components/DynamicHeader";
 import Dashboard from "./Dashboard";
 import NetworkingBanner from "@/components/NetworkingBanner";
 
 const Index = () => {
   return (
     <>
-      <NavigationBar />
+      <DynamicHeader />
       <NetworkingBanner 
         title="EskomSiteIQ Network Monitoring" 
         subtitle="AI-powered real-time insights for your network infrastructure"
