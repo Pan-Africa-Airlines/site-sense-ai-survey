@@ -6,6 +6,7 @@ import NetworkingBanner from "@/components/NetworkingBanner";
 import { Button } from "@/components/ui/button";
 import { useAI } from "@/contexts/AIContext";
 import { Sparkles } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const EskomSurvey = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
@@ -26,16 +27,23 @@ const EskomSurvey = () => {
               Complete the form below to document the site survey information
             </p>
           </div>
-          <Button
-            variant="outline"
-            className={`flex items-center gap-2 ${
-              showAIRecommendations ? "bg-akhanya-light text-akhanya border-akhanya" : ""
-            }`}
-            onClick={() => setShowAIRecommendations(!showAIRecommendations)}
-          >
-            <Sparkles className="h-4 w-4" />
-            AI Recommendations {showAIRecommendations ? "On" : "Off"}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                className={`flex items-center gap-2 ${
+                  showAIRecommendations ? "bg-akhanya-light text-akhanya border-akhanya" : ""
+                }`}
+                onClick={() => setShowAIRecommendations(!showAIRecommendations)}
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Recommendations {showAIRecommendations ? "On" : "Off"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Toggle AI assistance for this form</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <EskomSiteSurveyForm showAIRecommendations={showAIRecommendations} />
       </div>

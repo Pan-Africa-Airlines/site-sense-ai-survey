@@ -59,11 +59,12 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AIProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      {/* Move AIProvider outside of TooltipProvider */}
+      <AIProvider>
+        <BrowserRouter>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
             <div className="flex flex-col min-h-screen">
               <Routes>
                 {/* Login route */}
@@ -207,9 +208,9 @@ const App = () => {
                 } />
               </Routes>
             </div>
-          </BrowserRouter>
-        </AIProvider>
-      </TooltipProvider>
+          </TooltipProvider>
+        </BrowserRouter>
+      </AIProvider>
     </QueryClientProvider>
   );
 };
