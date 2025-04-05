@@ -467,7 +467,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       
       const { data: { user } } = await supabase.auth.getUser();
       
-      const surveyRecord = {
+      const surveyRecord: Record<string, any> = {
         site_name: siteName,
         region: region,
         date: date,
@@ -478,7 +478,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: restOfFormData as any
+        survey_data: restOfFormData
       };
       
       let response;

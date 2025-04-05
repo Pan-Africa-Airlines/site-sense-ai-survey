@@ -114,10 +114,12 @@ const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({ showAIRecom
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
+    const checked = (e.target as HTMLInputElement).type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
+    
     setFormData(prevData => ({
       ...prevData,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: checked !== undefined ? checked : value
     }));
   };
 
@@ -131,7 +133,6 @@ const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({ showAIRecom
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // Displaying the values for demonstration purposes
     console.log(values);
     toast({
       title: "Installation Form Submitted",
@@ -145,7 +146,6 @@ const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({ showAIRecom
       ? await enhanceNotes(formData.notes || "", "installation") 
       : formData.notes;
     
-    // Use the enhanced notes in your submission logic
     setFormData({
       ...formData,
       notes: enhancedNotes || ""
