@@ -1,473 +1,178 @@
-
 import React, { useState } from "react";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { useAI } from "@/contexts/AIContext";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import ImageCapture from "@/components/ImageCapture";
 import NavigationBar from "@/components/NavigationBar";
-import { CheckCircle2, XCircle } from "lucide-react";
-
-type CarCheckupFormValues = {
-  vehicleRegistration: string;
-  odometerReading: string;
-  fuelLevel: string;
-  hasValidLicense: boolean;
-  tiresCondition: string;
-  lightsWorking: boolean;
-  brakesFunctional: boolean;
-  additionalNotes: string;
-};
-
-type ImageValidation = {
-  imageData: string;
-  validationResult: "pending" | "valid" | "invalid" | null;
-  aiComment: string;
-};
+import NetworkingBanner from "@/components/NetworkingBanner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Sparkles, Car, Fuel, BarChart, Tool } from "lucide-react";
 
 const CarCheckup = () => {
-  const navigate = useNavigate();
-  const { analyzeImage, isProcessing } = useAI();
-  const [images, setImages] = useState<Record<string, ImageValidation>>({
-    tires: { imageData: "", validationResult: null, aiComment: "" },
-    licenseDisc: { imageData: "", validationResult: null, aiComment: "" },
-    dashboard: { imageData: "", validationResult: null, aiComment: "" },
-    carExterior: { imageData: "", validationResult: null, aiComment: "" }
+  const [tab, setTab] = useState("vehicle");
+  const [vehicleInfo, setVehicleInfo] = useState({
+    make: "",
+    model: "",
+    year: "",
+    mileage: "",
+    licensePlate: "",
   });
-
-  const form = useForm<CarCheckupFormValues>({
-    defaultValues: {
-      vehicleRegistration: "",
-      odometerReading: "",
-      fuelLevel: "",
-      hasValidLicense: false,
-      tiresCondition: "",
-      lightsWorking: false,
-      brakesFunctional: false,
-      additionalNotes: ""
-    }
+  const [fuelEfficiency, setFuelEfficiency] = useState({
+    currentReading: "",
+    averageReading: "",
   });
+  const [maintenanceChecklist, setMaintenanceChecklist] = useState({
+    oilChange: false,
+    tireRotation: false,
+    brakeInspection: false,
+    fluidLevels: false,
+  });
+  const [engineerNotes, setEngineerNotes] = useState("");
 
-  const handleImageCapture = async (type: string, imageData: string) => {
-    if (!imageData) {
-      setImages(prev => ({
-        ...prev,
-        [type]: { imageData: "", validationResult: null, aiComment: "" }
-      }));
-      return;
-    }
-
-    setImages(prev => ({
-      ...prev,
-      [type]: { ...prev[type], imageData, validationResult: "pending" }
-    }));
-
-    try {
-      // Analyze the image with AI
-      const analysis = await analyzeImage(imageData);
-      
-      // Determine if image is valid based on type-specific criteria
-      let isValid = false;
-      let comment = analysis;
-      
-      if (type === "tires") {
-        isValid = !analysis.toLowerCase().includes("worn") && 
-                 !analysis.toLowerCase().includes("damaged") &&
-                 !analysis.toLowerCase().includes("flat");
-      } else if (type === "licenseDisc") {
-        isValid = analysis.toLowerCase().includes("valid") || 
-                 !analysis.toLowerCase().includes("expired");
-      } else if (type === "dashboard") {
-        isValid = !analysis.toLowerCase().includes("warning") &&
-                 !analysis.toLowerCase().includes("error");
-      } else if (type === "carExterior") {
-        isValid = !analysis.toLowerCase().includes("damaged") &&
-                 !analysis.toLowerCase().includes("dent");
-      }
-      
-      setImages(prev => ({
-        ...prev,
-        [type]: { 
-          imageData, 
-          validationResult: isValid ? "valid" : "invalid", 
-          aiComment: comment 
-        }
-      }));
-    } catch (error) {
-      console.error("Error analyzing image:", error);
-      setImages(prev => ({
-        ...prev,
-        [type]: { 
-          imageData, 
-          validationResult: null, 
-          aiComment: "Failed to analyze image" 
-        }
-      }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (tab === "vehicle") {
+      setVehicleInfo(prev => ({ ...prev, [name]: value }));
+    } else if (tab === "fuel") {
+      setFuelEfficiency(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const onSubmit = async (data: CarCheckupFormValues) => {
-    // Check if any images are missing or invalid
-    const missingImages = Object.entries(images).filter(([_, img]) => !img.imageData);
-    const invalidImages = Object.entries(images).filter(([_, img]) => img.validationResult === "invalid");
-    
-    if (missingImages.length > 0) {
-      toast.error(`Please capture all required images`, {
-        description: missingImages.map(([type]) => type).join(", ")
-      });
-      return;
-    }
-    
-    if (invalidImages.length > 0) {
-      // Show warning but allow submission
-      const proceed = confirm(`Some images show potential issues with: ${invalidImages.map(([type]) => type).join(", ")}. Do you want to proceed anyway?`);
-      if (!proceed) return;
-    }
-    
-    // In a real app, we would submit the data to a backend
-    console.log("Car checkup data:", { ...data, images });
-    
-    toast.success("Car check completed successfully!", {
-      description: "You can now proceed to site assessment."
-    });
-    
-    // Navigate to the main app
-    navigate("/");
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setMaintenanceChecklist(prev => ({ ...prev, [name]: checked }));
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <NavigationBar />
+      <NetworkingBanner
+        title="Vehicle System Check"
+        subtitle="Comprehensive diagnostic and maintenance tracking for field engineer vehicles"
+      />
       <div className="container mx-auto px-4 py-8">
-        <Card className="mb-8">
-          <CardHeader className="bg-akhanya-light">
-            <CardTitle className="text-akhanya text-2xl">Vehicle Safety Check</CardTitle>
-            <CardDescription>
-              Complete this safety check before traveling to site
-            </CardDescription>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-akhanya">Vehicle Checkup</CardTitle>
+            <CardDescription>Record vehicle status and maintenance details</CardDescription>
           </CardHeader>
-          <CardContent className="pt-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="form-section">
-                  <div className="section-title">Vehicle Information</div>
-                  <div className="field-row">
-                    <FormField
-                      control={form.control}
-                      name="vehicleRegistration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="required">Registration Number</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. ABC 123 GP" {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="odometerReading"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="required">Odometer Reading (km)</FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="e.g. 45000" {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+          <CardContent>
+            <Tabs defaultValue="vehicle" className="space-y-4" onValueChange={setTab}>
+              <TabsList>
+                <TabsTrigger value="vehicle" className="text-akhanya">
+                  <Car className="w-4 h-4 mr-2" /> Vehicle Info
+                </TabsTrigger>
+                <TabsTrigger value="fuel" className="text-akhanya">
+                  <Fuel className="w-4 h-4 mr-2" /> Fuel Efficiency
+                </TabsTrigger>
+                <TabsTrigger value="maintenance" className="text-akhanya">
+                  <Tool className="w-4 h-4 mr-2" /> Maintenance
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="vehicle" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="make">Make</Label>
+                    <Input type="text" id="make" name="make" value={vehicleInfo.make} onChange={handleInputChange} />
                   </div>
-                  <div className="field-row">
-                    <FormField
-                      control={form.control}
-                      name="fuelLevel"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="required">Fuel Level</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. 3/4 full" {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="hasValidLicense"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-8">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Vehicle has valid license disk
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
+                  <div>
+                    <Label htmlFor="model">Model</Label>
+                    <Input type="text" id="model" name="model" value={vehicleInfo.model} onChange={handleInputChange} />
+                  </div>
+                  <div>
+                    <Label htmlFor="year">Year</Label>
+                    <Input type="text" id="year" name="year" value={vehicleInfo.year} onChange={handleInputChange} />
+                  </div>
+                  <div>
+                    <Label htmlFor="mileage">Mileage</Label>
+                    <Input type="text" id="mileage" name="mileage" value={vehicleInfo.mileage} onChange={handleInputChange} />
+                  </div>
+                  <div>
+                    <Label htmlFor="licensePlate">License Plate</Label>
+                    <Input type="text" id="licensePlate" name="licensePlate" value={vehicleInfo.licensePlate} onChange={handleInputChange} />
                   </div>
                 </div>
-
-                <div className="form-section">
-                  <div className="section-title">Vehicle Condition</div>
-                  <div className="field-row">
-                    <FormField
-                      control={form.control}
-                      name="tiresCondition"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="required">Tires Condition</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. Good tread, no visible damage" {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+              </TabsContent>
+              <TabsContent value="fuel" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="currentReading">Current Reading</Label>
+                    <Input type="text" id="currentReading" name="currentReading" value={fuelEfficiency.currentReading} onChange={handleInputChange} />
                   </div>
-                  <div className="field-row">
-                    <FormField
-                      control={form.control}
-                      name="lightsWorking"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              All lights are working properly
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="brakesFunctional"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Brakes are functional
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
+                  <div>
+                    <Label htmlFor="averageReading">Average Reading</Label>
+                    <Input type="text" id="averageReading" name="averageReading" value={fuelEfficiency.averageReading} onChange={handleInputChange} />
                   </div>
                 </div>
-
-                <div className="form-section">
-                  <div className="section-title">Image Documentation</div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Take clear photos of the following items. AI will analyze each image for safety concerns.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <ImageCapture
-                        label="Vehicle Tires"
-                        description="Take a photo of the front tires"
-                        onCapture={(imageData) => handleImageCapture("tires", imageData)}
-                        capturedImage={images.tires.imageData}
+              </TabsContent>
+              <TabsContent value="maintenance" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="oilChange">
+                      <Checkbox
+                        id="oilChange"
+                        name="oilChange"
+                        checked={maintenanceChecklist.oilChange}
+                        onCheckedChange={(checked) => handleCheckboxChange({ target: { name: "oilChange", checked } } as any)}
                       />
-                      {images.tires.validationResult && (
-                        <div className={`mt-2 p-2 rounded-md ${
-                          images.tires.validationResult === "valid" 
-                            ? "bg-green-50 text-green-800" 
-                            : images.tires.validationResult === "invalid" 
-                              ? "bg-red-50 text-red-800" 
-                              : "bg-yellow-50 text-yellow-800"
-                        }`}>
-                          {images.tires.validationResult === "valid" && (
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-4 w-4" />
-                              <span>Tires appear in good condition</span>
-                            </div>
-                          )}
-                          {images.tires.validationResult === "invalid" && (
-                            <div className="flex items-center gap-1">
-                              <XCircle className="h-4 w-4" />
-                              <span>Possible issues with tires</span>
-                            </div>
-                          )}
-                          {images.tires.validationResult === "pending" && (
-                            <span>Analyzing image...</span>
-                          )}
-                          <p className="text-xs mt-1">{images.tires.aiComment}</p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <ImageCapture
-                        label="License Disc"
-                        description="Take a clear photo of the license disc"
-                        onCapture={(imageData) => handleImageCapture("licenseDisc", imageData)}
-                        capturedImage={images.licenseDisc.imageData}
+                      <span className="ml-2">Oil Change</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <Label htmlFor="tireRotation">
+                      <Checkbox
+                        id="tireRotation"
+                        name="tireRotation"
+                        checked={maintenanceChecklist.tireRotation}
+                        onCheckedChange={(checked) => handleCheckboxChange({ target: { name: "tireRotation", checked } } as any)}
                       />
-                      {images.licenseDisc.validationResult && (
-                        <div className={`mt-2 p-2 rounded-md ${
-                          images.licenseDisc.validationResult === "valid" 
-                            ? "bg-green-50 text-green-800" 
-                            : images.licenseDisc.validationResult === "invalid" 
-                              ? "bg-red-50 text-red-800" 
-                              : "bg-yellow-50 text-yellow-800"
-                        }`}>
-                          {images.licenseDisc.validationResult === "valid" && (
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-4 w-4" />
-                              <span>License appears valid</span>
-                            </div>
-                          )}
-                          {images.licenseDisc.validationResult === "invalid" && (
-                            <div className="flex items-center gap-1">
-                              <XCircle className="h-4 w-4" />
-                              <span>Possible issues with license</span>
-                            </div>
-                          )}
-                          {images.licenseDisc.validationResult === "pending" && (
-                            <span>Analyzing image...</span>
-                          )}
-                          <p className="text-xs mt-1">{images.licenseDisc.aiComment}</p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <ImageCapture
-                        label="Dashboard/Instrument Panel"
-                        description="Take a photo showing all gauges and warning lights"
-                        onCapture={(imageData) => handleImageCapture("dashboard", imageData)}
-                        capturedImage={images.dashboard.imageData}
+                      <span className="ml-2">Tire Rotation</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <Label htmlFor="brakeInspection">
+                      <Checkbox
+                        id="brakeInspection"
+                        name="brakeInspection"
+                        checked={maintenanceChecklist.brakeInspection}
+                        onCheckedChange={(checked) => handleCheckboxChange({ target: { name: "brakeInspection", checked } } as any)}
                       />
-                      {images.dashboard.validationResult && (
-                        <div className={`mt-2 p-2 rounded-md ${
-                          images.dashboard.validationResult === "valid" 
-                            ? "bg-green-50 text-green-800" 
-                            : images.dashboard.validationResult === "invalid" 
-                              ? "bg-red-50 text-red-800" 
-                              : "bg-yellow-50 text-yellow-800"
-                        }`}>
-                          {images.dashboard.validationResult === "valid" && (
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-4 w-4" />
-                              <span>No warning lights detected</span>
-                            </div>
-                          )}
-                          {images.dashboard.validationResult === "invalid" && (
-                            <div className="flex items-center gap-1">
-                              <XCircle className="h-4 w-4" />
-                              <span>Warning lights may be active</span>
-                            </div>
-                          )}
-                          {images.dashboard.validationResult === "pending" && (
-                            <span>Analyzing image...</span>
-                          )}
-                          <p className="text-xs mt-1">{images.dashboard.aiComment}</p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <ImageCapture
-                        label="Car Exterior"
-                        description="Take a photo of the car exterior (front view)"
-                        onCapture={(imageData) => handleImageCapture("carExterior", imageData)}
-                        capturedImage={images.carExterior.imageData}
+                      <span className="ml-2">Brake Inspection</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <Label htmlFor="fluidLevels">
+                      <Checkbox
+                        id="fluidLevels"
+                        name="fluidLevels"
+                        checked={maintenanceChecklist.fluidLevels}
+                        onCheckedChange={(checked) => handleCheckboxChange({ target: { name: "fluidLevels", checked } } as any)}
                       />
-                      {images.carExterior.validationResult && (
-                        <div className={`mt-2 p-2 rounded-md ${
-                          images.carExterior.validationResult === "valid" 
-                            ? "bg-green-50 text-green-800" 
-                            : images.carExterior.validationResult === "invalid" 
-                              ? "bg-red-50 text-red-800" 
-                              : "bg-yellow-50 text-yellow-800"
-                        }`}>
-                          {images.carExterior.validationResult === "valid" && (
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-4 w-4" />
-                              <span>Exterior appears in good condition</span>
-                            </div>
-                          )}
-                          {images.carExterior.validationResult === "invalid" && (
-                            <div className="flex items-center gap-1">
-                              <XCircle className="h-4 w-4" />
-                              <span>Possible issues with exterior</span>
-                            </div>
-                          )}
-                          {images.carExterior.validationResult === "pending" && (
-                            <span>Analyzing image...</span>
-                          )}
-                          <p className="text-xs mt-1">{images.carExterior.aiComment}</p>
-                        </div>
-                      )}
-                    </div>
+                      <span className="ml-2">Fluid Levels Check</span>
+                    </Label>
                   </div>
                 </div>
-
-                <div className="form-section">
-                  <div className="section-title">Additional Notes</div>
-                  <FormField
-                    control={form.control}
-                    name="additionalNotes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Any other issues or concerns</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter any additional information about the vehicle condition"
-                            className="min-h-32"
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => navigate("/")}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit"
-                    className="bg-akhanya-purple hover:bg-akhanya-dark"
-                    disabled={isProcessing}
-                  >
-                    {isProcessing ? "Processing..." : "Submit Vehicle Check"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
+              </TabsContent>
+            </Tabs>
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="engineerNotes">Engineer Notes</Label>
+              <Textarea
+                id="engineerNotes"
+                placeholder="Any additional notes about the vehicle"
+                value={engineerNotes}
+                onChange={(e) => setEngineerNotes(e.target.value)}
+              />
+            </div>
+            <Button className="w-full mt-4 bg-akhanya hover:bg-akhanya-dark">
+              Submit Vehicle Checkup
+            </Button>
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
 };
 
