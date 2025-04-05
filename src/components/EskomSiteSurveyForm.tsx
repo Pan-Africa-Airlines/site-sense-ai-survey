@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -211,16 +212,15 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     });
   };
 
-  const handleImageCapture = (type: keyof typeof formData.sitePhotos, imageData: string) => {
+  const handleImageCapture = (type: string, imageData: string) => {
+    // Fix: Update the type to be a string key of formData (not sitePhotos)
     setFormData({
       ...formData,
-      sitePhotos: {
-        ...formData.sitePhotos,
-        [type]: imageData
-      }
+      [type]: imageData
     });
 
     if (formData.useAIAssistance && imageData) {
+      // Fix: Pass proper arguments to analyzeImage function
       analyzeImage(imageData, type).then(analysis => {
         setAiSuggestions({ ...aiSuggestions, [type]: analysis });
       });
@@ -241,6 +241,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
+    // Fix: Pass proper arguments to getSuggestion function
     const suggestion = await getSuggestion(fieldName, formData);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
@@ -248,9 +249,10 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleEnhanceNotes = async () => {
-    if (formData.additionalNotes) {
-      const enhanced = await enhanceNotes(formData.additionalNotes, 'additionalNotes');
-      setFormData({ ...formData, additionalNotes: enhanced });
+    if (formData.generalRemarks) {
+      // Fix: Use generalRemarks instead of additionalNotes
+      const enhanced = await enhanceNotes(formData.generalRemarks, 'generalRemarks');
+      setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
       toast.error("Please add some notes first");
