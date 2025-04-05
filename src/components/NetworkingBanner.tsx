@@ -16,12 +16,12 @@ const NetworkingBanner: React.FC<NetworkingBannerProps> = ({
   return (
     <div className="relative w-full overflow-hidden mb-8">
       {/* Background gradient with overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-akhanya-dark to-akhanya opacity-90 z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800 opacity-90 z-10"></div>
       
       {/* Banner image */}
       <img
-        src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
-        alt="Network Engineers"
+        src="/lovable-uploads/47596378-d2cb-4456-a4b6-34e2a2abfdba.png"
+        alt="Network Engineer"
         className="w-full h-48 object-cover"
         onError={(e) => {
           e.currentTarget.src = "https://via.placeholder.com/1200x300?text=Network+Engineering";
@@ -37,24 +37,31 @@ const NetworkingBanner: React.FC<NetworkingBannerProps> = ({
           {/* Network icons */}
           {showIcons && (
             <div className="flex space-x-4 mt-4">
-              <div className="bg-white bg-opacity-20 p-2 rounded-full">
+              <div className="bg-white bg-opacity-10 p-2 rounded-full">
                 <Server className="w-5 h-5 text-white" />
               </div>
-              <div className="bg-white bg-opacity-20 p-2 rounded-full">
+              <div className="bg-white bg-opacity-10 p-2 rounded-full">
                 <Wifi className="w-5 h-5 text-white" />
               </div>
-              <div className="bg-white bg-opacity-20 p-2 rounded-full">
+              <div className="bg-white bg-opacity-10 p-2 rounded-full">
                 <Cable className="w-5 h-5 text-white" />
               </div>
-              <div className="bg-white bg-opacity-20 p-2 rounded-full">
+              <div className="bg-white bg-opacity-10 p-2 rounded-full">
                 <Router className="w-5 h-5 text-white" />
               </div>
             </div>
           )}
           
-          {/* AI badge */}
-          <div className="absolute top-4 right-4 bg-white bg-opacity-20 px-3 py-1 rounded-full flex items-center space-x-1">
-            <span className="text-white text-sm font-medium">AI-Enhanced</span>
+          {/* Partner logos */}
+          <div className="absolute top-4 right-4 flex items-center space-x-3">
+            <img 
+              src="https://www.eskom.co.za/wp-content/uploads/2021/08/Eskom-logo.png"
+              alt="Eskom" 
+              className="h-8 bg-white bg-opacity-10 p-1 rounded"
+              onError={(e) => {
+                e.currentTarget.src = "https://via.placeholder.com/80x40?text=Eskom";
+              }}
+            />
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
           </div>
         </div>
