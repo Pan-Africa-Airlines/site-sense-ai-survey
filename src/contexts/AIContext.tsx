@@ -4,9 +4,9 @@ import { toast } from "sonner";
 
 interface AIContextType {
   isProcessing: boolean;
-  analyzeImage: (imageData: string) => Promise<string>;
+  analyzeImage: (imageData: string, field: string) => Promise<string>;
   getSuggestion: (fieldName: string, currentData: Record<string, any>) => Promise<string | null>;
-  enhanceNotes: (notes: string) => Promise<string>;
+  enhanceNotes: (notes: string, field: string) => Promise<string>;
 }
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
@@ -27,7 +27,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Mock AI image analysis function
-  const analyzeImage = async (imageData: string): Promise<string> => {
+  const analyzeImage = async (imageData: string, field: string): Promise<string> => {
     setIsProcessing(true);
     
     try {
@@ -83,7 +83,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
   };
 
   // Mock function to enhance/improve notes
-  const enhanceNotes = async (notes: string): Promise<string> => {
+  const enhanceNotes = async (notes: string, field: string): Promise<string> => {
     if (!notes || notes.trim() === '') return '';
     
     setIsProcessing(true);
