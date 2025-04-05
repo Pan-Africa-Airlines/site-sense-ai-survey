@@ -12,6 +12,10 @@ import CarCheckup from "./pages/CarCheckup";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Footer from "./components/Footer";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminAssessments from "./pages/AdminAssessments";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -57,6 +61,7 @@ const App = () => {
           <BrowserRouter>
             <div className="flex flex-col min-h-screen">
               <Routes>
+                {/* Regular user routes */}
                 <Route path="/login" element={
                   <>
                     <Login />
@@ -107,6 +112,27 @@ const App = () => {
                     </ProtectedRoute>
                   } 
                 />
+                
+                {/* Admin routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route 
+                  path="/admin/dashboard" 
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminDashboard />
+                    </AdminProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/assessments" 
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminAssessments />
+                    </AdminProtectedRoute>
+                  } 
+                />
+                
+                {/* Not found route */}
                 <Route path="*" element={
                   <div className="flex flex-col min-h-screen">
                     <NotFound />

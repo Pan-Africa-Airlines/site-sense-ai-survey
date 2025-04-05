@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User } from "lucide-react";
+import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -150,6 +151,11 @@ const NavigationBar: React.FC = () => {
                 <DropdownMenuItem onClick={() => navigate("/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/admin/login")}>
+                  <ShieldAlert className="mr-2 h-4 w-4" />
+                  <span>Admin Panel</span>
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
