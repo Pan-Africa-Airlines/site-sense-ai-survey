@@ -102,7 +102,7 @@ const Login = () => {
       <div className="container mx-auto px-4 z-10 mt-[-80px]">
         <div className="flex flex-col items-center justify-center gap-8">
           {/* Login Form with Logo Inside */}
-          <Card className="w-full max-w-lg border-gray-200 dark:border-white/20 bg-white/90 dark:bg-black/40 backdrop-blur-xl shadow-2xl">
+          <Card className="w-full max-w-lg border-gray-200 bg-white/90 backdrop-blur-xl shadow-2xl">
             <CardHeader className="space-y-1 pb-2">
               {/* Logo inside the card */}
               <div className="flex flex-col items-center mb-6 mt-2">
@@ -132,13 +132,13 @@ const Login = () => {
                   <Lock className="h-6 w-6 text-white" />
                 </div>
               </div>
-              <CardTitle className="text-2xl text-gray-800 dark:text-white text-center">Sign in</CardTitle>
-              <CardDescription className="text-gray-600 dark:text-gray-400 text-center">Enter your credentials to access the platform</CardDescription>
+              <CardTitle className="text-2xl text-gray-800 text-center">Sign in</CardTitle>
+              <CardDescription className="text-gray-600 text-center">Enter your credentials to access the platform</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
+                  <Label htmlFor="email" className="text-gray-700">Email</Label>
                   <Input
                     id="email"
                     type="email" 
@@ -146,12 +146,12 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="bg-white dark:bg-white/10 border-gray-300 dark:border-white/20 text-gray-800 dark:text-white placeholder-gray-400"
+                    className="bg-white border-gray-300 text-gray-800 placeholder-gray-400"
                   />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">Password</Label>
+                    <Label htmlFor="password" className="text-gray-700">Password</Label>
                     <Button variant="link" className="text-xs text-akhanya p-0 h-auto">
                       Forgot password?
                     </Button>
@@ -163,7 +163,7 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="bg-white dark:bg-white/10 border-gray-300 dark:border-white/20 text-gray-800 dark:text-white placeholder-gray-400"
+                    className="bg-white border-gray-300 text-gray-800 placeholder-gray-400"
                   />
                 </div>
                 <Button 
@@ -176,7 +176,7 @@ const Login = () => {
               </form>
             </CardContent>
             <CardFooter className="flex justify-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              <p className="text-sm text-gray-500 text-center">
                 For demo, use any email and password
               </p>
             </CardFooter>
