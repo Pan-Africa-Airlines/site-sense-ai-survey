@@ -100,14 +100,14 @@ const Login = () => {
       </div>
       
       <div className="container mx-auto px-4 z-10">
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-12">
-          {/* Branding and Features Section */}
+        <div className="flex flex-col items-center justify-center gap-12">
+          {/* Branding Section - Simplified with just the logo */}
           <div className="max-w-md">
             <div className="flex flex-col items-center mb-8">
               <img 
                 src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
                 alt="Akhanya IT" 
-                className="h-24 mb-4 drop-shadow-xl transition-all duration-300 hover:scale-105"
+                className="h-32 mb-4 drop-shadow-xl transition-all duration-300 hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.src = "https://via.placeholder.com/200x80?text=Akhanya";
                 }}
@@ -123,46 +123,6 @@ const Login = () => {
                   }}
                 />
                 <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
-              </div>
-            </div>
-            
-            <h1 className="text-4xl font-bold text-gray-800 dark:text-white text-center lg:text-left mb-4 drop-shadow-md">
-              <span className="text-akhanya">Site</span>Sense
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 text-center lg:text-left">
-              AI-powered network infrastructure monitoring and management platform
-            </p>
-            
-            {/* Feature highlights */}
-            <div className="space-y-6 bg-white/80 dark:bg-black/30 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-lg">
-              <div className="flex items-start gap-3">
-                <div className="mt-1 bg-akhanya p-2 rounded-full">
-                  <Brain className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800 dark:text-white">AI-Powered Insights</h3>
-                  <p className="text-gray-600 dark:text-gray-300">Advanced analytics for predictive maintenance and optimization</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="mt-1 bg-akhanya p-2 rounded-full">
-                  <Server className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800 dark:text-white">Infrastructure Monitoring</h3>
-                  <p className="text-gray-600 dark:text-gray-300">Real-time visibility into network health and performance</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="mt-1 bg-akhanya p-2 rounded-full">
-                  <Sparkles className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800 dark:text-white">Smart Recommendations</h3>
-                  <p className="text-gray-600 dark:text-gray-300">AI-guided solutions for optimal network performance</p>
-                </div>
               </div>
             </div>
           </div>
