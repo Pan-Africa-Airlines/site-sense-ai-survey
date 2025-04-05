@@ -124,10 +124,10 @@ const Dashboard = () => {
             <CardDescription>Monthly site assessments status</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-64">
               <ChartContainer
                 config={chartConfig}
-                className="w-full aspect-[4/3]"
+                className="w-full h-full"
               >
                 <BarChart data={assessmentData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -149,10 +149,10 @@ const Dashboard = () => {
             <CardDescription>Monthly installations completed</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-64">
               <ChartContainer
                 config={chartConfig}
-                className="w-full aspect-[4/3]"
+                className="w-full h-full"
               >
                 <LineChart data={installationData}>
                   <CartesianGrid strokeDasharray="3 3" />
