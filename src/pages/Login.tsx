@@ -101,35 +101,32 @@ const Login = () => {
       
       <div className="container mx-auto px-4 z-10 mt-[-80px]">
         <div className="flex flex-col items-center justify-center gap-8">
-          {/* Branding Section - Simplified with just the logo */}
-          <div className="max-w-md">
-            <div className="flex flex-col items-center mb-4">
-              <img 
-                src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
-                alt="Akhanya IT" 
-                className="h-48 mb-2 drop-shadow-xl transition-all duration-300 hover:scale-105"
-                onError={(e) => {
-                  e.currentTarget.src = "https://via.placeholder.com/200x80?text=Akhanya";
-                }}
-              />
-              <div className="flex items-center gap-3 mt-2">
-                <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+          {/* Login Form with Logo Inside */}
+          <Card className="w-full max-w-lg border-gray-200 dark:border-white/20 bg-white/90 dark:bg-black/40 backdrop-blur-xl shadow-2xl">
+            <CardHeader className="space-y-1 pb-2">
+              {/* Logo inside the card */}
+              <div className="flex flex-col items-center mb-6 mt-2">
                 <img 
-                  src="/eskom-logo.png" 
-                  alt="Eskom" 
-                  className="h-10"
+                  src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
+                  alt="Akhanya IT" 
+                  className="h-40 mb-2 drop-shadow-xl transition-all duration-300 hover:scale-105"
                   onError={(e) => {
-                    e.currentTarget.src = "https://via.placeholder.com/80x30?text=Eskom";
+                    e.currentTarget.src = "https://via.placeholder.com/200x80?text=Akhanya";
                   }}
                 />
-                <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+                <div className="flex items-center gap-3 mt-2">
+                  <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+                  <img 
+                    src="/eskom-logo.png" 
+                    alt="Eskom" 
+                    className="h-10"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://via.placeholder.com/80x30?text=Eskom";
+                    }}
+                  />
+                  <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+                </div>
               </div>
-            </div>
-          </div>
-          
-          {/* Login Form */}
-          <Card className="w-full max-w-md border-gray-200 dark:border-white/20 bg-white/90 dark:bg-black/40 backdrop-blur-xl shadow-2xl">
-            <CardHeader className="space-y-1 pb-2">
               <div className="flex items-center justify-center mb-2">
                 <div className="bg-akhanya p-3 rounded-full">
                   <Lock className="h-6 w-6 text-white" />
