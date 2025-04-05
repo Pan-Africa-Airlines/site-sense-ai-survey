@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,138 +6,105 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAI } from "@/contexts/AIContext";
 import { toast } from "sonner";
-import { MapPin, Info, Check } from "lucide-react";
+import { MapPin, Info, Check, Calendar, Users, Building, Router, FileText, Power, Radio, Thermometer, Save, Loader } from "lucide-react";
 import ImageCapture from "./ImageCapture";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 interface SiteInstallationFormProps {
   onSubmit?: (data: any) => void;
-  assessmentData?: any; // Optional assessment data to pre-fill fields
+  installationData?: any; // Optional installation data to pre-fill fields
   showAIRecommendations?: boolean;
 }
 
 const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({ 
   onSubmit, 
-  assessmentData, 
+  installationData, 
   showAIRecommendations = false 
 }) => {
-  const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
   const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
-  
-  const initialFormData = {
-    // Installation Information
-    installationDate: new Date().toISOString().split('T')[0],
-    installationType: "new", // new, upgrade, replacement
-    
-    // Site Information (pre-filled if assessment data exists)
-    siteName: assessmentData?.siteName || "",
-    siteAddress: assessmentData?.siteAddress || "",
-    siteCoordinates: assessmentData?.siteCoordinates || "",
-    customerName: assessmentData?.customerName || "",
-    customerContactPerson: assessmentData?.customerContactPerson || "",
-    
-    // Equipment Details
+  const [formData, setFormData] = useState({
+    installationDate: installationData?.installationDate || new Date().toISOString().split('T')[0],
+    installationType: installationData?.installationType || "",
+    siteName: installationData?.siteName || "",
+    siteAddress: installationData?.siteAddress || "",
+    siteCoordinates: installationData?.siteCoordinates || "",
+    customerName: installationData?.customerName || "",
+    customerContactPerson: installationData?.customerContactPerson || "",
     installedEquipment: {
-      switches: false,
-      routers: false,
-      accessPoints: false,
-      servers: false,
-      storage: false,
-      cabling: false,
-      ups: false,
-      other: false
+      switches: installationData?.installedEquipment?.switches || false,
+      routers: installationData?.installedEquipment?.routers || false,
+      servers: installationData?.installedEquipment?.servers || false,
+      firewalls: installationData?.installedEquipment?.firewalls || false,
+      ups: installationData?.installedEquipment?.ups || false,
+      coolingSystems: installationData?.installedEquipment?.coolingSystems || false,
+      other: installationData?.installedEquipment?.other || false,
     },
-    equipmentDetails: "",
-    
-    // Network Configuration
-    networkSubnet: "",
-    ipRange: "",
-    gateway: "",
-    dnsServers: "",
-    vlanConfiguration: "",
-    wirelessDetails: "",
-    
-    // Installation Tasks
-    rackMounting: false,
-    cableLaying: false,
-    powerConfiguration: false,
-    networkConfiguration: false,
-    testing: false,
-    documentation: false,
-    userTraining: false,
-    
-    // Installation Photos
-    installationPhotos: {
-      rackSetup: "",
-      cabling: "",
-      equipment: "",
-      testing: ""
-    },
-    
-    // Additional Details
-    challengesFaced: "",
-    resolutionDetails: "",
-    additionalNotes: "",
-    
-    // Engineer Details
-    engineerName: assessmentData?.engineerName || "",
-    engineerContact: assessmentData?.engineerContact || "",
-    
-    useAIAssistance: true
-  };
-  
-  const [formData, setFormData] = useState(initialFormData);
-  const [aiSuggestions, setAiSuggestions] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState("basic");
+    powerAvailability: installationData?.powerAvailability || "",
+    networkConnectivity: installationData?.networkConnectivity || "",
+    environmentalConditions: installationData?.environmentalConditions || "",
+    installationNotes: installationData?.installationNotes || "",
+    installerName: installationData?.installerName || "",
+    installerContact: installationData?.installerContact || "",
+    installationPhotos: installationData?.installationPhotos || "",
+    siteSketch: installationData?.siteSketch || "",
+    testResults: installationData?.testResults || "",
+    challengesFaced: installationData?.challengesFaced || "",
+    recommendations: installationData?.recommendations || "",
+    completionDate: installationData?.completionDate || new Date().toISOString().split('T')[0],
+    signature: installationData?.signature || "",
+    useAIAssistance: installationData?.useAIAssistance || true,
+  });
+  const [aiSuggestions, setAiSuggestions] = useState({});
+  const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
+
+  useEffect(() => {
+    if (showAIRecommendations && formData.siteAddress) {
+      getSuggestion("siteAddress", formData.siteAddress).then(suggestion => {
+        if (suggestion) {
+          setAiSuggestions(prev => ({ ...prev, siteAddress: suggestion }));
+        }
+      });
+    }
+  }, [formData.siteAddress, getSuggestion, showAIRecommendations]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      installedEquipment: {
+        ...prevState.installedEquipment,
+        [name]: checked,
+      },
+    }));
+  };
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
   };
-  
-  const handleCheckboxChange = (category: string, item: string, checked: boolean) => {
-    if (category === 'installedEquipment') {
-      setFormData({
-        ...formData,
-        installedEquipment: {
-          ...formData.installedEquipment,
-          [item]: checked
-        }
-      });
-    } else if (category === 'tasks') {
-      setFormData({
-        ...formData,
-        [item]: checked
-      });
-    }
-  };
 
-  const handleImageCapture = (type: keyof typeof formData.installationPhotos, imageData: string) => {
+  const handleImageCapture = (type: string, imageData: string) => {
     setFormData({
       ...formData,
-      installationPhotos: {
-        ...formData.installationPhotos,
-        [type]: imageData
-      }
+      [type]: imageData
     });
 
-    // If AI assistance is enabled and an image was captured, analyze it
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData, type).then(analysis => {
-        setAiSuggestions({ ...aiSuggestions, [type]: analysis });
+      analyzeImage(imageData, "site").then(analysis => {
+        if (analysis) {
+          setAiSuggestions({ ...aiSuggestions, [type]: analysis });
+        }
       });
     }
   };
-
+  
   const handleLocationUpdate = () => {
     if (latitude && longitude) {
       setFormData({
@@ -152,46 +119,35 @@ const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, formData);
+    const suggestion = await getSuggestion(fieldName, formData[fieldName] as string);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
   };
 
   const handleEnhanceNotes = async () => {
-    if (formData.additionalNotes) {
-      const enhanced = await enhanceNotes(formData.additionalNotes, 'additionalNotes');
-      setFormData({ ...formData, additionalNotes: enhanced });
-      toast.success("Notes enhanced with AI suggestions");
+    if (formData.installationNotes) {
+      const enhancedNotes = await enhanceNotes(formData.installationNotes, "installation");
+      setFormData({ ...formData, installationNotes: enhancedNotes });
+      toast.success("Notes enhanced with AI assistance");
     } else {
-      toast.error("Please add some notes first");
+      toast.error("Please add some notes to enhance");
     }
   };
 
-  const handleSubmitForm = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate required fields
-    const requiredFields = ['siteName', 'installationDate', 'engineerName'];
-    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
-    
-    if (missingFields.length > 0) {
-      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-      return;
-    }
-    
-    onSubmit(formData);
-    toast.success("Installation record submitted successfully!");
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
+    onSubmit?.(formData);
+    toast.success("Installation data submitted!");
   };
 
   return (
-    <form onSubmit={handleSubmitForm} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-bcx">Site Installation Form</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-bcx">Network Installation Form</h2>
+          <h3 className="text-xl font-semibold">Site Installation Details</h3>
+        </div>
         <div className="flex items-center space-x-2">
           <Switch
             id="ai-mode-install"
@@ -204,629 +160,481 @@ const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-6">
-          <TabsTrigger value="basic">Basic Info</TabsTrigger>
-          <TabsTrigger value="equipment">Equipment</TabsTrigger>
-          <TabsTrigger value="network">Network</TabsTrigger>
-          <TabsTrigger value="documentation">Documentation</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="basic" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Installation Information</h3>
-              
-              <div className="field-row">
-                <div>
-                  <Label htmlFor="installationDate" className="required">Installation Date</Label>
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-0">
+          <table className="w-full">
+            <tbody>
+              <tr>
+                <td className="font-medium w-1/4 bg-gray-50 p-4">Installation Date:</td>
+                <td className="p-4">
                   <Input
-                    id="installationDate"
-                    name="installationDate"
                     type="date"
+                    name="installationDate"
                     value={formData.installationDate}
                     onChange={handleInputChange}
+                    className="w-full"
                   />
-                </div>
-                
-                <div>
-                  <Label htmlFor="installationType">Installation Type</Label>
+                </td>
+              </tr>
+              <tr>
+                <td className="font-medium w-1/4 bg-gray-50 p-4">Installation Type:</td>
+                <td className="p-4">
                   <Select
                     value={formData.installationType}
                     onValueChange={(value) => handleSelectChange("installationType", value)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select installation type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="new">New Installation</SelectItem>
                       <SelectItem value="upgrade">Upgrade</SelectItem>
-                      <SelectItem value="replacement">Replacement</SelectItem>
-                      <SelectItem value="expansion">Expansion</SelectItem>
+                      <SelectItem value="maintenance">Maintenance</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Site Information</h3>
-              
-              <div className="field-row">
-                <div>
-                  <Label htmlFor="siteName" className="required">Site Name</Label>
-                  <Input
-                    id="siteName"
-                    name="siteName"
-                    value={formData.siteName}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Head Office"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="customerName">Customer Name</Label>
-                  <Input
-                    id="customerName"
-                    name="customerName"
-                    value={formData.customerName}
-                    onChange={handleInputChange}
-                    placeholder="e.g. ABC Corporation"
-                  />
-                </div>
-              </div>
-              
-              <div className="field-row">
-                <div className="relative">
-                  <Label htmlFor="siteAddress">Site Address</Label>
-                  <Input
-                    id="siteAddress"
-                    name="siteAddress"
-                    value={formData.siteAddress}
-                    onChange={handleInputChange}
-                    placeholder="Full address of the site"
-                  />
-                </div>
-                
-                <div className="relative">
-                  <Label htmlFor="siteCoordinatesInstall">GPS Coordinates</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="siteCoordinatesInstall"
-                      name="siteCoordinates"
-                      value={formData.siteCoordinates}
-                      onChange={handleInputChange}
-                      placeholder="Latitude, Longitude"
-                      className="flex-grow"
-                    />
-                    <Button 
-                      type="button" 
-                      size="icon"
-                      variant="outline" 
-                      onClick={handleLocationUpdate} 
-                      disabled={locationLoading}
-                      className="flex-shrink-0"
-                    >
-                      <MapPin size={18} />
-                    </Button>
-                  </div>
-                  {address && (
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {address}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Engineer Information</h3>
-              
-              <div className="field-row">
-                <div>
-                  <Label htmlFor="engineerName" className="required">Engineer Name</Label>
-                  <Input
-                    id="engineerName"
-                    name="engineerName"
-                    value={formData.engineerName}
-                    onChange={handleInputChange}
-                    placeholder="Your name"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="engineerContact">Engineer Contact</Label>
-                  <Input
-                    id="engineerContact"
-                    name="engineerContact"
-                    value={formData.engineerContact}
-                    onChange={handleInputChange}
-                    placeholder="Your contact number"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="equipment" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Installed Equipment</h3>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="switches" 
-                    checked={formData.installedEquipment.switches}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'switches', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="switches" className="cursor-pointer">Switches</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="routers" 
-                    checked={formData.installedEquipment.routers}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'routers', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="routers" className="cursor-pointer">Routers</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="accessPoints" 
-                    checked={formData.installedEquipment.accessPoints}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'accessPoints', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="accessPoints" className="cursor-pointer">Access Points</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="servers" 
-                    checked={formData.installedEquipment.servers}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'servers', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="servers" className="cursor-pointer">Servers</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="storage" 
-                    checked={formData.installedEquipment.storage}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'storage', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="storage" className="cursor-pointer">Storage</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="cabling" 
-                    checked={formData.installedEquipment.cabling}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'cabling', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="cabling" className="cursor-pointer">Cabling</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="ups" 
-                    checked={formData.installedEquipment.ups}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'ups', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="ups" className="cursor-pointer">UPS</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="other" 
-                    checked={formData.installedEquipment.other}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('installedEquipment', 'other', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="other" className="cursor-pointer">Other</Label>
-                </div>
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Site Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="siteName">Site Name</Label>
+              <Input
+                type="text"
+                id="siteName"
+                name="siteName"
+                value={formData.siteName}
+                onChange={handleInputChange}
+                placeholder="Enter site name"
+              />
+            </div>
+            <div className="relative">
+              <Label htmlFor="siteAddress">Site Address</Label>
+              <div className="flex space-x-2">
+                <Input
+                  type="text"
+                  id="siteAddress"
+                  name="siteAddress"
+                  value={formData.siteAddress}
+                  onChange={handleInputChange}
+                  placeholder="Enter site address"
+                  className="flex-grow"
+                />
+                <Button 
+                  type="button" 
+                  size="icon"
+                  variant="outline" 
+                  onClick={handleLocationUpdate} 
+                  disabled={locationLoading}
+                  className="flex-shrink-0"
+                >
+                  <MapPin size={18} />
+                </Button>
               </div>
-              
-              <div className="field-row">
-                <div className="field-full">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="equipmentDetails">Equipment Details</Label>
-                    {formData.useAIAssistance && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleGetAISuggestion('equipmentRecommendation')}
-                        disabled={isProcessing}
-                        className="h-8 px-2 text-xs"
-                      >
-                        <Info size={14} className="mr-1" />
-                        Get AI Suggestion
-                      </Button>
-                    )}
-                  </div>
-                  <Textarea
-                    id="equipmentDetails"
-                    name="equipmentDetails"
-                    value={formData.equipmentDetails}
-                    onChange={handleInputChange}
-                    placeholder="Detailed specifications of installed equipment (make, model, serial numbers, etc.)"
-                    rows={4}
-                  />
-                  {aiSuggestions['equipmentRecommendation'] && (
-                    <div className="ai-suggestion">
-                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['equipmentRecommendation']}</p>
-                    </div>
-                  )}
+              {address && (
+                <p className="text-xs text-muted-foreground mt-1 truncate">
+                  {address}
+                </p>
+              )}
+              {showAIRecommendations && aiSuggestions.siteAddress && (
+                <div className="ai-suggestion mt-2">
+                  <Info className="h-4 w-4 inline-block mr-1" />
+                  {aiSuggestions.siteAddress}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Installation Tasks</h3>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="rackMounting" 
-                    checked={formData.rackMounting}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('tasks', 'rackMounting', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="rackMounting" className="cursor-pointer">Rack Mounting</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="cableLaying" 
-                    checked={formData.cableLaying}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('tasks', 'cableLaying', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="cableLaying" className="cursor-pointer">Cable Laying</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="powerConfiguration" 
-                    checked={formData.powerConfiguration}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('tasks', 'powerConfiguration', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="powerConfiguration" className="cursor-pointer">Power Config</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="networkConfiguration" 
-                    checked={formData.networkConfiguration}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('tasks', 'networkConfiguration', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="networkConfiguration" className="cursor-pointer">Network Config</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="testing" 
-                    checked={formData.testing}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('tasks', 'testing', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="testing" className="cursor-pointer">Testing</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="documentation" 
-                    checked={formData.documentation}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('tasks', 'documentation', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="documentation" className="cursor-pointer">Documentation</Label>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="userTraining" 
-                    checked={formData.userTraining}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('tasks', 'userTraining', checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="userTraining" className="cursor-pointer">User Training</Label>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="siteCoordinates">Site Coordinates</Label>
+              <Input
+                type="text"
+                id="siteCoordinates"
+                name="siteCoordinates"
+                value={formData.siteCoordinates}
+                onChange={handleInputChange}
+                placeholder="Enter site coordinates"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="network" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Network Configuration</h3>
-              
-              <div className="field-row">
-                <div>
-                  <Label htmlFor="networkSubnet">Network Subnet</Label>
-                  <Input
-                    id="networkSubnet"
-                    name="networkSubnet"
-                    value={formData.networkSubnet}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 192.168.1.0/24"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="ipRange">IP Range</Label>
-                  <Input
-                    id="ipRange"
-                    name="ipRange"
-                    value={formData.ipRange}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 192.168.1.10 - 192.168.1.50"
-                  />
-                </div>
-              </div>
-              
-              <div className="field-row">
-                <div>
-                  <Label htmlFor="gateway">Default Gateway</Label>
-                  <Input
-                    id="gateway"
-                    name="gateway"
-                    value={formData.gateway}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 192.168.1.1"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="dnsServers">DNS Servers</Label>
-                  <Input
-                    id="dnsServers"
-                    name="dnsServers"
-                    value={formData.dnsServers}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 8.8.8.8, 8.8.4.4"
-                  />
-                </div>
-              </div>
-              
-              <div className="field-row">
-                <div>
-                  <Label htmlFor="vlanConfiguration">VLAN Configuration</Label>
-                  <Textarea
-                    id="vlanConfiguration"
-                    name="vlanConfiguration"
-                    value={formData.vlanConfiguration}
-                    onChange={handleInputChange}
-                    placeholder="Details of VLAN setup (IDs, names, purpose)"
-                    rows={3}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="wirelessDetails">Wireless Network Details</Label>
-                  <Textarea
-                    id="wirelessDetails"
-                    name="wirelessDetails"
-                    value={formData.wirelessDetails}
-                    onChange={handleInputChange}
-                    placeholder="SSID, security, coverage details"
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Challenges & Resolutions</h3>
-              
-              <div className="field-row">
-                <div>
-                  <Label htmlFor="challengesFaced">Challenges Faced</Label>
-                  <Textarea
-                    id="challengesFaced"
-                    name="challengesFaced"
-                    value={formData.challengesFaced}
-                    onChange={handleInputChange}
-                    placeholder="Any challenges or issues encountered during installation"
-                    rows={3}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="resolutionDetails">Resolution Details</Label>
-                  <Textarea
-                    id="resolutionDetails"
-                    name="resolutionDetails"
-                    value={formData.resolutionDetails}
-                    onChange={handleInputChange}
-                    placeholder="How challenges were resolved"
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Customer Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="customerName">Customer Name</Label>
+              <Input
+                type="text"
+                id="customerName"
+                name="customerName"
+                value={formData.customerName}
+                onChange={handleInputChange}
+                placeholder="Enter customer name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="customerContactPerson">Contact Person</Label>
+              <Input
+                type="text"
+                id="customerContactPerson"
+                name="customerContactPerson"
+                value={formData.customerContactPerson}
+                onChange={handleInputChange}
+                placeholder="Enter contact person"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="documentation" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="section-title">Installation Photos</h3>
-              <p className="text-sm text-muted-foreground mb-4">Document the installation with photos for record-keeping and verification.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <ImageCapture
-                    label="Rack Setup"
-                    description="Photo of rack mounting and equipment layout"
-                    onCapture={(imageData) => handleImageCapture("rackSetup", imageData)}
-                    capturedImage={formData.installationPhotos.rackSetup}
-                  />
-                  {aiSuggestions['rackSetup'] && (
-                    <div className="ai-suggestion mt-2">
-                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['rackSetup']}</p>
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <ImageCapture
-                    label="Cabling"
-                    description="Photo of cable management and installation"
-                    onCapture={(imageData) => handleImageCapture("cabling", imageData)}
-                    capturedImage={formData.installationPhotos.cabling}
-                  />
-                  {aiSuggestions['cabling'] && (
-                    <div className="ai-suggestion mt-2">
-                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['cabling']}</p>
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <ImageCapture
-                    label="Equipment"
-                    description="Close-up of installed equipment"
-                    onCapture={(imageData) => handleImageCapture("equipment", imageData)}
-                    capturedImage={formData.installationPhotos.equipment}
-                  />
-                  {aiSuggestions['equipment'] && (
-                    <div className="ai-suggestion mt-2">
-                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['equipment']}</p>
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <ImageCapture
-                    label="Testing"
-                    description="Photo of testing procedures/results"
-                    onCapture={(imageData) => handleImageCapture("testing", imageData)}
-                    capturedImage={formData.installationPhotos.testing}
-                  />
-                  {aiSuggestions['testing'] && (
-                    <div className="ai-suggestion mt-2">
-                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['testing']}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="section-title mb-0">Additional Notes</h3>
-                {formData.useAIAssistance && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleEnhanceNotes}
-                    disabled={isProcessing || !formData.additionalNotes}
-                  >
-                    Enhance with AI
-                  </Button>
-                )}
-              </div>
-              
-              <div className="field-row">
-                <div className="field-full">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="additionalNotes">Additional Notes</Label>
-                    {formData.useAIAssistance && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleGetAISuggestion('installationNotes')}
-                        disabled={isProcessing}
-                        className="h-8 px-2 text-xs"
-                      >
-                        <Info size={14} className="mr-1" />
-                        Get AI Suggestion
-                      </Button>
-                    )}
-                  </div>
-                  <Textarea
-                    id="additionalNotes"
-                    name="additionalNotes"
-                    value={formData.additionalNotes}
-                    onChange={handleInputChange}
-                    placeholder="Any additional information, observations, or follow-up requirements"
-                    rows={5}
-                  />
-                  {aiSuggestions['installationNotes'] && (
-                    <div className="ai-suggestion">
-                      <p><Check size={12} className="inline mr-1" /> {aiSuggestions['installationNotes']}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Installed Equipment</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="inline-flex items-center space-x-2">
+                <Checkbox
+                  id="switches"
+                  name="switches"
+                  checked={formData.installedEquipment.switches}
+                  onCheckedChange={checked => setFormData(prevState => ({
+                    ...prevState,
+                    installedEquipment: {
+                      ...prevState.installedEquipment,
+                      switches: checked === true,
+                    },
+                  }))}
+                />
+                <span>Switches</span>
+              </Label>
+            </div>
+            <div>
+              <Label className="inline-flex items-center space-x-2">
+                <Checkbox
+                  id="routers"
+                  name="routers"
+                  checked={formData.installedEquipment.routers}
+                  onCheckedChange={checked => setFormData(prevState => ({
+                    ...prevState,
+                    installedEquipment: {
+                      ...prevState.installedEquipment,
+                      routers: checked === true,
+                    },
+                  }))}
+                />
+                <span>Routers</span>
+              </Label>
+            </div>
+            <div>
+              <Label className="inline-flex items-center space-x-2">
+                <Checkbox
+                  id="servers"
+                  name="servers"
+                  checked={formData.installedEquipment.servers}
+                  onCheckedChange={checked => setFormData(prevState => ({
+                    ...prevState,
+                    installedEquipment: {
+                      ...prevState.installedEquipment,
+                      servers: checked === true,
+                    },
+                  }))}
+                />
+                <span>Servers</span>
+              </Label>
+            </div>
+            <div>
+              <Label className="inline-flex items-center space-x-2">
+                <Checkbox
+                  id="firewalls"
+                  name="firewalls"
+                  checked={formData.installedEquipment.firewalls}
+                   onCheckedChange={checked => setFormData(prevState => ({
+                    ...prevState,
+                    installedEquipment: {
+                      ...prevState.installedEquipment,
+                      firewalls: checked === true,
+                    },
+                  }))}
+                />
+                <span>Firewalls</span>
+              </Label>
+            </div>
+            <div>
+              <Label className="inline-flex items-center space-x-2">
+                <Checkbox
+                  id="ups"
+                  name="ups"
+                  checked={formData.installedEquipment.ups}
+                  onCheckedChange={checked => setFormData(prevState => ({
+                    ...prevState,
+                    installedEquipment: {
+                      ...prevState.installedEquipment,
+                      ups: checked === true,
+                    },
+                  }))}
+                />
+                <span>UPS</span>
+              </Label>
+            </div>
+            <div>
+              <Label className="inline-flex items-center space-x-2">
+                <Checkbox
+                  id="coolingSystems"
+                  name="coolingSystems"
+                  checked={formData.installedEquipment.coolingSystems}
+                  onCheckedChange={checked => setFormData(prevState => ({
+                    ...prevState,
+                    installedEquipment: {
+                      ...prevState.installedEquipment,
+                      coolingSystems: checked === true,
+                    },
+                  }))}
+                />
+                <span>Cooling Systems</span>
+              </Label>
+            </div>
+            <div>
+              <Label className="inline-flex items-center space-x-2">
+                <Checkbox
+                  id="other"
+                  name="other"
+                  checked={formData.installedEquipment.other}
+                  onCheckedChange={checked => setFormData(prevState => ({
+                    ...prevState,
+                    installedEquipment: {
+                      ...prevState.installedEquipment,
+                      other: checked === true,
+                    },
+                  }))}
+                />
+                <span>Other</span>
+              </Label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex justify-between items-center pt-4">
-        <div className="flex items-center">
-          {latitude && longitude && (
-            <Badge variant="outline" className="location-badge">
-              <MapPin size={12} /> Location tracked
-            </Badge>
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Additional Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="powerAvailability">Power Availability</Label>
+              <Input
+                type="text"
+                id="powerAvailability"
+                name="powerAvailability"
+                value={formData.powerAvailability}
+                onChange={handleInputChange}
+                placeholder="Enter power availability details"
+              />
+            </div>
+            <div>
+              <Label htmlFor="networkConnectivity">Network Connectivity</Label>
+              <Input
+                type="text"
+                id="networkConnectivity"
+                name="networkConnectivity"
+                value={formData.networkConnectivity}
+                onChange={handleInputChange}
+                placeholder="Enter network connectivity details"
+              />
+            </div>
+            <div>
+              <Label htmlFor="environmentalConditions">Environmental Conditions</Label>
+              <Input
+                type="text"
+                id="environmentalConditions"
+                name="environmentalConditions"
+                value={formData.environmentalConditions}
+                onChange={handleInputChange}
+                placeholder="Enter environmental conditions details"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Installation Notes</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <Textarea
+                id="installationNotes"
+                name="installationNotes"
+                value={formData.installationNotes}
+                onChange={handleInputChange}
+                placeholder="Enter installation notes"
+                rows={4}
+              />
+              {showAIRecommendations && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="mt-2"
+                  onClick={handleEnhanceNotes}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Enhancing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Enhance with AI
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Installer Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="installerName">Installer Name</Label>
+              <Input
+                type="text"
+                id="installerName"
+                name="installerName"
+                value={formData.installerName}
+                onChange={handleInputChange}
+                placeholder="Enter installer name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="installerContact">Contact Number</Label>
+              <Input
+                type="text"
+                id="installerContact"
+                name="installerContact"
+                value={formData.installerContact}
+                onChange={handleInputChange}
+                placeholder="Enter contact number"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Installation Photos</h3>
+          <ImageCapture
+            label="Installation Photos"
+            description="Take a photo of the completed installation"
+            onCapture={(imageData) => handleImageCapture("installationPhotos", imageData)}
+            capturedImage={formData.installationPhotos}
+          />
+          {aiSuggestions['installationPhotos'] && (
+            <div className="ai-suggestion mt-2">
+              <p><Check size={12} className="inline mr-1" /> {aiSuggestions['installationPhotos']}</p>
+            </div>
           )}
-        </div>
-        
-        <div className="flex space-x-2">
-          <Button 
-            type="button" 
-            variant="outline"
-            onClick={() => {
-              // Reset form would go here
-              toast.info("Form reset functionality would go here");
-            }}
-          >
-            Reset
-          </Button>
-          <Button type="submit">Submit Installation</Button>
-        </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Site Sketch</h3>
+          <ImageCapture
+            label="Site Sketch"
+            description="Take a photo of the site sketch"
+            onCapture={(imageData) => handleImageCapture("siteSketch", imageData)}
+            capturedImage={formData.siteSketch}
+          />
+          {aiSuggestions['siteSketch'] && (
+            <div className="ai-suggestion mt-2">
+              <p><Check size={12} className="inline mr-1" /> {aiSuggestions['siteSketch']}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden shadow-md">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Final Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="testResults">Test Results</Label>
+              <Textarea
+                id="testResults"
+                name="testResults"
+                value={formData.testResults}
+                onChange={handleInputChange}
+                placeholder="Enter test results"
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label htmlFor="challengesFaced">Challenges Faced</Label>
+              <Textarea
+                id="challengesFaced"
+                name="challengesFaced"
+                value={formData.challengesFaced}
+                onChange={handleInputChange}
+                placeholder="Enter challenges faced"
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label htmlFor="recommendations">Recommendations</Label>
+              <Textarea
+                id="recommendations"
+                name="recommendations"
+                value={formData.recommendations}
+                onChange={handleInputChange}
+                placeholder="Enter recommendations"
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label htmlFor="completionDate">Completion Date</Label>
+              <Input
+                type="date"
+                id="completionDate"
+                name="completionDate"
+                value={formData.completionDate}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <Label htmlFor="signature">Signature</Label>
+              <Input
+                type="text"
+                id="signature"
+                name="signature"
+                value={formData.signature}
+                onChange={handleInputChange}
+                placeholder="Enter signature"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end space-x-4 pt-6">
+        <Button type="reset" variant="outline">
+          Cancel
+        </Button>
+        <Button type="submit">
+          Submit
+        </Button>
       </div>
     </form>
   );

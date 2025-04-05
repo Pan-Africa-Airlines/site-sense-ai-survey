@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -196,11 +195,11 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
 
   const handleEnhanceNotes = async () => {
     if (formData.additionalNotes) {
-      const enhanced = await enhanceNotes(formData.additionalNotes, 'additionalNotes');
-      setFormData({ ...formData, additionalNotes: enhanced });
-      toast.success("Notes enhanced with AI suggestions");
+      const enhancedNotes = await enhanceNotes(formData.additionalNotes, "assessment");
+      setFormData({ ...formData, additionalNotes: enhancedNotes });
+      toast.success("Notes enhanced with AI assistance");
     } else {
-      toast.error("Please add some notes first");
+      toast.error("Please add some notes to enhance");
     }
   };
 

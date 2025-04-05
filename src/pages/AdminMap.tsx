@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,7 +79,6 @@ const AdminMap = () => {
     setShowVehicleCheckDialog(false);
     
     if (startJourneyEngineerId) {
-      // Update engineer status to en-route
       setEngineers(prev => 
         prev.map(eng => 
           eng.id === startJourneyEngineerId 
@@ -144,12 +142,9 @@ const AdminMap = () => {
     });
 
     try {
-      const optimizedDestinations = await optimizeRoute(
-        { lat: engineer.lat, lng: engineer.lng },
-        destinations
-      );
+      const startPoint = { lat: engineer.lat, lng: engineer.lng };
+      const optimizedDestinations = await optimizeRoute(startPoint, destinations);
 
-      // Generate realistic distances for each leg of the journey
       const distances = optimizedDestinations.map(() => Math.floor(Math.random() * 50) + 5);
       const totalDistance = distances.reduce((sum, distance) => sum + distance, 0);
 
@@ -289,7 +284,6 @@ const AdminMap = () => {
                             )}
                           </div>
                           
-                          {/* Distance information */}
                           {optimizedRoutes[selectedEngineer]?.distances && 
                            optimizedRoutes[selectedEngineer].route.findIndex((r: any) => parseInt(r.siteId) === site.id) >= 0 && (
                             <div className="mt-1 flex items-center text-xs text-blue-600">

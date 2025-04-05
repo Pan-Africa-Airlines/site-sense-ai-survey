@@ -367,13 +367,16 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleNestedInputChange = (category: string, field: string, value: any) => {
-    setFormData({
-      ...formData,
-      [category]: {
-        ...formData[category as keyof FormDataType],
-        [field]: value
-      }
-    });
+    const currentCategory = formData[category as keyof FormDataType];
+    if (currentCategory && typeof currentCategory === 'object') {
+      setFormData({
+        ...formData,
+        [category]: {
+          ...currentCategory,
+          [field]: value
+        }
+      });
+    }
   };
 
   const handleArrayItemChange = (arrayName: string, index: number, field: string, value: any) => {
@@ -439,7 +442,8 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, formData[fieldName] as string);
+    const currentValue = formData[fieldName] as string || "";
+    const suggestion = await getSuggestion(fieldName, currentValue);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -459,7 +463,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     setIsSaving(true);
     
     try {
-      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...surveyData } = formData;
+      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...restOfFormData } = formData;
       
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -474,7 +478,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: surveyData as Json
+        survey_data: restOfFormData as any
       };
       
       let response;
