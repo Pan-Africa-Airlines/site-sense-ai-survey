@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAI } from "@/contexts/AIContext";
-import { MapPin, Navigation, Truck, User } from "lucide-react";
+import { MapPin, Navigation, Truck, User, Car, Clock, Route } from "lucide-react";
 import EngineerAllocationDialog from "@/components/EngineerAllocationDialog";
+import VehicleCheckDialog from "@/components/VehicleCheckDialog";
 import MapView from "@/components/MapView";
 
 const MOCK_ENGINEERS = [
@@ -30,7 +32,9 @@ const AdminMap = () => {
   const [selectedEngineer, setSelectedEngineer] = useState<number | null>(null);
   const [selectedSites, setSelectedSites] = useState<number[]>([]);
   const [showAllocationDialog, setShowAllocationDialog] = useState(false);
+  const [showVehicleCheckDialog, setShowVehicleCheckDialog] = useState(false);
   const [optimizedRoutes, setOptimizedRoutes] = useState<Record<number, any>>({});
+  const [startJourneyEngineerId, setStartJourneyEngineerId] = useState<number | null>(null);
   
   const centerLocation = {
     lat: -29.0000, 
@@ -65,6 +69,33 @@ const AdminMap = () => {
       return;
     }
     setShowAllocationDialog(true);
+  };
+
+  const handleStartJourney = (engineerId: number) => {
+    setStartJourneyEngineerId(engineerId);
+    setShowVehicleCheckDialog(true);
+  };
+
+  const handleConfirmVehicleCheck = () => {
+    setShowVehicleCheckDialog(false);
+    
+    if (startJourneyEngineerId) {
+      // Update engineer status to en-route
+      setEngineers(prev => 
+        prev.map(eng => 
+          eng.id === startJourneyEngineerId 
+            ? { ...eng, status: "en-route" } 
+            : eng
+        )
+      );
+      
+      toast({
+        title: "Journey started",
+        description: `Engineer is now en route to allocated sites`,
+      });
+    }
+    
+    setStartJourneyEngineerId(null);
   };
 
   const handleAllocateSites = async () => {
@@ -118,8 +149,12 @@ const AdminMap = () => {
         destinations
       );
 
-      const routeMetrics = optimizedDestinations.map(() => ({
-        distance: Math.floor(Math.random() * 50) + 5,
+      // Generate realistic distances for each leg of the journey
+      const distances = optimizedDestinations.map(() => Math.floor(Math.random() * 50) + 5);
+      const totalDistance = distances.reduce((sum, distance) => sum + distance, 0);
+
+      const routeMetrics = optimizedDestinations.map((_, index) => ({
+        distance: distances[index],
         traffic: ["light", "moderate", "heavy"][Math.floor(Math.random() * 3)]
       }));
 
@@ -129,7 +164,9 @@ const AdminMap = () => {
         ...prev,
         [engineerId]: {
           route: optimizedDestinations,
-          eta: estimatedTimes
+          eta: estimatedTimes,
+          distances: distances,
+          totalDistance: totalDistance
         }
       }));
 
@@ -251,6 +288,19 @@ const AdminMap = () => {
                               </span>
                             )}
                           </div>
+                          
+                          {/* Distance information */}
+                          {optimizedRoutes[selectedEngineer]?.distances && 
+                           optimizedRoutes[selectedEngineer].route.findIndex((r: any) => parseInt(r.siteId) === site.id) >= 0 && (
+                            <div className="mt-1 flex items-center text-xs text-blue-600">
+                              <Clock className="h-3 w-3 mr-1" />
+                              <span>
+                                {optimizedRoutes[selectedEngineer].distances[
+                                  optimizedRoutes[selectedEngineer].route.findIndex((r: any) => parseInt(r.siteId) === site.id)
+                                ]} km
+                              </span>
+                            </div>
+                          )}
                         </div>
                       ))
                   ) : (
@@ -267,11 +317,31 @@ const AdminMap = () => {
                     <p className="text-sm text-blue-600">
                       Route optimized for efficiency with {optimizedRoutes[selectedEngineer].route.length} stops.
                     </p>
-                    <div className="mt-2 text-xs text-gray-500">
-                      {optimizedRoutes[selectedEngineer].eta.some((t: number) => t > 0) && (
-                        <p>Estimated total time: {optimizedRoutes[selectedEngineer].eta.reduce((a: number, b: number) => a + b, 0)} minutes</p>
+                    <div className="mt-2 text-xs text-gray-600 space-y-1">
+                      <div className="flex items-center">
+                        <Route className="h-3 w-3 mr-1" />
+                        <span>Total distance: {optimizedRoutes[selectedEngineer].totalDistance} km</span>
+                      </div>
+                      {optimizedRoutes[selectedEngineer].eta.some((t: any) => t) && (
+                        <div className="flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>Est. total time: {Math.ceil(optimizedRoutes[selectedEngineer].eta.reduce((a: number, b: any) => a + (b?.minutes || 0), 0))} minutes</span>
+                        </div>
                       )}
                     </div>
+                    
+                    {engineers.find(e => e.id === selectedEngineer)?.status === 'available' && 
+                     sites.filter(site => site.engineer === selectedEngineer).length > 0 && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="mt-3 w-full"
+                        onClick={() => handleStartJourney(selectedEngineer)}
+                      >
+                        <Car className="mr-2 h-3 w-3" />
+                        Start Journey
+                      </Button>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -304,7 +374,20 @@ const AdminMap = () => {
           sites={sites}
           selectedSites={selectedSites}
           onToggleSite={handleSiteSelection}
-          isProcessing={false}
+          isProcessing={isProcessing}
+        />
+      )}
+      
+      {showVehicleCheckDialog && startJourneyEngineerId && (
+        <VehicleCheckDialog
+          open={showVehicleCheckDialog}
+          onClose={() => {
+            setShowVehicleCheckDialog(false);
+            setStartJourneyEngineerId(null);
+          }}
+          onConfirm={handleConfirmVehicleCheck}
+          vehicle={engineers.find(e => e.id === startJourneyEngineerId)?.vehicle || ""}
+          isProcessing={isProcessing}
         />
       )}
     </div>

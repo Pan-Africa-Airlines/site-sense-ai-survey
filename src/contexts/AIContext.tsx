@@ -3,7 +3,7 @@ import React, { createContext, useState, useContext } from "react";
 
 interface AIContextType {
   loading: boolean;
-  isProcessing: boolean; // Add this missing property
+  isProcessing: boolean;
   analyzeImage: (imageData: string, category?: string) => Promise<string>;
   getSuggestion: (fieldName: string, currentValue?: any, additionalContext?: string) => Promise<string>;
   enhanceNotes: (notes: string, category?: string) => Promise<string>;
@@ -163,6 +163,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       return routes.map(route => ({
         ...route,
         eta: new Date(Date.now() + Math.random() * 3600000).toISOString(),
+        minutes: Math.floor(Math.random() * 30) + 10, // Random minutes between 10-40
         trafficCondition: Math.random() > 0.7 ? "Heavy" : "Normal"
       }));
     } catch (error) {

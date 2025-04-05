@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader } from 'lucide-react';
+import { Loader, Clock, Navigation } from 'lucide-react';
 
 // Define the interface for the MapView component props
 interface MapViewProps {
@@ -135,7 +135,17 @@ const MapView: React.FC<MapViewProps> = ({
             </div>
             {(isSelected || (selectedEngineer && site.engineer === selectedEngineer)) && (
               <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-white py-1 px-2 rounded shadow-md text-xs whitespace-nowrap">
-                {site.name}
+                <div>{site.name}</div>
+                {isSelected && optimizedRoutes[selectedEngineer]?.eta && (
+                  <div className="flex items-center mt-1 text-blue-600">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>
+                      {optimizedRoutes[selectedEngineer].route.findIndex((r: any) => parseInt(r.siteId) === site.id) >= 0 && 
+                       optimizedRoutes[selectedEngineer].distances && 
+                       `${optimizedRoutes[selectedEngineer].distances[optimizedRoutes[selectedEngineer].route.findIndex((r: any) => parseInt(r.siteId) === site.id)]} km`}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -196,6 +206,72 @@ const MapView: React.FC<MapViewProps> = ({
             return null;
           })}
         </svg>
+      )}
+      
+      {/* Distance markers on routes */}
+      {selectedEngineer && optimizedRoutes[selectedEngineer]?.route && optimizedRoutes[selectedEngineer]?.distances && (
+        <>
+          {optimizedRoutes[selectedEngineer].route.map((waypoint: any, index: number, array: any[]) => {
+            if (index === 0) {
+              // Find the engineer position
+              const engineer = engineers.find(e => e.id === selectedEngineer);
+              if (!engineer) return null;
+              
+              // Calculate midpoint for distance marker
+              const startX = (((engineer.lng - 22) * 80) + 600);
+              const startY = (((engineer.lat + 33) * -80) + 450);
+              
+              const endX = (((parseFloat(waypoint.lng) - 22) * 80) + 600);
+              const endY = (((parseFloat(waypoint.lat) + 33) * -80) + 450);
+              
+              const midX = (startX + endX) / 2;
+              const midY = (startY + endY) / 2;
+              
+              return (
+                <div 
+                  key={`distance-start`}
+                  className="absolute bg-white px-1.5 py-0.5 rounded-full text-[10px] font-medium text-blue-600 shadow-sm z-10 flex items-center"
+                  style={{ 
+                    left: `${midX}px`, 
+                    top: `${midY}px`,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                >
+                  <Navigation className="h-2.5 w-2.5 mr-0.5" />
+                  {optimizedRoutes[selectedEngineer].distances[0]} km
+                </div>
+              );
+            }
+            
+            if (index < array.length - 1) {
+              const startX = (((parseFloat(waypoint.lng) - 22) * 80) + 600);
+              const startY = (((parseFloat(waypoint.lat) + 33) * -80) + 450);
+              
+              const endX = (((parseFloat(array[index+1].lng) - 22) * 80) + 600);
+              const endY = (((parseFloat(array[index+1].lat) + 33) * -80) + 450);
+              
+              const midX = (startX + endX) / 2;
+              const midY = (startY + endY) / 2;
+              
+              return (
+                <div 
+                  key={`distance-${index}`}
+                  className="absolute bg-white px-1.5 py-0.5 rounded-full text-[10px] font-medium text-blue-600 shadow-sm z-10 flex items-center"
+                  style={{ 
+                    left: `${midX}px`, 
+                    top: `${midY}px`,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                >
+                  <Navigation className="h-2.5 w-2.5 mr-0.5" />
+                  {optimizedRoutes[selectedEngineer].distances[index+1]} km
+                </div>
+              );
+            }
+            
+            return null;
+          })}
+        </>
       )}
       
       {/* Map controls placeholder */}
