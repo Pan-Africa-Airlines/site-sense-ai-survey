@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -275,7 +276,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
         direction: "", 
         connectionType: "", 
         numberOfCores: "",
-        cores: Array(48).fill().map((_, i) => ({ number: i+1, used: false }))
+        cores: Array(48).fill(0).map((_, i) => ({ number: i+1, used: false }))
       }
     ],
     
@@ -286,13 +287,13 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       chargerLabel: "",
       chargerType: "single", // or "dual"
       circuits: {
-        chargerA: Array(26).fill().map((_, i) => ({ 
+        chargerA: Array(26).fill(0).map((_, i) => ({ 
           circuit: String.fromCharCode(65 + i), 
           mcbRating: "", 
           used: false, 
           label: "" 
         })),
-        chargerB: Array(26).fill().map((_, i) => ({ 
+        chargerB: Array(26).fill(0).map((_, i) => ({ 
           circuit: String.fromCharCode(65 + i), 
           mcbRating: "", 
           used: false, 
@@ -443,7 +444,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleGetAISuggestion = async (fieldName: string) => {
     const currentValue = formData[fieldName] as string || "";
-    const suggestion = await getSuggestion(fieldName, currentValue);
+    const suggestion = await getSuggestion(fieldName, currentValue, "site");
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -467,7 +468,8 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       
       const { data: { user } } = await supabase.auth.getUser();
       
-      const surveyRecord: Record<string, any> = {
+      // Create a properly typed object that meets Supabase's expectations
+      const surveyRecord = {
         site_name: siteName,
         region: region,
         date: date,
@@ -478,7 +480,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: restOfFormData
+        survey_data: restOfFormData as Json
       };
       
       let response;
