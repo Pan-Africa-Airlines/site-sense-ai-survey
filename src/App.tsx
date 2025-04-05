@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Assessment from "./pages/Assessment";
 import Installation from "./pages/Installation";
 import CarCheckup from "./pages/CarCheckup";
+import Configuration from "./pages/Configuration";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Footer from "./components/Footer";
@@ -107,6 +108,17 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex flex-col min-h-screen">
                         <CarCheckup />
+                        <Footer />
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/configuration" 
+                  element={
+                    <ProtectedRoute>
+                      <div className="flex flex-col min-h-screen">
+                        <Configuration />
                         <Footer />
                       </div>
                     </ProtectedRoute>
