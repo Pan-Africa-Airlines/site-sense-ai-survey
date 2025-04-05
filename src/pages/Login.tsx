@@ -99,20 +99,20 @@ const Login = () => {
         </div>
       </div>
       
-      <div className="container mx-auto px-4 z-10">
-        <div className="flex flex-col items-center justify-center gap-12">
+      <div className="container mx-auto px-4 z-10 mt-[-80px]">
+        <div className="flex flex-col items-center justify-center gap-8">
           {/* Branding Section - Simplified with just the logo */}
           <div className="max-w-md">
-            <div className="flex flex-col items-center mb-8">
+            <div className="flex flex-col items-center mb-4">
               <img 
                 src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
                 alt="Akhanya IT" 
-                className="h-32 mb-4 drop-shadow-xl transition-all duration-300 hover:scale-105"
+                className="h-28 mb-2 drop-shadow-xl transition-all duration-300 hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.src = "https://via.placeholder.com/200x80?text=Akhanya";
                 }}
               />
-              <div className="flex items-center gap-3 mt-4">
+              <div className="flex items-center gap-3 mt-2">
                 <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
                 <img 
                   src="/eskom-logo.png" 
