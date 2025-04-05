@@ -3,7 +3,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { Navigation, MapPin, Route, AlertCircle, Maximize2, Minimize2 } from "lucide-react";
+import { Navigation, MapPin, Route, AlertCircle, Maximize2, Minimize2, RefreshCw } from "lucide-react";
 
 interface NavigationPopupProps {
   open: boolean;
@@ -20,7 +20,7 @@ const NavigationPopup = ({
   siteAddress,
   siteDistance
 }: NavigationPopupProps) => {
-  const { latitude, longitude, loading, error } = useGeolocation();
+  const { latitude, longitude, loading, error, retry } = useGeolocation();
   const [expanded, setExpanded] = React.useState(false);
 
   // Generate Google Maps embed URL with directions
@@ -58,11 +58,21 @@ const NavigationPopup = ({
                 </div>
               ) : error ? (
                 <div className="p-4 h-full flex items-center justify-center">
-                  <div className="bg-red-50 p-4 rounded-md">
-                    <p className="text-red-800 font-medium flex items-center">
-                      <AlertCircle className="text-red-500 mr-2 h-5 w-5" />
-                      Location Error: {error}
-                    </p>
+                  <div className="bg-red-50 p-6 rounded-lg max-w-md">
+                    <div className="flex items-start">
+                      <AlertCircle className="text-red-500 mr-3 h-6 w-6 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-red-800 font-semibold text-lg mb-2">Location Error</p>
+                        <p className="text-red-700 mb-4">{error}</p>
+                        <Button 
+                          onClick={retry} 
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Retry Location
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -97,12 +107,21 @@ const NavigationPopup = ({
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-akhanya"></div>
                 </div>
               ) : error ? (
-                <div className="bg-red-50 p-3 rounded-md flex items-start">
-                  <AlertCircle className="text-red-500 mr-2 h-5 w-5 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-red-800 font-medium">Location Error</p>
-                    <p className="text-red-600 text-sm">{error}</p>
-                    <p className="text-red-600 text-sm mt-2">Please enable location services and try again.</p>
+                <div className="bg-red-50 p-4 rounded-md">
+                  <div className="flex items-start">
+                    <AlertCircle className="text-red-500 mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-red-800 font-medium mb-1">Location Error</p>
+                      <p className="text-red-700 mb-3">{error}</p>
+                      <Button 
+                        onClick={retry} 
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                        size="sm"
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Retry Location
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -157,27 +176,25 @@ const NavigationPopup = ({
                 Cancel
               </Button>
               <div className="flex gap-2">
-                <Button
-                  onClick={toggleExpand}
-                  disabled={loading || !!error}
-                  variant="outline"
-                  className="border-akhanya text-akhanya hover:bg-akhanya/10"
-                >
-                  <Maximize2 className="mr-2 h-4 w-4" />
-                  Full Screen
-                </Button>
-                <Button
-                  onClick={() => {
-                    // This button is now for starting navigation in the embedded map
-                    // The expand function serves this purpose
-                    toggleExpand();
-                  }}
-                  disabled={loading || !!error}
-                  className="bg-akhanya hover:bg-akhanya/80"
-                >
-                  <Navigation className="mr-2 h-4 w-4" />
-                  Start Navigation
-                </Button>
+                {!error && !loading && (
+                  <>
+                    <Button
+                      onClick={toggleExpand}
+                      variant="outline"
+                      className="border-akhanya text-akhanya hover:bg-akhanya/10"
+                    >
+                      <Maximize2 className="mr-2 h-4 w-4" />
+                      Full Screen
+                    </Button>
+                    <Button
+                      onClick={toggleExpand}
+                      className="bg-akhanya hover:bg-akhanya/80"
+                    >
+                      <Navigation className="mr-2 h-4 w-4" />
+                      Start Navigation
+                    </Button>
+                  </>
+                )}
               </div>
             </DialogFooter>
           </>

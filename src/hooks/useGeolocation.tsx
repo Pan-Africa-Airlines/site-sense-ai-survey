@@ -40,6 +40,7 @@ export const useGeolocation = () => {
         accuracy: position.coords.accuracy,
         loading: false,
         timestamp: position.timestamp,
+        error: null, // Clear any previous errors
       }));
 
       // Reverse geocoding to get address
@@ -53,27 +54,66 @@ export const useGeolocation = () => {
         })
         .catch(error => {
           console.error("Error getting address:", error);
+          // Don't set state error here, as we already have coordinates
         });
     };
 
     const geoError = (error: GeolocationPositionError) => {
+      let errorMessage = error.message;
+      
+      // Provide more user-friendly error messages
+      if (error.code === 1) {
+        errorMessage = "Location access denied. Please enable location permissions in your browser settings.";
+      } else if (error.code === 2) {
+        errorMessage = "Location unavailable. Please try again in a different area or with better signal.";
+      } else if (error.code === 3) {
+        errorMessage = "Location request timed out. Please check your GPS is enabled and try again.";
+      }
+      
       setState(prev => ({
         ...prev,
         loading: false,
-        error: error.message,
+        error: errorMessage,
       }));
     };
 
     const options = {
       enableHighAccuracy: true,
-      timeout: 5000,
+      timeout: 10000, // Increase timeout to 10 seconds
       maximumAge: 0
     };
 
+    // Add a backup timeout in case geolocation API hangs
+    const timeoutId = setTimeout(() => {
+      setState(prev => {
+        // Only set timeout error if we're still loading
+        if (prev.loading) {
+          return {
+            ...prev,
+            loading: false,
+            error: "Location request timed out. Please ensure location services are enabled and try again."
+          };
+        }
+        return prev;
+      });
+    }, 12000); // Slightly longer than the geolocation timeout
+
     const watchId = navigator.geolocation.watchPosition(geoSuccess, geoError, options);
 
-    return () => navigator.geolocation.clearWatch(watchId);
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
-  return state;
+  // Add a retry function to allow users to try again
+  const retry = () => {
+    setState(prev => ({
+      ...prev,
+      loading: true,
+      error: null
+    }));
+  };
+
+  return { ...state, retry };
 };
