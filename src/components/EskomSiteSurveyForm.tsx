@@ -177,7 +177,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const surveyId = searchParams.get('id');
   
-  // Get the active fields from the form configuration
   const getActiveFields = () => {
     if (!formConfig || !formConfig.eskomSurvey || !formConfig.eskomSurvey.fields) {
       return [];
@@ -187,7 +186,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const activeFields = getActiveFields();
   
-  // Check if a field is active
   const isFieldActive = (fieldId: string) => {
     if (!activeFields.length) return true; // If no configuration, show all fields
     return activeFields.some((field: FormField) => field.id === fieldId || field.id.endsWith(`_${fieldId}`));
@@ -440,7 +438,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, formData);
+    const suggestion = await getSuggestion(fieldName, formData || {});
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -448,7 +446,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.generalRemarks) {
-      const enhanced = await enhanceNotes(formData.generalRemarks);
+      const enhanced = await enhanceNotes(formData.generalRemarks || "");
       setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
@@ -460,7 +458,8 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     setIsSaving(true);
     
     try {
-      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...surveyData } = formData;
+      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...surveyData } = 
+        (formData as unknown as Record<string, any>);
       
       const { data: { user } } = await supabase.auth.getUser();
       
