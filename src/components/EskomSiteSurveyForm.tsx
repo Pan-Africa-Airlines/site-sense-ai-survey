@@ -232,7 +232,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     });
 
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData, type, "Analyze this image").then(analysis => {
+      analyzeImage(imageData, type).then(analysis => {
         if (analysis) {
           setAiSuggestions({ ...aiSuggestions, [type]: analysis });
         }
@@ -254,7 +254,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, formData);
+    const suggestion = await getSuggestion(fieldName);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -262,7 +262,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.generalRemarks) {
-      const enhanced = await enhanceNotes(formData.generalRemarks, "Enhance these notes");
+      const enhanced = await enhanceNotes(formData.generalRemarks);
       setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
