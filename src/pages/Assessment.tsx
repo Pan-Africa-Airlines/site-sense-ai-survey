@@ -1,6 +1,7 @@
 
 import React from "react";
 import { toast } from "sonner";
+import NavigationBar from "@/components/NavigationBar";
 import SiteAssessmentForm from "@/components/SiteAssessmentForm";
 import { useAI } from "@/contexts/AIContext";
 
@@ -24,14 +25,17 @@ const Assessment = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <SiteAssessmentForm onSubmit={handleSubmit} />
-      
-      {isProcessing && (
-        <div className="fixed bottom-4 right-4 bg-bcx text-white px-3 py-2 rounded-md shadow-lg animate-pulse-light">
-          AI is processing...
-        </div>
-      )}
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <NavigationBar />
+      <div className="container mx-auto px-4 py-6 flex-1">
+        <SiteAssessmentForm onSubmit={handleSubmit} />
+        
+        {isProcessing && (
+          <div className="fixed bottom-4 right-4 bg-akhanya text-white px-3 py-2 rounded-md shadow-lg animate-pulse-light">
+            AI is processing...
+          </div>
+        )}
+      </div>
     </div>
   );
 };
