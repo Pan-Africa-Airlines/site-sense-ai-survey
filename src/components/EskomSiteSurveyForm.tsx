@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { FormField } from "./FormFieldsConfiguration";
 
 interface EskomSiteSurveyFormProps {
   onSubmit?: (data: any) => void;
@@ -33,11 +34,28 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
   const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
   const [savedDrafts, setSavedDrafts] = useLocalStorage<Record<string, any>>("eskomSurveyDrafts", {});
+  const [formConfig, setFormConfig] = useLocalStorage<any>("formConfig", {});
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const surveyId = searchParams.get('id');
+  
+  // Get the active fields from the form configuration
+  const getActiveFields = () => {
+    if (!formConfig || !formConfig.eskomSurvey || !formConfig.eskomSurvey.fields) {
+      return [];
+    }
+    return formConfig.eskomSurvey.fields.filter((field: FormField) => field.active !== false);
+  };
+
+  const activeFields = getActiveFields();
+  
+  // Check if a field is active
+  const isFieldActive = (fieldId: string) => {
+    if (!activeFields.length) return true; // If no configuration, show all fields
+    return activeFields.some((field: FormField) => field.id === fieldId || field.id.endsWith(`_${fieldId}`));
+  };
   
   const initialFormData = {
     // Site Information & Location
@@ -484,63 +502,71 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
         <CardContent className="p-0">
           <Table>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium w-1/4 bg-gray-50">Site Name:</TableCell>
-                <TableCell>
-                  <Input
-                    id="siteName"
-                    name="siteName"
-                    value={formData.siteName}
-                    onChange={handleInputChange}
-                    placeholder="Enter site name"
-                  />
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium w-1/4 bg-gray-50">Region:</TableCell>
-                <TableCell>
-                  <Input
-                    id="region"
-                    name="region"
-                    value={formData.region}
-                    onChange={handleInputChange}
-                    placeholder="Enter region"
-                  />
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium w-1/4 bg-gray-50">Date:</TableCell>
-                <TableCell>
-                  <Input
-                    id="date"
-                    name="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                  />
-                </TableCell>
-              </TableRow>
+              {isFieldActive('siteName') && (
+                <TableRow>
+                  <TableCell className="font-medium w-1/4 bg-gray-50">Site Name:</TableCell>
+                  <TableCell>
+                    <Input
+                      id="siteName"
+                      name="siteName"
+                      value={formData.siteName}
+                      onChange={handleInputChange}
+                      placeholder="Enter site name"
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
+              {isFieldActive('region') && (
+                <TableRow>
+                  <TableCell className="font-medium w-1/4 bg-gray-50">Region:</TableCell>
+                  <TableCell>
+                    <Input
+                      id="region"
+                      name="region"
+                      value={formData.region}
+                      onChange={handleInputChange}
+                      placeholder="Enter region"
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
+              {isFieldActive('date') && (
+                <TableRow>
+                  <TableCell className="font-medium w-1/4 bg-gray-50">Date:</TableCell>
+                  <TableCell>
+                    <Input
+                      id="date"
+                      name="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={handleInputChange}
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-semibold mb-4">Full front view photo of building where IP/MPLS equipment will be situated</h3>
-          <ImageCapture
-            label="Building Photo"
-            description="Take a photo of the building front view"
-            onCapture={(imageData) => handleImageCapture("buildingPhoto", imageData)}
-            capturedImage={formData.buildingPhoto}
-          />
-          {aiSuggestions['buildingPhoto'] && (
-            <div className="ai-suggestion mt-2">
-              <p><Check size={12} className="inline mr-1" /> {aiSuggestions['buildingPhoto']}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {isFieldActive('buildingPhoto') && (
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4">Full front view photo of building where IP/MPLS equipment will be situated</h3>
+            <ImageCapture
+              label="Building Photo"
+              description="Take a photo of the building front view"
+              onCapture={(imageData) => handleImageCapture("buildingPhoto", imageData)}
+              capturedImage={formData.buildingPhoto}
+            />
+            {aiSuggestions['buildingPhoto'] && (
+              <div className="ai-suggestion mt-2">
+                <p><Check size={12} className="inline mr-1" /> {aiSuggestions['buildingPhoto']}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid grid-cols-5 mb-6">
@@ -558,624 +584,377 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
               
               <h4 className="text-md font-medium mb-2">1.1. Site Identification</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <Label htmlFor="siteId">Site ID (WorkPlace ID)</Label>
-                  <Input
-                    id="siteId"
-                    name="siteId"
-                    value={formData.siteId}
-                    onChange={handleInputChange}
-                    placeholder="Enter site ID"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="siteType">Site Type</Label>
-                  <Select
-                    value={formData.siteType}
-                    onValueChange={(value) => handleSelectChange("siteType", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select site type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sub-tx">Sub-TX</SelectItem>
-                      <SelectItem value="rs">RS</SelectItem>
-                      <SelectItem value="ps-coal">PS-Coal</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="md:col-span-2">
-                  <Label htmlFor="address">Address/Location Description</Label>
-                  <Textarea
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder="Enter full address or location description"
-                    rows={3}
-                  />
-                </div>
-                
-                <div className="md:col-span-2 relative">
-                  <Label htmlFor="gpsCoordinates">GPS coordinates WGS84 (Lat/Long)</Label>
-                  <div className="flex space-x-2">
+                {isFieldActive('siteId') && (
+                  <div>
+                    <Label htmlFor="siteId">Site ID (WorkPlace ID)</Label>
                     <Input
-                      id="gpsCoordinates"
-                      name="gpsCoordinates"
-                      value={formData.gpsCoordinates}
+                      id="siteId"
+                      name="siteId"
+                      value={formData.siteId}
                       onChange={handleInputChange}
-                      placeholder="Latitude, Longitude"
-                      className="flex-grow"
+                      placeholder="Enter site ID"
                     />
-                    <Button 
-                      type="button" 
-                      size="icon"
-                      variant="outline" 
-                      onClick={handleLocationUpdate} 
-                      disabled={locationLoading}
-                      className="flex-shrink-0"
-                    >
-                      <MapPin size={18} />
-                    </Button>
                   </div>
-                  {address && (
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {address}
-                    </p>
-                  )}
-                </div>
+                )}
+                
+                {isFieldActive('siteType') && (
+                  <div>
+                    <Label htmlFor="siteType">Site Type</Label>
+                    <Select
+                      value={formData.siteType}
+                      onValueChange={(value) => handleSelectChange("siteType", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select site type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sub-tx">Sub-TX</SelectItem>
+                        <SelectItem value="rs">RS</SelectItem>
+                        <SelectItem value="ps-coal">PS-Coal</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                {isFieldActive('address') && (
+                  <div className="md:col-span-2">
+                    <Label htmlFor="address">Address/Location Description</Label>
+                    <Textarea
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      placeholder="Enter full address or location description"
+                      rows={3}
+                    />
+                  </div>
+                )}
+                
+                {isFieldActive('gpsCoordinates') && (
+                  <div className="md:col-span-2 relative">
+                    <Label htmlFor="gpsCoordinates">GPS coordinates WGS84 (Lat/Long)</Label>
+                    <div className="flex space-x-2">
+                      <Input
+                        id="gpsCoordinates"
+                        name="gpsCoordinates"
+                        value={formData.gpsCoordinates}
+                        onChange={handleInputChange}
+                        placeholder="Latitude, Longitude"
+                        className="flex-grow"
+                      />
+                      <Button 
+                        type="button" 
+                        size="icon"
+                        variant="outline" 
+                        onClick={handleLocationUpdate} 
+                        disabled={locationLoading}
+                        className="flex-shrink-0"
+                      >
+                        <MapPin size={18} />
+                      </Button>
+                    </div>
+                    {address && (
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        {address}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
               
               <h4 className="text-md font-medium mb-2">1.3. Equipment Location</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <Label htmlFor="buildingName">Building name</Label>
-                  <Input
-                    id="buildingName"
-                    name="buildingName"
-                    value={formData.buildingName}
-                    onChange={handleInputChange}
-                    placeholder="Enter building name"
-                  />
-                </div>
+                {isFieldActive('buildingName') && (
+                  <div>
+                    <Label htmlFor="buildingName">Building name</Label>
+                    <Input
+                      id="buildingName"
+                      name="buildingName"
+                      value={formData.buildingName}
+                      onChange={handleInputChange}
+                      placeholder="Enter building name"
+                    />
+                  </div>
+                )}
                 
-                <div>
-                  <Label htmlFor="buildingType">Building type</Label>
-                  <Select
-                    value={formData.buildingType}
-                    onValueChange={(value) => handleSelectChange("buildingType", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select building type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="container">Container</SelectItem>
-                      <SelectItem value="brick">Brick</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {isFieldActive('buildingType') && (
+                  <div>
+                    <Label htmlFor="buildingType">Building type</Label>
+                    <Select
+                      value={formData.buildingType}
+                      onValueChange={(value) => handleSelectChange("buildingType", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select building type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="container">Container</SelectItem>
+                        <SelectItem value="brick">Brick</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 
-                <div>
-                  <Label htmlFor="floorLevel">Floor level</Label>
-                  <Input
-                    id="floorLevel"
-                    name="floorLevel"
-                    value={formData.floorLevel}
-                    onChange={handleInputChange}
-                    placeholder="Enter floor level"
-                  />
-                </div>
+                {isFieldActive('floorLevel') && (
+                  <div>
+                    <Label htmlFor="floorLevel">Floor level</Label>
+                    <Input
+                      id="floorLevel"
+                      name="floorLevel"
+                      value={formData.floorLevel}
+                      onChange={handleInputChange}
+                      placeholder="Enter floor level"
+                    />
+                  </div>
+                )}
                 
-                <div>
-                  <Label htmlFor="roomNumber">Equipment Room number / name</Label>
-                  <Input
-                    id="roomNumber"
-                    name="roomNumber"
-                    value={formData.roomNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter room number or name"
-                  />
-                </div>
+                {isFieldActive('roomNumber') && (
+                  <div>
+                    <Label htmlFor="roomNumber">Equipment Room number / name</Label>
+                    <Input
+                      id="roomNumber"
+                      name="roomNumber"
+                      value={formData.roomNumber}
+                      onChange={handleInputChange}
+                      placeholder="Enter room number or name"
+                    />
+                  </div>
+                )}
               </div>
               
               <h4 className="text-md font-medium mb-2">1.4. Access Procedure</h4>
               <div className="grid grid-cols-1 gap-4 mb-6">
-                <div>
-                  <Label htmlFor="accessRequirements">Requirements for site access</Label>
-                  <Textarea
-                    id="accessRequirements"
-                    name="accessRequirements"
-                    value={formData.accessRequirements}
-                    onChange={handleInputChange}
-                    placeholder="Detail requirements for accessing the site"
-                    rows={2}
-                  />
-                </div>
+                {isFieldActive('accessRequirements') && (
+                  <div>
+                    <Label htmlFor="accessRequirements">Requirements for site access</Label>
+                    <Textarea
+                      id="accessRequirements"
+                      name="accessRequirements"
+                      value={formData.accessRequirements}
+                      onChange={handleInputChange}
+                      placeholder="Detail requirements for accessing the site"
+                      rows={2}
+                    />
+                  </div>
+                )}
                 
-                <div>
-                  <Label htmlFor="securityRequirements">Site security requirements</Label>
-                  <Textarea
-                    id="securityRequirements"
-                    name="securityRequirements"
-                    value={formData.securityRequirements}
-                    onChange={handleInputChange}
-                    placeholder="Detail security requirements for the site"
-                    rows={2}
-                  />
-                </div>
+                {isFieldActive('securityRequirements') && (
+                  <div>
+                    <Label htmlFor="securityRequirements">Site security requirements</Label>
+                    <Textarea
+                      id="securityRequirements"
+                      name="securityRequirements"
+                      value={formData.securityRequirements}
+                      onChange={handleInputChange}
+                      placeholder="Detail security requirements for the site"
+                      rows={2}
+                    />
+                  </div>
+                )}
                 
-                <div>
-                  <Label htmlFor="vehicleType">Vehicle type to reach site</Label>
-                  <Input
-                    id="vehicleType"
-                    name="vehicleType"
-                    value={formData.vehicleType}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 4x4, Sedan, etc."
-                  />
-                </div>
-              </div>
-              
-              <h4 className="text-md font-medium mb-2">1.5. Eskom site owner contact details</h4>
-              {formData.siteOwnerContacts.map((contact, index) => (
-                <div key={`contact-${index}`} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-2 border rounded">
+                {isFieldActive('vehicleType') && (
                   <div>
-                    <Label htmlFor={`contactName-${index}`}>Contact name</Label>
+                    <Label htmlFor="vehicleType">Vehicle type to reach site</Label>
                     <Input
-                      id={`contactName-${index}`}
-                      value={contact.name}
-                      onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'name', e.target.value)}
-                      placeholder="Contact name"
+                      id="vehicleType"
+                      name="vehicleType"
+                      value={formData.vehicleType}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 4x4, Sedan, etc."
                     />
                   </div>
-                  
-                  <div>
-                    <Label htmlFor={`contactPhone-${index}`}>Cellphone number</Label>
-                    <Input
-                      id={`contactPhone-${index}`}
-                      value={contact.cellphone}
-                      onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'cellphone', e.target.value)}
-                      placeholder="Cellphone number"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor={`contactEmail-${index}`}>Email address</Label>
-                    <Input
-                      id={`contactEmail-${index}`}
-                      value={contact.email}
-                      onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'email', e.target.value)}
-                      placeholder="Email address"
-                    />
-                  </div>
-                </div>
-              ))}
-              
-              <div className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addArrayItem('siteOwnerContacts', { name: "", cellphone: "", email: "" })}
-                >
-                  Add Contact
-                </Button>
-                {formData.siteOwnerContacts.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => removeArrayItem('siteOwnerContacts', formData.siteOwnerContacts.length - 1)}
-                  >
-                    Remove Last
-                  </Button>
                 )}
               </div>
+              
+              {isFieldActive('siteOwnerContacts') && (
+                <>
+                  <h4 className="text-md font-medium mb-2">1.5. Eskom site owner contact details</h4>
+                  {formData.siteOwnerContacts.map((contact, index) => (
+                    <div key={`contact-${index}`} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-2 border rounded">
+                      <div>
+                        <Label htmlFor={`contactName-${index}`}>Contact name</Label>
+                        <Input
+                          id={`contactName-${index}`}
+                          value={contact.name}
+                          onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'name', e.target.value)}
+                          placeholder="Contact name"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`contactPhone-${index}`}>Cellphone number</Label>
+                        <Input
+                          id={`contactPhone-${index}`}
+                          value={contact.cellphone}
+                          onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'cellphone', e.target.value)}
+                          placeholder="Cellphone number"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`contactEmail-${index}`}>Email address</Label>
+                        <Input
+                          id={`contactEmail-${index}`}
+                          value={contact.email}
+                          onChange={(e) => handleArrayItemChange('siteOwnerContacts', index, 'email', e.target.value)}
+                          placeholder="Email address"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem('siteOwnerContacts', { name: "", cellphone: "", email: "" })}
+                    >
+                      Add Contact
+                    </Button>
+                    {formData.siteOwnerContacts.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeArrayItem('siteOwnerContacts', formData.siteOwnerContacts.length - 1)}
+                      >
+                        Remove Last
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="attendees" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Site visit attendee's information</h3>
-              
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Cellphone</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {formData.attendees.map((attendee, index) => (
-                      <TableRow key={`attendee-${index}`}>
-                        <TableCell>
-                          <Input
-                            type="date"
-                            value={attendee.date}
-                            onChange={(e) => handleArrayItemChange('attendees', index, 'date', e.target.value)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={attendee.name}
-                            onChange={(e) => handleArrayItemChange('attendees', index, 'name', e.target.value)}
-                            placeholder="Name"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={attendee.company}
-                            onChange={(e) => handleArrayItemChange('attendees', index, 'company', e.target.value)}
-                            placeholder="Company"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={attendee.department}
-                            onChange={(e) => handleArrayItemChange('attendees', index, 'department', e.target.value)}
-                            placeholder="Department"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={attendee.cellphone}
-                            onChange={(e) => handleArrayItemChange('attendees', index, 'cellphone', e.target.value)}
-                            placeholder="Cellphone"
-                          />
-                        </TableCell>
+          {isFieldActive('attendees') && (
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">Site visit attendee's information</h3>
+                
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Company</TableHead>
+                        <TableHead>Department</TableHead>
+                        <TableHead>Cellphone</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addArrayItem('attendees', { date: "", name: "", company: "", department: "", cellphone: "" })}
-                >
-                  Add Attendee
-                </Button>
-                {formData.attendees.length > 1 && (
+                    </TableHeader>
+                    <TableBody>
+                      {formData.attendees.map((attendee, index) => (
+                        <TableRow key={`attendee-${index}`}>
+                          <TableCell>
+                            <Input
+                              type="date"
+                              value={attendee.date}
+                              onChange={(e) => handleArrayItemChange('attendees', index, 'date', e.target.value)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={attendee.name}
+                              onChange={(e) => handleArrayItemChange('attendees', index, 'name', e.target.value)}
+                              placeholder="Name"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={attendee.company}
+                              onChange={(e) => handleArrayItemChange('attendees', index, 'company', e.target.value)}
+                              placeholder="Company"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={attendee.department}
+                              onChange={(e) => handleArrayItemChange('attendees', index, 'department', e.target.value)}
+                              placeholder="Department"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={attendee.cellphone}
+                              onChange={(e) => handleArrayItemChange('attendees', index, 'cellphone', e.target.value)}
+                              placeholder="Cellphone"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                <div className="flex justify-end space-x-2 mt-4">
                   <Button
                     type="button"
-                    variant="destructive"
+                    variant="outline"
                     size="sm"
-                    onClick={() => removeArrayItem('attendees', formData.attendees.length - 1)}
+                    onClick={() => addArrayItem('attendees', { date: "", name: "", company: "", department: "", cellphone: "" })}
                   >
-                    Remove Last
+                    Add Attendee
                   </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  {formData.attendees.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeArrayItem('attendees', formData.attendees.length - 1)}
+                    >
+                      Remove Last
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Site survey outcome</h3>
-              
-              <div className="grid grid-cols-1 gap-6">
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-3">OEM Contractor</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-                    <div>
-                      <Label htmlFor="oemContractorName">Name</Label>
-                      <Input
-                        id="oemContractorName"
-                        value={formData.surveyOutcome.oemContractor.name}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, name: e.target.value})}
-                        placeholder="Name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="oemContractorSignature">Signature</Label>
-                      <Input
-                        id="oemContractorSignature"
-                        value={formData.surveyOutcome.oemContractor.signature}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, signature: e.target.value})}
-                        placeholder="Signature"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="oemContractorDate">Date</Label>
-                      <Input
-                        id="oemContractorDate"
-                        type="date"
-                        value={formData.surveyOutcome.oemContractor.date}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, date: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-6 mb-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="oemContractorAccepted" 
-                        checked={formData.surveyOutcome.oemContractor.accepted}
-                        onCheckedChange={(checked) => 
-                          handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, accepted: !!checked})
-                        }
-                      />
-                      <Label htmlFor="oemContractorAccepted">Accepted</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="oemContractorRejected" 
-                        checked={!formData.surveyOutcome.oemContractor.accepted}
-                        onCheckedChange={(checked) => 
-                          handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, accepted: !checked})
-                        }
-                      />
-                      <Label htmlFor="oemContractorRejected">Rejected</Label>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="oemContractorComments">Comments</Label>
-                    <Textarea
-                      id="oemContractorComments"
-                      value={formData.surveyOutcome.oemContractor.comments}
-                      onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, comments: e.target.value})}
-                      placeholder="Comments"
-                      rows={2}
-                    />
-                  </div>
-                </div>
+          {isFieldActive('surveyOutcome') && (
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">Site survey outcome</h3>
                 
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-3">OEM Engineer</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-                    <div>
-                      <Label htmlFor="oemEngineerName">Name</Label>
-                      <Input
-                        id="oemEngineerName"
-                        value={formData.surveyOutcome.oemEngineer.name}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemEngineer', {...formData.surveyOutcome.oemEngineer, name: e.target.value})}
-                        placeholder="Name"
-                      />
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="border rounded-md p-4">
+                    <h4 className="font-medium mb-3">OEM Contractor</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                      <div>
+                        <Label htmlFor="oemContractorName">Name</Label>
+                        <Input
+                          id="oemContractorName"
+                          value={formData.surveyOutcome.oemContractor.name}
+                          onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, name: e.target.value})}
+                          placeholder="Name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="oemContractorSignature">Signature</Label>
+                        <Input
+                          id="oemContractorSignature"
+                          value={formData.surveyOutcome.oemContractor.signature}
+                          onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, signature: e.target.value})}
+                          placeholder="Signature"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="oemContractorDate">Date</Label>
+                        <Input
+                          id="oemContractorDate"
+                          type="date"
+                          value={formData.surveyOutcome.oemContractor.date}
+                          onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemContractor', {...formData.surveyOutcome.oemContractor, date: e.target.value})}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="oemEngineerSignature">Signature</Label>
-                      <Input
-                        id="oemEngineerSignature"
-                        value={formData.surveyOutcome.oemEngineer.signature}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemEngineer', {...formData.surveyOutcome.oemEngineer, signature: e.target.value})}
-                        placeholder="Signature"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="oemEngineerDate">Date</Label>
-                      <Input
-                        id="oemEngineerDate"
-                        type="date"
-                        value={formData.surveyOutcome.oemEngineer.date}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemEngineer', {...formData.surveyOutcome.oemEngineer, date: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-6 mb-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="oemEngineerAccepted" 
-                        checked={formData.surveyOutcome.oemEngineer.accepted}
-                        onCheckedChange={(checked) => 
-                          handleNestedInputChange('surveyOutcome', 'oemEngineer', {...formData.surveyOutcome.oemEngineer, accepted: !!checked})
-                        }
-                      />
-                      <Label htmlFor="oemEngineerAccepted">Accepted</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="oemEngineerRejected" 
-                        checked={!formData.surveyOutcome.oemEngineer.accepted}
-                        onCheckedChange={(checked) => 
-                          handleNestedInputChange('surveyOutcome', 'oemEngineer', {...formData.surveyOutcome.oemEngineer, accepted: !checked})
-                        }
-                      />
-                      <Label htmlFor="oemEngineerRejected">Rejected</Label>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="oemEngineerComments">Comments</Label>
-                    <Textarea
-                      id="oemEngineerComments"
-                      value={formData.surveyOutcome.oemEngineer.comments}
-                      onChange={(e) => handleNestedInputChange('surveyOutcome', 'oemEngineer', {...formData.surveyOutcome.oemEngineer, comments: e.target.value})}
-                      placeholder="Comments"
-                      rows={2}
-                    />
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-3">Eskom Representative</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-                    <div>
-                      <Label htmlFor="eskomRepName">Name</Label>
-                      <Input
-                        id="eskomRepName"
-                        value={formData.surveyOutcome.eskomRepresentative.name}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'eskomRepresentative', {...formData.surveyOutcome.eskomRepresentative, name: e.target.value})}
-                        placeholder="Name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="eskomRepSignature">Signature</Label>
-                      <Input
-                        id="eskomRepSignature"
-                        value={formData.surveyOutcome.eskomRepresentative.signature}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'eskomRepresentative', {...formData.surveyOutcome.eskomRepresentative, signature: e.target.value})}
-                        placeholder="Signature"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="eskomRepDate">Date</Label>
-                      <Input
-                        id="eskomRepDate"
-                        type="date"
-                        value={formData.surveyOutcome.eskomRepresentative.date}
-                        onChange={(e) => handleNestedInputChange('surveyOutcome', 'eskomRepresentative', {...formData.surveyOutcome.eskomRepresentative, date: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-6 mb-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="eskomRepAccepted" 
-                        checked={formData.surveyOutcome.eskomRepresentative.accepted}
-                        onCheckedChange={(checked) => 
-                          handleNestedInputChange('surveyOutcome', 'eskomRepresentative', {...formData.surveyOutcome.eskomRepresentative, accepted: !!checked})
-                        }
-                      />
-                      <Label htmlFor="eskomRepAccepted">Accepted</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="eskomRepRejected" 
-                        checked={!formData.surveyOutcome.eskomRepresentative.accepted}
-                        onCheckedChange={(checked) => 
-                          handleNestedInputChange('surveyOutcome', 'eskomRepresentative', {...formData.surveyOutcome.eskomRepresentative, accepted: !checked})
-                        }
-                      />
-                      <Label htmlFor="eskomRepRejected">Rejected</Label>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="eskomRepComments">Comments</Label>
-                    <Textarea
-                      id="eskomRepComments"
-                      value={formData.surveyOutcome.eskomRepresentative.comments}
-                      onChange={(e) => handleNestedInputChange('surveyOutcome', 'eskomRepresentative', {...formData.surveyOutcome.eskomRepresentative, comments: e.target.value})}
-                      placeholder="Comments"
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="equipment" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">2. EQUIPMENT ROOM (GENERAL)</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="cableAccess">Cable access to the cabinet</Label>
-                  <Select
-                    value={formData.cableAccess}
-                    onValueChange={(value) => handleSelectChange("cableAccess", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select cable access type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="underfloor">Underfloor</SelectItem>
-                      <SelectItem value="overhead">Overhead</SelectItem>
-                      <SelectItem value="both">Both</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="roomLighting">Room lighting</Label>
-                  <Input
-                    id="roomLighting"
-                    name="roomLighting"
-                    value={formData.roomLighting}
-                    onChange={handleInputChange}
-                    placeholder="Indicate if any lights are faulty"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="power" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">3. POWER & TRANSPORT</h3>
-              
-              <p className="text-gray-500 italic">
-                This section is for power and transport details.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="annexures" className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">4. ANNEXURES</h3>
-              
-              <p className="text-gray-500 italic">
-                This section contains additional annexure information.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="flex justify-between mt-6">
-        <Button 
-          type="button" 
-          variant="outline"
-          onClick={handleSaveDraft}
-          className="flex items-center gap-1"
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <Loader className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
-          Save and Continue Later
-        </Button>
-        <Button type="submit" disabled={isSaving}>
-          {isSaving ? (
-            <>
-              <Loader className="h-4 w-4 animate-spin mr-2" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Survey"
-          )}
-        </Button>
-      </div>
-      
-      {Object.keys(savedDrafts).length > 0 && (
-        <div className="mt-4 border rounded-md p-4">
-          <h4 className="font-medium mb-2">Saved Drafts</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            {Object.keys(savedDrafts).map((key) => (
-              <Button 
-                key={key}
-                variant="outline" 
-                size="sm"
-                onClick={() => handleLoadDraft(key)}
-                className="text-xs justify-start truncate"
-              >
-                {key}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-    </form>
-  );
-};
-
-export default EskomSiteSurveyForm;
+                    <div className="flex items-center space-x-6 mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="oemContractorAccepted" 
+                          checked={formData.surveyOutcome.oemContractor.accepted}
