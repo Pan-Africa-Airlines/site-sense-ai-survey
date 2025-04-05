@@ -59,7 +59,7 @@ export default {
 					dark: '#004494'
 				},
 				akhanya: {
-					DEFAULT: '#E13B45', // The red from Akhanya logo
+					DEFAULT: '#E13B45', // The main red from Akhanya logo
 					secondary: '#3C3C3C', // The dark gray from "IT INNOVATIONS"
 					light: '#F8D7D9', // Light variant of the red
 					dark: '#B42F38', // Darker variant of the red

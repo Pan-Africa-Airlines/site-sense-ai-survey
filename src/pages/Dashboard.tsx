@@ -32,20 +32,21 @@ const techniciansData = [
   { name: 'Team D', value: 4 },
 ];
 
-const COLORS = ['#9b87f5', '#6E59A5', '#E5DEFF', '#1A1F2C'];
+// Updated colors to match Akhanya branding
+const COLORS = ['#E13B45', '#B42F38', '#F8D7D9', '#3C3C3C'];
 
 const chartConfig = {
   completed: {
     label: "Completed",
-    color: "#9b87f5"
+    color: "#E13B45"  // Akhanya red
   },
   pending: {
     label: "Pending",
-    color: "#6E59A5"
+    color: "#3C3C3C"  // Akhanya secondary dark gray
   },
   installations: {
     label: "Installations",
-    color: "#9b87f5"
+    color: "#E13B45"  // Akhanya red
   }
 };
 
@@ -62,36 +63,36 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-akhanya">Dashboard</h1>
           <p className="text-gray-600">Welcome to the SiteSense monitoring platform</p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <Button 
             onClick={() => navigate("/car-check")}
-            className="bg-akhanya-purple hover:bg-akhanya-dark"
+            className="bg-akhanya hover:bg-akhanya-dark"
           >
             New Vehicle Checkup
           </Button>
           <Button 
             onClick={() => navigate("/assessment")}
-            className="bg-akhanya-purple hover:bg-akhanya-dark"
+            className="bg-akhanya hover:bg-akhanya-dark"
           >
             New Assessment
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
         <Card className="card-dashboard">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-akhanya">Total Assessments</CardTitle>
             <CardDescription>All time site assessments</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya-purple">120</div>
+            <div className="text-3xl font-bold mb-4 text-akhanya">120</div>
             <div className="text-sm text-green-600">+12% from last month</div>
           </CardContent>
         </Card>
@@ -102,7 +103,7 @@ const Dashboard = () => {
             <CardDescription>Successfully completed installations</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya-purple">98</div>
+            <div className="text-3xl font-bold mb-4 text-akhanya">98</div>
             <div className="text-sm text-green-600">+8% from last month</div>
           </CardContent>
         </Card>
@@ -113,13 +114,13 @@ const Dashboard = () => {
             <CardDescription>Technicians currently in the field</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya-purple">28</div>
+            <div className="text-3xl font-bold mb-4 text-akhanya">28</div>
             <div className="text-sm text-blue-600">4 teams deployed</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-akhanya">Assessment Progress</CardTitle>
@@ -137,8 +138,8 @@ const Dashboard = () => {
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend />
-                  <Bar dataKey="completed" fill="#9b87f5" name="Completed" />
-                  <Bar dataKey="pending" fill="#6E59A5" name="Pending" />
+                  <Bar dataKey="completed" fill="#E13B45" name="Completed" />
+                  <Bar dataKey="pending" fill="#3C3C3C" name="Pending" />
                 </BarChart>
               </ChartContainer>
             </div>
@@ -166,7 +167,7 @@ const Dashboard = () => {
                     type="monotone" 
                     dataKey="installations" 
                     name="Installations"
-                    stroke="#9b87f5" 
+                    stroke="#E13B45" 
                     strokeWidth={2}
                     activeDot={{ r: 8 }} 
                   />
@@ -177,7 +178,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-akhanya">Team Distribution</CardTitle>
@@ -214,20 +215,20 @@ const Dashboard = () => {
             <CardDescription>Latest system activities</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {[
                 { user: "John Doe", action: "Completed site assessment", time: "2 hours ago", location: "Johannesburg CBD" },
                 { user: "Jane Smith", action: "Submitted installation report", time: "Yesterday", location: "Pretoria East" },
                 { user: "Mike Johnson", action: "Started vehicle check", time: "Yesterday", location: "Sandton" },
                 { user: "Sarah Williams", action: "Completed installation", time: "2 days ago", location: "Midrand" },
               ].map((activity, i) => (
-                <div key={i} className="flex items-start space-x-4 border-b border-gray-100 pb-3 last:border-0">
-                  <div className="rounded-full bg-akhanya-light text-akhanya-dark p-2 font-bold">
+                <div key={i} className="flex items-start space-x-4 border-b border-gray-100 pb-4 last:border-0">
+                  <div className="rounded-full bg-akhanya text-white p-2 font-bold w-10 h-10 flex items-center justify-center">
                     {activity.user.split(' ').map(name => name[0]).join('')}
                   </div>
                   <div>
                     <p className="font-medium">{activity.user} <span className="text-gray-600 font-normal">- {activity.action}</span></p>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                       <span>{activity.time}</span>
                       <span>•</span>
                       <span className="location-badge">{activity.location}</span>
