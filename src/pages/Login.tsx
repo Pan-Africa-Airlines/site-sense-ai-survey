@@ -117,7 +117,7 @@ const Login = () => {
                 <div className="flex items-center gap-3 mt-2">
                   <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
                   <img 
-                    src="/eskom-logo.png" 
+                    src="/lovable-uploads/79b9a4a2-93ea-4150-a0ff-fe05f4ae326a.png" 
                     alt="Eskom" 
                     className="h-10"
                     onError={(e) => {
