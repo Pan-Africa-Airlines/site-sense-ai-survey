@@ -220,7 +220,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
     // If AI assistance is enabled and an image was captured, analyze it
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData).then(analysis => {
+      analyzeImage(imageData, field).then(analysis => {
         setAiSuggestions({ ...aiSuggestions, [field]: analysis });
       });
     }
@@ -248,7 +248,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async (field: string) => {
     if (formData[field as keyof typeof formData]) {
-      const enhanced = await enhanceNotes(formData[field as keyof typeof formData] as string);
+      const enhanced = await enhanceNotes(formData[field as keyof typeof formData] as string, field);
       setFormData({ ...formData, [field]: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
