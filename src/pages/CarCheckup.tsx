@@ -1,10 +1,10 @@
+
 import React, { useState } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
-import SiteAssessmentForm from "@/components/SiteAssessmentForm";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { useAI } from "@/contexts/AIContext";
-import { Sparkles } from "lucide-react";
+import { Sparkles, FileText, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
@@ -12,10 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ImageCapture from "@/components/ImageCapture";
 import { Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const CarCheckup = () => {
   const [activeTab, setActiveTab] = useState("engine");
-  const { isProcessing, analyzeImage } = useAI();
+  const { isProcessing, analyzeImage, detectAnomalies, recommendMaintenance } = useAI();
   const [engineImage, setEngineImage] = useState("");
   const [tireImage, setTireImage] = useState("");
   const [brakeImage, setBrakeImage] = useState("");
@@ -25,6 +26,8 @@ const CarCheckup = () => {
   const [engineAnalysis, setEngineAnalysis] = useState("");
   const [tireAnalysis, setTireAnalysis] = useState("");
   const [brakeAnalysis, setBrakeAnalysis] = useState("");
+  const [anomaliesReport, setAnomaliesReport] = useState("");
+  const [maintenanceRecommendations, setMaintenanceRecommendations] = useState("");
 
   const handleEngineImageCapture = (imageData: string) => {
     setEngineImage(imageData);
@@ -56,6 +59,31 @@ const CarCheckup = () => {
     }
   };
 
+  const checkForAnomalies = async () => {
+    const data = {
+      engine: { image: engineImage, notes: engineNotes, analysis: engineAnalysis },
+      tires: { image: tireImage, notes: tireNotes, analysis: tireAnalysis },
+      brakes: { image: brakeImage, notes: brakeNotes, analysis: brakeAnalysis },
+    };
+    
+    const anomalies = await detectAnomalies(data);
+    setAnomaliesReport(anomalies);
+    toast.success("Vehicle anomalies detected");
+  };
+
+  const getMaintenanceRecommendations = async () => {
+    const data = {
+      engine: { image: engineImage, notes: engineNotes, analysis: engineAnalysis },
+      tires: { image: tireImage, notes: tireNotes, analysis: tireAnalysis },
+      brakes: { image: brakeImage, notes: brakeNotes, analysis: brakeAnalysis },
+    };
+    
+    // Use the engine image for visual analysis
+    const recommendations = await recommendMaintenance(data, engineImage);
+    setMaintenanceRecommendations(recommendations);
+    toast.success("Maintenance recommendations generated");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <NavigationBar />
@@ -64,11 +92,56 @@ const CarCheckup = () => {
         subtitle="Comprehensive evaluation of vehicle condition"
       />
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-akhanya">Vehicle Inspection</h2>
-          <p className="text-gray-600">
-            Capture images of key vehicle components for AI-assisted analysis
-          </p>
+        <div className="mb-6 flex justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-akhanya">Vehicle Inspection</h2>
+            <p className="text-gray-600">
+              Capture images of key vehicle components for AI-assisted analysis
+            </p>
+          </div>
+          <div className="flex space-x-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2" onClick={checkForAnomalies}>
+                  <AlertTriangle className="h-4 w-4" />
+                  Detect Anomalies
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Vehicle Anomaly Analysis</DialogTitle>
+                </DialogHeader>
+                <div className="p-4 bg-muted/50 rounded-md mt-4 max-h-[60vh] overflow-y-auto">
+                  {anomaliesReport ? (
+                    <div dangerouslySetInnerHTML={{ __html: anomaliesReport.replace(/\n/g, '<br>') }} />
+                  ) : (
+                    <p>Click "Detect Anomalies" to analyze your vehicle data for potential issues.</p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2" onClick={getMaintenanceRecommendations}>
+                  <FileText className="h-4 w-4" />
+                  Maintenance Report
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Recommended Maintenance</DialogTitle>
+                </DialogHeader>
+                <div className="p-4 bg-muted/50 rounded-md mt-4 max-h-[60vh] overflow-y-auto">
+                  {maintenanceRecommendations ? (
+                    <div dangerouslySetInnerHTML={{ __html: maintenanceRecommendations.replace(/\n/g, '<br>') }} />
+                  ) : (
+                    <p>Click "Maintenance Report" to generate recommendations based on your vehicle inspection.</p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

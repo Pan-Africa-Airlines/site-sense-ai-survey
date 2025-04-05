@@ -1,12 +1,16 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AIContextType {
   isProcessing: boolean;
   analyzeImage: (imageData: string, field: string, prompt?: string) => Promise<string>;
   getSuggestion: (fieldName: string, currentData: Record<string, any>) => Promise<string | null>;
   enhanceNotes: (notes: string, prompt?: string) => Promise<string>;
+  generateReport: (surveyData: Record<string, any>) => Promise<string>;
+  detectAnomalies: (surveyData: Record<string, any>) => Promise<string>;
+  recommendMaintenance: (surveyData: Record<string, any>, imageData?: string) => Promise<string>;
 }
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
@@ -26,26 +30,20 @@ interface AIProviderProps {
 export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Mock AI image analysis function
+  // Real AI image analysis function using OpenAI
   const analyzeImage = async (imageData: string, field: string, prompt?: string): Promise<string> => {
     setIsProcessing(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'analyzeImage',
+          data: { imageData, field, prompt }
+        }
+      });
       
-      // For demo purposes, return canned responses based on timestamp to simulate different analyses
-      const timestamp = new Date().getTime();
-      const responses = [
-        "The image shows a well-maintained network cabinet with proper cable management.",
-        "The image appears to show outdated networking equipment that may need replacement.",
-        "The image shows a server room with adequate cooling and power infrastructure.",
-        "The image shows improperly installed cabling that may cause connectivity issues.",
-        "The image shows a clean, well-organized rack setup with modern equipment."
-      ];
-      
-      const responseIndex = timestamp % responses.length;
-      return responses[responseIndex];
+      if (error) throw error;
+      return data.analysis || "Could not analyze image";
     } catch (error) {
       console.error("Error analyzing image:", error);
       toast.error("Failed to analyze image");
@@ -55,50 +53,118 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
     }
   };
 
-  // Mock function to get AI suggestions based on current form data
+  // Real AI function to get suggestions based on current form data
   const getSuggestion = async (fieldName: string, currentData: Record<string, any>): Promise<string | null> => {
     setIsProcessing(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'getSuggestion',
+          data: { fieldName, currentData }
+        }
+      });
       
-      // For demo purposes, return canned suggestions for specific fields
-      const suggestions: Record<string, string> = {
-        'siteCondition': 'Based on your entries, the site appears to be in good condition with minor maintenance needed.',
-        'networkAvailability': 'Given the location details, fiber connectivity should be available from major ISPs.',
-        'powerInfrastructure': 'Recommend checking UPS capacity based on the equipment specifications.',
-        'coolingRequirements': 'Consider additional cooling based on the number of devices and room dimensions.',
-        'equipmentRecommendation': 'Based on site requirements, recommend Cisco Catalyst switches and Meraki access points.',
-        'installationNotes': 'Remember to include cable labeling and documentation of network topology.'
-      };
-      
-      return suggestions[fieldName] || null;
+      if (error) throw error;
+      return data.suggestion || null;
     } catch (error) {
       console.error("Error getting AI suggestion:", error);
+      toast.error("Failed to get AI suggestion");
       return null;
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // Mock function to enhance/improve notes
+  // Real AI function to enhance/improve notes
   const enhanceNotes = async (notes: string, prompt?: string): Promise<string> => {
     if (!notes || notes.trim() === '') return '';
     
     setIsProcessing(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'enhanceNotes',
+          data: { notes, prompt }
+        }
+      });
       
-      // For demo purposes, just add some professional language to the notes
-      const enhancedNotes = notes + "\n\nAdditional observations: Site appears to meet standards for the planned deployment. Recommend proceeding with standard implementation plan while noting the specific requirements documented above.";
-      
-      return enhancedNotes;
+      if (error) throw error;
+      return data.enhancedNotes || notes;
     } catch (error) {
       console.error("Error enhancing notes:", error);
+      toast.error("Failed to enhance notes");
       return notes;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Generate comprehensive reports based on survey data
+  const generateReport = async (surveyData: Record<string, any>): Promise<string> => {
+    setIsProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'generateReport',
+          data: { surveyData }
+        }
+      });
+      
+      if (error) throw error;
+      return data.report || "Could not generate report";
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast.error("Failed to generate report");
+      return "Could not generate report";
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Detect anomalies in survey data
+  const detectAnomalies = async (surveyData: Record<string, any>): Promise<string> => {
+    setIsProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'detectAnomalies',
+          data: { surveyData }
+        }
+      });
+      
+      if (error) throw error;
+      return data.anomalies || "No anomalies detected";
+    } catch (error) {
+      console.error("Error detecting anomalies:", error);
+      toast.error("Failed to detect anomalies");
+      return "Could not analyze for anomalies";
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Recommend maintenance based on survey data and images
+  const recommendMaintenance = async (surveyData: Record<string, any>, imageData?: string): Promise<string> => {
+    setIsProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'recommendMaintenance',
+          data: { surveyData, imageData }
+        }
+      });
+      
+      if (error) throw error;
+      return data.recommendations || "Could not generate maintenance recommendations";
+    } catch (error) {
+      console.error("Error recommending maintenance:", error);
+      toast.error("Failed to generate maintenance recommendations");
+      return "Could not generate maintenance recommendations";
     } finally {
       setIsProcessing(false);
     }
@@ -110,7 +176,10 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
         isProcessing,
         analyzeImage,
         getSuggestion,
-        enhanceNotes
+        enhanceNotes,
+        generateReport,
+        detectAnomalies,
+        recommendMaintenance
       }}
     >
       {children}
