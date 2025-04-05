@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { BarChart, LineChart, PieChart, Bar, Line, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
-// Sample data for the charts
 const assessmentData = [
   { month: 'Jan', completed: 12, pending: 3 },
   { month: 'Feb', completed: 15, pending: 2 },
@@ -32,28 +30,26 @@ const techniciansData = [
   { name: 'Team D', value: 4 },
 ];
 
-// Updated colors to match Akhanya branding
 const COLORS = ['#E13B45', '#B42F38', '#F8D7D9', '#3C3C3C'];
 
 const chartConfig = {
   completed: {
     label: "Completed",
-    color: "#E13B45"  // Akhanya red
+    color: "#E13B45"
   },
   pending: {
     label: "Pending",
-    color: "#3C3C3C"  // Akhanya secondary dark gray
+    color: "#3C3C3C"
   },
   installations: {
     label: "Installations",
-    color: "#E13B45"  // Akhanya red
+    color: "#E13B45"
   }
 };
 
 const Dashboard = () => {
   const navigate = useNavigate();
   
-  // Check if user is logged in
   React.useEffect(() => {
     const loggedIn = localStorage.getItem("loggedIn");
     if (!loggedIn) {
@@ -120,7 +116,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         <Card>
           <CardHeader>
             <CardTitle className="text-akhanya">Assessment Progress</CardTitle>
@@ -178,8 +174,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Added extra margin bottom to create more space between these sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-akhanya">Team Distribution</CardTitle>
@@ -210,8 +205,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Added extra top margin for more separation */}
-        <Card className="lg:col-span-2 mt-4 lg:mt-0">
+        <Card className="lg:col-span-2 mt-8 lg:mt-0 mb-8">
           <CardHeader>
             <CardTitle className="text-akhanya">Recent Activity</CardTitle>
             <CardDescription>Latest system activities</CardDescription>
