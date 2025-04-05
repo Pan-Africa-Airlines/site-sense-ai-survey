@@ -63,6 +63,7 @@ const Login = () => {
 
   return (
     <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
+      {/* Theme toggle */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
         <Sun className="h-4 w-4 text-gray-600 dark:text-gray-300" />
         <Switch 
@@ -73,115 +74,107 @@ const Login = () => {
         <Moon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
       </div>
 
-      {/* Background with network engineer image */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-black/80">
-        <div className="absolute inset-0 bg-cover bg-center opacity-40" 
+      {/* Background with overlay and image */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90">
+        <div className="absolute inset-0 bg-cover bg-center opacity-30" 
              style={{backgroundImage: "url('/lovable-uploads/2aff538a-e780-4ee1-8585-46294ea82699.png')"}}></div>
-        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMzMzMzMiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTloLTJ2LTRoMnY0ek00NCAyN2gtMnYtNGgydjR6TTQgMjdIMnYtNGgydjR6bTAtOUgydi00aDJ2NHptMC05SDJ2LTRoMnY0ek0xMyA0aDJ2NGgtMlY0em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00eiIvPjwvZz48L2c+PC9zdmc+')]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-gray-900/20 to-gray-900/50"></div>
       </div>
 
+      {/* Tech icons background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/6 text-blue-400 dark:text-blue-500 opacity-20 animate-pulse">
+        <div className="absolute top-1/4 left-1/6 text-blue-400 dark:text-blue-500 opacity-10 animate-pulse">
           <Server size={50} />
         </div>
-        <div className="absolute top-2/3 left-1/3 text-blue-300 dark:text-blue-400 opacity-15 animate-pulse" style={{animationDelay: "1s"}}>
+        <div className="absolute top-2/3 left-1/3 text-blue-300 dark:text-blue-400 opacity-10 animate-pulse" style={{animationDelay: "1s"}}>
           <Wifi size={60} />
         </div>
-        <div className="absolute top-1/5 right-1/4 text-green-400 dark:text-green-500 opacity-20 animate-pulse" style={{animationDelay: "1.5s"}}>
+        <div className="absolute top-1/5 right-1/4 text-green-400 dark:text-green-500 opacity-10 animate-pulse" style={{animationDelay: "1.5s"}}>
           <Cable size={45} />
         </div>
-        <div className="absolute bottom-1/4 right-1/6 text-purple-400 dark:text-purple-500 opacity-15 animate-pulse" style={{animationDelay: "0.8s"}}>
+        <div className="absolute bottom-1/4 right-1/6 text-purple-400 dark:text-purple-500 opacity-10 animate-pulse" style={{animationDelay: "0.8s"}}>
           <Router size={55} />
         </div>
       </div>
       
-      <div className="container mx-auto px-4 z-10 mt-[-80px]">
-        <div className="flex flex-col items-center justify-center gap-8">
-          <Card className="w-full max-w-lg border-gray-200 bg-white/90 backdrop-blur-xl shadow-2xl">
-            <CardHeader className="space-y-1 pb-2">
-              <div className="flex flex-col items-center mb-6 mt-2">
+      {/* Content */}
+      <div className="container mx-auto px-4 z-10">
+        <div className="flex flex-col items-center justify-center">
+          <Card className="w-full max-w-md border-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl rounded-xl overflow-hidden">
+            <CardHeader className="space-y-1 pb-2 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col items-center mb-4">
                 <img 
                   src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
                   alt="Akhanya IT" 
-                  className="h-52 mb-3 drop-shadow-xl transition-all duration-300 hover:scale-105"
+                  className="h-24 mb-5 drop-shadow-md"
                   onError={(e) => {
                     e.currentTarget.src = "https://via.placeholder.com/300x120?text=Akhanya";
                   }}
                 />
-                <div className="flex items-center justify-center gap-6 mt-4">
-                  <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
-                  <img 
-                    src="/lovable-uploads/d67b70d4-e9cc-436f-a32c-4063e2443190.png" 
-                    alt="BCX" 
-                    className="h-12 mx-2"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/80x40?text=BCX";
-                    }}
-                  />
-                  <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
-                </div>
-                <div className="flex items-center justify-center mt-4">
-                  <img 
-                    src="/lovable-uploads/2aff538a-e780-4ee1-8585-46294ea82699.png" 
-                    alt="Eskom" 
-                    className="h-14"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/150x60?text=Eskom";
-                    }}
-                  />
-                </div>
+                <img 
+                  src="/lovable-uploads/d67b70d4-e9cc-436f-a32c-4063e2443190.png" 
+                  alt="BCX" 
+                  className="h-16 mb-3"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://via.placeholder.com/80x40?text=BCX";
+                  }}
+                />
               </div>
-              <div className="flex items-center justify-center mb-2">
-                <div className="bg-akhanya p-3 rounded-full">
-                  <Lock className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <CardTitle className="text-2xl text-gray-800 text-center">Sign in</CardTitle>
-              <CardDescription className="text-gray-600 text-center">Enter your credentials to access the platform</CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700">Email</Label>
-                  <Input
-                    id="email"
-                    type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                    className="bg-white border-gray-300 text-gray-800 placeholder-gray-400"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-gray-700">Password</Label>
-                    <Button variant="link" className="text-xs text-akhanya p-0 h-auto">
-                      Forgot password?
-                    </Button>
+            <CardContent className="pt-6">
+              <div className="flex flex-col space-y-6">
+                <div className="flex items-center justify-center mb-2">
+                  <div className="rounded-full bg-akhanya p-2.5 shadow-md">
+                    <Lock className="h-5 w-5 text-white" />
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    className="bg-white border-gray-300 text-gray-800 placeholder-gray-400"
-                  />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-akhanya hover:bg-akhanya-dark transition-all duration-300 shadow-lg hover:shadow-akhanya/50" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Signing in..." : "Sign in"}
-                </Button>
-              </form>
+                <div className="text-center space-y-1.5">
+                  <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100">Sign in to your account</CardTitle>
+                  <CardDescription className="text-gray-500 dark:text-gray-400">Enter your credentials to access the platform</CardDescription>
+                </div>
+                <form onSubmit={handleLogin} className="space-y-4 mt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
+                    <Input
+                      id="email"
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required
+                      className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">Password</Label>
+                      <Button variant="link" className="text-xs text-akhanya p-0 h-auto">
+                        Forgot password?
+                      </Button>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full mt-2 bg-akhanya hover:bg-akhanya-dark transition-all duration-300 shadow-lg hover:shadow-akhanya/30 rounded-md" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Signing in..." : "Sign in"}
+                  </Button>
+                </form>
+              </div>
             </CardContent>
-            <CardFooter className="flex justify-center">
-              <p className="text-sm text-gray-500 text-center">
-                For demo, use any email and password
+            <CardFooter className="flex justify-center border-t border-gray-100 dark:border-gray-800 pt-4 pb-6 px-8">
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                For demo purposes, use any email and password
               </p>
             </CardFooter>
           </Card>
