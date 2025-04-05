@@ -21,6 +21,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import EskomSurvey from "./pages/EskomSurvey";
 import EskomSurveys from "./pages/EskomSurveys";
+import AdminMap from "./pages/AdminMap";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -195,6 +196,14 @@ const App = () => {
                   element={
                     <AdminProtectedRoute>
                       <AdminInstallations />
+                    </AdminProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/map" 
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminMap />
                     </AdminProtectedRoute>
                   } 
                 />

@@ -11,6 +11,8 @@ interface AIContextType {
   generateReport: (surveyData: Record<string, any>) => Promise<string>;
   detectAnomalies: (surveyData: Record<string, any>) => Promise<string>;
   recommendMaintenance: (surveyData: Record<string, any>, imageData?: string) => Promise<string>;
+  optimizeRoute: (startLocation: { lat: number, lng: number }, destinations: Array<{ lat: number, lng: number, siteId: string }>) => Promise<Array<{ lat: number, lng: number, siteId: string }>>;
+  predictETAs: (routes: Array<{ distance: number, traffic: string }>) => Promise<Array<number>>;
 }
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
@@ -170,6 +172,57 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
     }
   };
 
+  // Optimize route based on multiple destinations
+  const optimizeRoute = async (
+    startLocation: { lat: number, lng: number }, 
+    destinations: Array<{ lat: number, lng: number, siteId: string }>
+  ): Promise<Array<{ lat: number, lng: number, siteId: string }>> => {
+    setIsProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'optimizeRoute',
+          data: { startLocation, destinations }
+        }
+      });
+      
+      if (error) throw error;
+      return data.optimizedRoute || destinations;
+    } catch (error) {
+      console.error("Error optimizing route:", error);
+      toast.error("Failed to optimize route");
+      return destinations;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Predict ETAs for a set of routes
+  const predictETAs = async (
+    routes: Array<{ distance: number, traffic: string }>
+  ): Promise<Array<number>> => {
+    setIsProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          action: 'predictETAs',
+          data: { routes }
+        }
+      });
+      
+      if (error) throw error;
+      return data.estimatedTimes || routes.map(() => 0);
+    } catch (error) {
+      console.error("Error predicting ETAs:", error);
+      toast.error("Failed to predict travel times");
+      return routes.map(() => 0);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <AIContext.Provider
       value={{
@@ -179,7 +232,9 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
         enhanceNotes,
         generateReport,
         detectAnomalies,
-        recommendMaintenance
+        recommendMaintenance,
+        optimizeRoute,
+        predictETAs
       }}
     >
       {children}
