@@ -107,7 +107,7 @@ const Login = () => {
               <img 
                 src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
                 alt="Akhanya IT" 
-                className="h-28 mb-2 drop-shadow-xl transition-all duration-300 hover:scale-105"
+                className="h-48 mb-2 drop-shadow-xl transition-all duration-300 hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.src = "https://via.placeholder.com/200x80?text=Akhanya";
                 }}
