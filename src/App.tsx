@@ -15,6 +15,8 @@ import NotFound from "./pages/NotFound";
 import Footer from "./components/Footer";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAssessments from "./pages/AdminAssessments";
+import AdminUsers from "./pages/AdminUsers";
+import AdminLogin from "./pages/AdminLogin";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import { useEffect, useState } from "react";
 
@@ -65,6 +67,14 @@ const App = () => {
                 <Route path="/login" element={
                   <>
                     <Login />
+                    <Footer />
+                  </>
+                } />
+                
+                {/* Admin login route */}
+                <Route path="/admin/login" element={
+                  <>
+                    <AdminLogin />
                     <Footer />
                   </>
                 } />
@@ -140,6 +150,14 @@ const App = () => {
                   element={
                     <AdminProtectedRoute>
                       <AdminAssessments />
+                    </AdminProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/users" 
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminUsers />
                     </AdminProtectedRoute>
                   } 
                 />
