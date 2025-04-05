@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Dialog,
@@ -28,13 +27,25 @@ type AssessmentDetailsProps = {
 const AssessmentDetailsDialog = ({ isOpen, onClose, assessment }: AssessmentDetailsProps) => {
   if (!assessment) return null;
 
+  const getBadgeVariant = (status: string) => {
+    if (status === "completed") return "outline";
+    if (status === "rejected") return "destructive";
+    return "outline";
+  };
+
+  const getBadgeClasses = (status: string) => {
+    if (status === "completed") return "bg-green-100 text-green-800 hover:bg-green-100";
+    if (status === "rejected") return "bg-red-100 text-red-800 hover:bg-red-100";
+    return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center gap-2">
             <span className="text-2xl">{assessment.siteName}</span>
-            <Badge variant={assessment.status === "completed" ? "success" : assessment.status === "rejected" ? "destructive" : "outline"}>
+            <Badge variant={getBadgeVariant(assessment.status)} className={getBadgeClasses(assessment.status)}>
               {assessment.status}
             </Badge>
           </DialogTitle>
@@ -179,7 +190,6 @@ const AssessmentDetailsDialog = ({ isOpen, onClose, assessment }: AssessmentDeta
   );
 };
 
-// Helper components
 const InfoCard = ({ 
   icon, 
   title, 
