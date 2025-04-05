@@ -73,7 +73,10 @@ const Login = () => {
         <Moon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-gray-100 to-white dark:from-gray-900 dark:via-gray-800 dark:to-black">
+      {/* Background with network engineer image */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-black/80">
+        <div className="absolute inset-0 bg-cover bg-center opacity-40" 
+             style={{backgroundImage: "url('/lovable-uploads/2aff538a-e780-4ee1-8585-46294ea82699.png')"}}></div>
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMzMzMzMiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTloLTJ2LTRoMnY0ek00NCAyN2gtMnYtNGgydjR6TTQgMjdIMnYtNGgydjR6bTAtOUgydi00aDJ2NHptMC05SDJ2LTRoMnY0ek0xMyA0aDJ2NGgtMlY0em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00eiIvPjwvZz48L2c+PC9zdmc+')]"></div>
       </div>
 
@@ -105,17 +108,27 @@ const Login = () => {
                     e.currentTarget.src = "https://via.placeholder.com/300x120?text=Akhanya";
                   }}
                 />
-                <div className="flex items-center gap-3 mt-2">
+                <div className="flex items-center justify-center gap-6 mt-4">
                   <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
                   <img 
                     src="/lovable-uploads/d67b70d4-e9cc-436f-a32c-4063e2443190.png" 
                     alt="BCX" 
-                    className="h-8 mx-2"
+                    className="h-12 mx-2"
                     onError={(e) => {
                       e.currentTarget.src = "https://via.placeholder.com/80x40?text=BCX";
                     }}
                   />
                   <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+                </div>
+                <div className="flex items-center justify-center mt-4">
+                  <img 
+                    src="/lovable-uploads/2aff538a-e780-4ee1-8585-46294ea82699.png" 
+                    alt="Eskom" 
+                    className="h-14"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://via.placeholder.com/150x60?text=Eskom";
+                    }}
+                  />
                 </div>
               </div>
               <div className="flex items-center justify-center mb-2">
