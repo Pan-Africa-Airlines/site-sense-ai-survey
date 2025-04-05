@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -66,26 +65,26 @@ const NavigationBar: React.FC = () => {
               <img 
                 src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
                 alt="Akhanya IT" 
-                className="h-10"
+                className="h-16" 
                 onError={(e) => {
                   // Fallback if image not found
-                  e.currentTarget.src = "https://via.placeholder.com/80x30?text=Akhanya";
+                  e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
                 }}
               />
-              <div className="h-6 w-px bg-gray-300 mx-1"></div>
+              <div className="h-8 w-px bg-gray-300 mx-2"></div>
               <img 
                 src="/eskom-logo.png" 
                 alt="Eskom" 
-                className="h-8"
+                className="h-12"
                 onError={(e) => {
                   // Fallback if image not found
-                  e.currentTarget.src = "https://via.placeholder.com/80x30?text=Eskom";
+                  e.currentTarget.src = "https://via.placeholder.com/120x45?text=Eskom";
                 }}
               />
             </div>
-            <div className="h-6 w-px bg-gray-300 mx-3"></div>
-            <div className="text-akhanya-secondary font-bold text-xl mr-2">SiteSense</div>
-            <div className="text-xs bg-akhanya text-white px-1.5 py-0.5 rounded">AI</div>
+            <div className="h-8 w-px bg-gray-300 mx-4"></div>
+            <div className="text-akhanya-secondary font-bold text-2xl mr-2">SiteSense</div>
+            <div className="text-sm bg-akhanya text-white px-2 py-1 rounded">AI</div>
           </div>
           
           <div className="flex space-x-2">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +16,6 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check for saved theme preference on component mount
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
@@ -26,7 +24,6 @@ const Login = () => {
     }
   }, []);
 
-  // Toggle between light and dark mode
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
     if (!isDarkMode) {
@@ -42,7 +39,6 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login process
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     if (email && password) {
@@ -66,7 +62,6 @@ const Login = () => {
 
   return (
     <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
-      {/* Theme toggle in top-right corner */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
         <Sun className="h-4 w-4 text-gray-600 dark:text-gray-300" />
         <Switch 
@@ -77,13 +72,10 @@ const Login = () => {
         <Moon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
       </div>
 
-      {/* Light/dark responsive background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-gray-100 to-white dark:from-gray-900 dark:via-gray-800 dark:to-black">
-        {/* Circuit pattern overlay */}
-        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMzMzMzMiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTloLTJ2LTRoMnY0ek00NCAyN2gtMnYtNGgydjR6TTQgMjdIMnYtNGgydjR6bTAtOUgydi00aDJ2NHptMC05SDJ2LTRoMnY0ek0xMyA0aDJ2NGgtMlY0em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00ek00OSA0aDJ2NGgtMlY0em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00eiIvPjwvZz48L2c+PC9zdmc+')]"></div>
+        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMzMzMzMiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTloLTJ2LTRoMnY0ek00NCAyN2gtMnYtNGgydjR6TTQgMjdIMnYtNGgydjR6bTAtOUgydi00aDJ2NHptMC05SDJ2LTRoMnY0ek0xMyA0aDJ2NGgtMlY0em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00em0wIDloMnY0aC0ydi00eiIvPjwvZz48L2c+PC9zdmc+')]"></div>
       </div>
 
-      {/* Animated network elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/6 text-blue-400 dark:text-blue-500 opacity-20 animate-pulse">
           <Server size={50} />
@@ -101,17 +93,15 @@ const Login = () => {
       
       <div className="container mx-auto px-4 z-10 mt-[-80px]">
         <div className="flex flex-col items-center justify-center gap-8">
-          {/* Login Form with Logo Inside */}
           <Card className="w-full max-w-lg border-gray-200 bg-white/90 backdrop-blur-xl shadow-2xl">
             <CardHeader className="space-y-1 pb-2">
-              {/* Logo inside the card */}
               <div className="flex flex-col items-center mb-6 mt-2">
                 <img 
                   src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
                   alt="Akhanya IT" 
-                  className="h-40 mb-2 drop-shadow-xl transition-all duration-300 hover:scale-105"
+                  className="h-52 mb-3 drop-shadow-xl transition-all duration-300 hover:scale-105"
                   onError={(e) => {
-                    e.currentTarget.src = "https://via.placeholder.com/200x80?text=Akhanya";
+                    e.currentTarget.src = "https://via.placeholder.com/300x120?text=Akhanya";
                   }}
                 />
                 <div className="flex items-center gap-3 mt-2">
@@ -119,9 +109,9 @@ const Login = () => {
                   <img 
                     src="/lovable-uploads/79b9a4a2-93ea-4150-a0ff-fe05f4ae326a.png" 
                     alt="Eskom" 
-                    className="h-10"
+                    className="h-14"
                     onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/80x30?text=Eskom";
+                      e.currentTarget.src = "https://via.placeholder.com/120x45?text=Eskom";
                     }}
                   />
                   <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
