@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Settings, LogOut, BarChart3, Users, ClipboardList, Database } from "lucide-react";
+import { Home, Settings, LogOut, BarChart3, Users, ClipboardList, Database, Cog } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   DropdownMenu, 
@@ -94,6 +94,14 @@ const AdminNavBar: React.FC = () => {
               className={isActive("/admin/users") ? "bg-red-600 hover:bg-red-700" : ""}
             >
               <Users className="w-4 h-4 mr-1" /> Users
+            </Button>
+            <Button
+              variant={isActive("/configuration") ? "default" : "ghost"}
+              size="sm"
+              onClick={() => navigate("/configuration")}
+              className={isActive("/configuration") ? "bg-red-600 hover:bg-red-700" : ""}
+            >
+              <Cog className="w-4 h-4 mr-1" /> Configuration
             </Button>
           </div>
           
