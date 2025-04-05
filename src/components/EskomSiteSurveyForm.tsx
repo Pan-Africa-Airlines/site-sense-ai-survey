@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,21 +20,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FormField } from "./FormFieldsConfiguration";
 
-interface EskomSiteSurveyFormProps {
-  onSubmit?: (data: any) => void;
-  assessmentData?: any; // Optional assessment data to pre-fill fields
-  showAIRecommendations?: boolean;
+interface SiteOwnerContact {
+  name: string;
+  cellphone: string;
+  email: string;
 }
 
-type SurveyOutcomeParty = {
+interface Attendee {
+  date: string;
+  name: string;
+  company: string;
+  department: string;
+  cellphone: string;
+}
+
+interface TransportLink {
+  linkNumber: string;
+  linkType: string;
+  direction: string;
+  capacity: string;
+}
+
+interface SurveyOutcomeParty {
   name: string;
   signature: string;
   date: string;
   accepted: boolean;
   comments: string;
-};
+}
 
-type FormDataType = {
+interface FormDataType {
   siteName: string;
   region: string;
   date: string;
@@ -44,30 +58,26 @@ type FormDataType = {
   address: string;
   gpsCoordinates: string;
   buildingPhoto: string;
-  attendees: Array<{
-    date: string;
-    name: string;
-    company: string;
-    department: string;
-    cellphone: string;
-  }>;
+  
+  attendees: Attendee[];
+  
   surveyOutcome: {
     oemContractor: SurveyOutcomeParty;
     oemEngineer: SurveyOutcomeParty;
     eskomRepresentative: SurveyOutcomeParty;
   };
+  
   buildingName: string;
   buildingType: string;
   floorLevel: string;
   roomNumber: string;
+  
   accessRequirements: string;
   securityRequirements: string;
   vehicleType: string;
-  siteOwnerContacts: Array<{
-    name: string;
-    cellphone: string;
-    email: string;
-  }>;
+  
+  siteOwnerContacts: SiteOwnerContact[];
+  
   cableAccess: string;
   roomLighting: string;
   fireProtection: string;
@@ -75,18 +85,17 @@ type FormDataType = {
   coolingRating: string;
   roomTemperature: string;
   roomCondition: string;
+  
   numberOfRouters: string;
   cabinetLocationPhoto: string;
-  transportLinks: Array<{
-    linkNumber: string;
-    linkType: string;
-    direction: string;
-    capacity: string;
-  }>;
+  
+  transportLinks: TransportLink[];
+  
   chargerALoadCurrent: string;
   chargerBLoadCurrent: string;
   powerSupplyMethod: string;
   dcCableLength: string;
+  
   equipmentRoomPhotos: string;
   cabinetLocationPhotos: string;
   dcPowerDistributionPhotos: string;
@@ -95,6 +104,7 @@ type FormDataType = {
   accessEquipmentPhotos: string;
   cableRoutingPhotos: string;
   ceilingHvacPhotos: string;
+  
   installationRequirements: {
     accessSecurity: string;
     coolingVentilation: string;
@@ -104,7 +114,9 @@ type FormDataType = {
     roofType: string;
     powerCables: string;
   };
+  
   generalRemarks: string;
+  
   odfDetails: Array<{
     cabinetName: string;
     direction: string;
@@ -115,7 +127,9 @@ type FormDataType = {
       used: boolean;
     }>;
   }>;
+  
   cabinetLayoutNotes: string;
+  
   chargerLoadDistribution: {
     siteName: string;
     chargerLabel: string;
@@ -135,10 +149,18 @@ type FormDataType = {
       }>;
     };
   };
+  
   roomLayoutDrawing: string;
+  
   useAIAssistance: boolean;
   [key: string]: any;
-};
+}
+
+interface EskomSiteSurveyFormProps {
+  onSubmit?: (data: any) => void;
+  assessmentData?: any; // Optional assessment data to pre-fill fields
+  showAIRecommendations?: boolean;
+}
 
 const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ 
   onSubmit, 
@@ -328,7 +350,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
           buildingPhoto: data.building_photo || ''
         };
         
-        setFormData(surveyData);
+        setFormData(surveyData as FormDataType);
         setDraftName(data.site_name);
         toast.success(`Loaded survey: ${data.site_name}`);
       }
@@ -532,7 +554,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     e.preventDefault();
     
     const requiredFields = ['siteName', 'date', 'region'];
-    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    const missingFields = requiredFields.filter(field => !formData[field as keyof FormDataType]);
     
     if (missingFields.length > 0) {
       toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
