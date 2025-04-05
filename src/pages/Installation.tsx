@@ -3,6 +3,7 @@ import React from "react";
 import { toast } from "sonner";
 import SiteInstallationForm from "@/components/SiteInstallationForm";
 import { useAI } from "@/contexts/AIContext";
+import NavigationBar from "@/components/NavigationBar";
 
 const Installation = () => {
   const { isProcessing } = useAI();
@@ -23,27 +24,22 @@ const Installation = () => {
     // 3. Generate reports or notifications
   };
 
-  // In a real app, you might fetch the assessment data
-  // const [assessmentData, setAssessmentData] = useState(null);
-  // 
-  // useEffect(() => {
-  //   // Fetch assessment data from API or local storage
-  //   // setAssessmentData(data);
-  // }, []);
-
   return (
-    <div className="container mx-auto px-4 py-6">
-      <SiteInstallationForm 
-        onSubmit={handleSubmit} 
-        // assessmentData={assessmentData} 
-      />
-      
-      {isProcessing && (
-        <div className="fixed bottom-4 right-4 bg-bcx text-white px-3 py-2 rounded-md shadow-lg animate-pulse-light">
-          AI is processing...
-        </div>
-      )}
-    </div>
+    <>
+      <NavigationBar />
+      <div className="container mx-auto px-4 py-6">
+        <SiteInstallationForm 
+          onSubmit={handleSubmit} 
+          // assessmentData={assessmentData} 
+        />
+        
+        {isProcessing && (
+          <div className="fixed bottom-4 right-4 bg-bcx text-white px-3 py-2 rounded-md shadow-lg animate-pulse-light">
+            AI is processing...
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
