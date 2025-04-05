@@ -12,10 +12,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAI } from "@/contexts/AIContext";
 import { toast } from "sonner";
-import { MapPin, Info, Check, Calendar, Users, Building, Router, FileText, Power, Radio, Thermometer, Save } from "lucide-react";
+import { MapPin, Info, Check, Calendar, Users, Building, Router, FileText, Power, Radio, Thermometer, Save, Loader } from "lucide-react";
 import ImageCapture from "./ImageCapture";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface EskomSiteSurveyFormProps {
   onSubmit?: (data: any) => void;
@@ -31,6 +33,11 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
   const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
   const [savedDrafts, setSavedDrafts] = useLocalStorage<Record<string, any>>("eskomSurveyDrafts", {});
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const surveyId = searchParams.get('id');
   
   const initialFormData = {
     // Site Information & Location
@@ -166,15 +173,54 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const [draftName, setDraftName] = useState<string>("");
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const draftId = urlParams.get('draftId');
-    
-    if (draftId && savedDrafts[draftId]) {
-      setFormData(savedDrafts[draftId]);
-      setDraftName(draftId);
-      toast.success(`Loaded draft: ${draftId}`);
+    if (surveyId) {
+      fetchSurveyData(surveyId);
+    } else {
+      const draftId = searchParams.get('draftId');
+      if (draftId && savedDrafts[draftId]) {
+        setFormData(savedDrafts[draftId]);
+        setDraftName(draftId);
+        toast.success(`Loaded draft: ${draftId}`);
+      }
     }
-  }, [savedDrafts]);
+  }, [savedDrafts, searchParams, surveyId]);
+
+  const fetchSurveyData = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('site_surveys')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        const surveyData = {
+          ...initialFormData,
+          ...data.survey_data,
+          siteName: data.site_name,
+          region: data.region,
+          date: data.date,
+          siteId: data.site_id || '',
+          siteType: data.site_type || '',
+          address: data.address || '',
+          gpsCoordinates: data.gps_coordinates || '',
+          buildingPhoto: data.building_photo || ''
+        };
+        
+        setFormData(surveyData);
+        setDraftName(data.site_name);
+        toast.success(`Loaded survey: ${data.site_name}`);
+      }
+    } catch (error) {
+      console.error('Error fetching survey:', error);
+      toast.error('Failed to load survey data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -232,7 +278,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     });
 
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData, type).then(analysis => {
+      analyzeImage(imageData, type, "Analyze this image").then(analysis => {
         if (analysis) {
           setAiSuggestions({ ...aiSuggestions, [type]: analysis });
         }
@@ -254,7 +300,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName);
+    const suggestion = await getSuggestion(fieldName, formData);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -262,7 +308,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.generalRemarks) {
-      const enhanced = await enhanceNotes(formData.generalRemarks);
+      const enhanced = await enhanceNotes(formData.generalRemarks, "Enhance these notes");
       setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
@@ -270,7 +316,73 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     }
   };
   
-  const handleSaveDraft = () => {
+  const saveSurveyToSupabase = async (status: 'draft' | 'submitted' = 'draft') => {
+    setIsSaving(true);
+    
+    try {
+      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...surveyData } = formData;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const surveyRecord = {
+        site_name: siteName,
+        region: region,
+        date: date,
+        site_id: siteId,
+        site_type: siteType,
+        address: address,
+        gps_coordinates: gpsCoordinates,
+        building_photo: buildingPhoto,
+        user_id: user?.id,
+        status: status,
+        survey_data: surveyData
+      };
+      
+      let response;
+      
+      if (surveyId) {
+        response = await supabase
+          .from('site_surveys')
+          .update(surveyRecord)
+          .eq('id', surveyId);
+      } else {
+        response = await supabase
+          .from('site_surveys')
+          .insert(surveyRecord)
+          .select();
+      }
+      
+      if (response.error) throw response.error;
+      
+      const newId = surveyId || (response.data && response.data[0]?.id);
+      
+      if (newId) {
+        if (status === 'submitted') {
+          toast.success("Survey submitted successfully!");
+          
+          if (draftName && savedDrafts[draftName]) {
+            const { [draftName]: _, ...remainingDrafts } = savedDrafts;
+            setSavedDrafts(remainingDrafts);
+          }
+          
+          setTimeout(() => navigate('/'), 2000);
+        } else {
+          toast.success("Survey saved to database");
+          
+          const url = new URL(window.location.href);
+          url.searchParams.set('id', newId);
+          window.history.replaceState({}, '', url.toString());
+        }
+      }
+    } catch (error) {
+      console.error('Error saving survey:', error);
+      toast.error("Failed to save survey. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const handleSaveDraft = async () => {
     const saveName = draftName || `Draft_${new Date().toISOString().slice(0, 10)}_${Math.floor(Math.random() * 1000)}`;
     
     const updatedDrafts = { 
@@ -281,11 +393,11 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     setSavedDrafts(updatedDrafts);
     setDraftName(saveName);
     
+    await saveSurveyToSupabase('draft');
+    
     const url = new URL(window.location.href);
     url.searchParams.set('draftId', saveName);
     window.history.replaceState({}, '', url.toString());
-    
-    toast.success(`Draft saved as: ${saveName}`);
   };
 
   const handleLoadDraft = (draftId: string) => {
@@ -298,7 +410,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     }
   };
 
-  const handleSubmitForm = (e: React.FormEvent) => {
+  const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const requiredFields = ['siteName', 'date', 'region'];
@@ -309,18 +421,23 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       return;
     }
     
-    onSubmit?.(formData);
-    toast.success("Site survey report submitted successfully!");
+    await saveSurveyToSupabase('submitted');
     
-    if (draftName && savedDrafts[draftName]) {
-      const { [draftName]: _, ...remainingDrafts } = savedDrafts;
-      setSavedDrafts(remainingDrafts);
-    }
+    onSubmit?.(formData);
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading survey data...</span>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmitForm} className="space-y-6">
@@ -343,8 +460,13 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
             variant="outline" 
             onClick={handleSaveDraft}
             className="flex items-center gap-1"
+            disabled={isSaving}
           >
-            <Save className="h-4 w-4" />
+            {isSaving ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
             Save Draft
           </Button>
           <Switch
@@ -1013,12 +1135,24 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
           variant="outline"
           onClick={handleSaveDraft}
           className="flex items-center gap-1"
+          disabled={isSaving}
         >
-          <Save className="h-4 w-4" />
+          {isSaving ? (
+            <Loader className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
           Save and Continue Later
         </Button>
-        <Button type="submit">
-          Submit Survey
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? (
+            <>
+              <Loader className="h-4 w-4 animate-spin mr-2" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Survey"
+          )}
         </Button>
       </div>
       

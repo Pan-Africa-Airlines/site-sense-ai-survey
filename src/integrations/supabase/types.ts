@@ -9,7 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      site_surveys: {
+        Row: {
+          address: string | null
+          building_photo: string | null
+          created_at: string
+          date: string
+          gps_coordinates: string | null
+          id: string
+          region: string
+          site_id: string | null
+          site_name: string
+          site_type: string | null
+          status: string
+          survey_data: Json
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          building_photo?: string | null
+          created_at?: string
+          date: string
+          gps_coordinates?: string | null
+          id?: string
+          region: string
+          site_id?: string | null
+          site_name: string
+          site_type?: string | null
+          status?: string
+          survey_data?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          building_photo?: string | null
+          created_at?: string
+          date?: string
+          gps_coordinates?: string | null
+          id?: string
+          region?: string
+          site_id?: string | null
+          site_name?: string
+          site_type?: string | null
+          status?: string
+          survey_data?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

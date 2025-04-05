@@ -19,6 +19,8 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminInstallations from "./pages/AdminInstallations";
 import AdminLogin from "./pages/AdminLogin";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import EskomSurvey from "./pages/EskomSurvey";
+import EskomSurveys from "./pages/EskomSurveys";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -92,6 +94,31 @@ const App = () => {
                     </ProtectedRoute>
                   } 
                 />
+
+                {/* Eskom Survey Routes */}
+                <Route 
+                  path="/eskom-survey" 
+                  element={
+                    <ProtectedRoute>
+                      <div className="flex flex-col min-h-screen">
+                        <EskomSurvey />
+                        <Footer />
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/eskom-surveys" 
+                  element={
+                    <ProtectedRoute>
+                      <div className="flex flex-col min-h-screen">
+                        <EskomSurveys />
+                        <Footer />
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+                
                 <Route 
                   path="/assessment" 
                   element={
