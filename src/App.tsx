@@ -11,6 +11,7 @@ import Installation from "./pages/Installation";
 import CarCheckup from "./pages/CarCheckup";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -54,42 +55,66 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route 
-                path="/" 
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/assessment" 
-                element={
-                  <ProtectedRoute>
-                    <Assessment />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/installation" 
-                element={
-                  <ProtectedRoute>
-                    <Installation />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/car-check" 
-                element={
-                  <ProtectedRoute>
-                    <CarCheckup />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <div className="flex flex-col min-h-screen">
+              <Routes>
+                <Route path="/login" element={
+                  <>
+                    <Login />
+                    <Footer />
+                  </>
+                } />
+                <Route 
+                  path="/" 
+                  element={
+                    <ProtectedRoute>
+                      <div className="flex flex-col min-h-screen">
+                        <Index />
+                        <Footer />
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/assessment" 
+                  element={
+                    <ProtectedRoute>
+                      <div className="flex flex-col min-h-screen">
+                        <Assessment />
+                        <Footer />
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/installation" 
+                  element={
+                    <ProtectedRoute>
+                      <div className="flex flex-col min-h-screen">
+                        <Installation />
+                        <Footer />
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/car-check" 
+                  element={
+                    <ProtectedRoute>
+                      <div className="flex flex-col min-h-screen">
+                        <CarCheckup />
+                        <Footer />
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="*" element={
+                  <div className="flex flex-col min-h-screen">
+                    <NotFound />
+                    <Footer />
+                  </div>
+                } />
+              </Routes>
+            </div>
           </BrowserRouter>
         </AIProvider>
       </TooltipProvider>
