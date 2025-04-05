@@ -1,9 +1,18 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { 
+  Form as FormRoot,
+  FormControl, 
+  FormDescription, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -12,7 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useAI } from "@/contexts/AIContext";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Sparkles } from "lucide-react";
 
 const formSchema = z.object({
   siteName: z.string().min(2, {
@@ -63,8 +72,6 @@ const formSchema = z.object({
     required_error: "You must accept the terms and conditions.",
   }),
 });
-
-import { Sparkles } from "lucide-react";
 
 interface SiteAssessmentFormProps {
   showAIRecommendations?: boolean;
@@ -183,7 +190,7 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({
   }
 
   return (
-    <Form {...form}>
+    <FormRoot {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <Card>
           <CardHeader>
@@ -294,7 +301,8 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({
                         <SelectItem value="Free State">Free State</SelectItem>
                         <SelectItem value="Northern Cape">Northern Cape</SelectItem>
                       </SelectContent>
-                    </FormControl>
+                    </Select>
+                  </FormControl>
                   <FormDescription>
                     Select the geographical region of the site.
                   </FormDescription>
@@ -626,7 +634,7 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({
         />
         <Button type="submit">Submit</Button>
       </form>
-    </Form>
+    </FormRoot>
   );
 };
 
