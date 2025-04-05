@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 210 100% 35%;
+    --primary: 265 67% 75%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -37,7 +37,7 @@
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 210 100% 35%;
+    --sidebar-primary: 265 67% 75%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
@@ -54,7 +54,7 @@
   }
   
   .section-title {
-    @apply text-xl font-semibold text-bcx mb-4 border-b pb-2;
+    @apply text-xl font-semibold text-akhanya mb-4 border-b pb-2;
   }
   
   .field-row {
@@ -70,7 +70,7 @@
   }
   
   .ai-suggestion {
-    @apply bg-blue-50 border border-blue-200 rounded-md p-2 text-sm text-blue-800 mt-1;
+    @apply bg-akhanya-light border border-akhanya-purple rounded-md p-2 text-sm text-akhanya-dark mt-1;
   }
   
   .location-badge {
@@ -80,5 +80,13 @@
   .required:after {
     content: " *";
     @apply text-red-500;
+  }
+
+  .akhanya-gradient {
+    @apply bg-gradient-to-r from-akhanya-purple to-akhanya-dark;
+  }
+
+  .card-dashboard {
+    @apply bg-white rounded-lg border border-gray-200 shadow-md p-4 hover:shadow-lg transition-shadow duration-300;
   }
 }

@@ -58,6 +58,12 @@ export default {
 					light: '#007bff',
 					dark: '#004494'
 				},
+				akhanya: {
+					DEFAULT: '#1A1F2C',
+					purple: '#9b87f5',
+					light: '#E5DEFF',
+					dark: '#6E59A5'
+				},
 				success: '#28a745',
 				warning: '#ffc107',
 				error: '#dc3545',
