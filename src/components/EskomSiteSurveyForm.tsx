@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -917,8 +918,46 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
                     placeholder="Indicate if any lights are faulty"
                   />
                 </div>
-                
-                <div>
-                  <Label htmlFor="fireProtection">Fire Protection</Label>
-                  <Input
-                    id="fireProtection
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="power" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4">3. POWER & TRANSPORT</h3>
+              
+              <p className="text-gray-500 italic">
+                This section is for power and transport details.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="annexures" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4">4. ANNEXURES</h3>
+              
+              <p className="text-gray-500 italic">
+                This section contains additional annexure information.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      <div className="flex justify-between mt-6">
+        <Button type="button" variant="outline">
+          Save as Draft
+        </Button>
+        <Button type="submit">
+          Submit Survey
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default EskomSiteSurveyForm;
