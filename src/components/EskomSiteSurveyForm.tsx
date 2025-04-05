@@ -416,7 +416,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     });
 
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData, type).then(analysis => {
+      analyzeImage(imageData, type, "Analyze image").then(analysis => {
         if (analysis) {
           setAiSuggestions({ ...aiSuggestions, [type]: analysis });
         }
@@ -438,7 +438,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, formData || {});
+    const suggestion = await getSuggestion(fieldName, formData, "Generate suggestion");
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -446,7 +446,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.generalRemarks) {
-      const enhanced = await enhanceNotes(formData.generalRemarks || "");
+      const enhanced = await enhanceNotes(formData.generalRemarks, "Enhance notes");
       setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
@@ -458,8 +458,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     setIsSaving(true);
     
     try {
-      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...surveyData } = 
-        (formData as unknown as Record<string, any>);
+      const { siteName, region, date, siteId, siteType, address, gpsCoordinates, buildingPhoto, ...surveyData } = formData;
       
       const { data: { user } } = await supabase.auth.getUser();
       
