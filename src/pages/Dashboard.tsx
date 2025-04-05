@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,7 +82,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         <Card className="card-dashboard">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-akhanya">Total Assessments</CardTitle>
@@ -116,7 +117,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
         <Card>
           <CardHeader>
             <CardTitle className="text-akhanya">Assessment Progress</CardTitle>
@@ -174,7 +175,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-akhanya">Team Distribution</CardTitle>
@@ -205,7 +206,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 mt-8 lg:mt-0 mb-8">
+        <Card className="lg:col-span-2 mt-10 lg:mt-0 mb-10">
           <CardHeader>
             <CardTitle className="text-akhanya">Recent Activity</CardTitle>
             <CardDescription>Latest system activities</CardDescription>
