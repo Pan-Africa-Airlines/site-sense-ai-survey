@@ -178,7 +178,8 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Added extra margin bottom to create more space between these sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-akhanya">Team Distribution</CardTitle>
@@ -209,7 +210,8 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        {/* Added extra top margin for more separation */}
+        <Card className="lg:col-span-2 mt-4 lg:mt-0">
           <CardHeader>
             <CardTitle className="text-akhanya">Recent Activity</CardTitle>
             <CardDescription>Latest system activities</CardDescription>

@@ -1,15 +1,26 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Car, ClipboardList, HardHat, ChevronRight } from "lucide-react";
+import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 
 const NavigationBar: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
   
@@ -24,6 +35,16 @@ const NavigationBar: React.FC = () => {
   };
   
   const userEmail = localStorage.getItem("userEmail") || "User";
+  
+  // Get initials from email for the avatar fallback
+  const getInitials = (email: string) => {
+    if (email === "User") return "U";
+    const nameParts = email.split('@')[0].split('.');
+    if (nameParts.length > 1) {
+      return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+    }
+    return email.substring(0, 2).toUpperCase();
+  };
 
   // Function to get page title based on current path
   const getPageTitle = () => {
@@ -104,13 +125,42 @@ const NavigationBar: React.FC = () => {
           
           <div className="flex items-center gap-3">
             <div className="text-sm text-gray-600 hidden md:block">{userEmail}</div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
+            
+            {/* Profile dropdown menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar>
+                    <AvatarImage src="/engineer-profile.jpg" alt="Profile" />
+                    <AvatarFallback className="bg-akhanya text-white">
+                      {getInitials(userEmail)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
