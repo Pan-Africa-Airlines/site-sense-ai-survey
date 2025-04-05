@@ -41,7 +41,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const surveyId = searchParams.get('id');
   
-  // Get the active fields from the form configuration
   const getActiveFields = () => {
     if (!formConfig || !formConfig.eskomSurvey || !formConfig.eskomSurvey.fields) {
       return [];
@@ -51,14 +50,12 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const activeFields = getActiveFields();
   
-  // Check if a field is active
   const isFieldActive = (fieldId: string) => {
     if (!activeFields.length) return true; // If no configuration, show all fields
     return activeFields.some((field: FormField) => field.id === fieldId || field.id.endsWith(`_${fieldId}`));
   };
   
   const initialFormData = {
-    // Site Information & Location
     siteName: assessmentData?.siteName || "",
     region: assessmentData?.region || "",
     date: new Date().toISOString().split('T')[0],
@@ -68,35 +65,29 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     gpsCoordinates: "",
     buildingPhoto: "",
     
-    // Site Visit Attendees
     attendees: [
       { date: "", name: "", company: "", department: "", cellphone: "" }
     ],
     
-    // Site Survey Outcome
     surveyOutcome: {
       oemContractor: { name: "", signature: "", date: "", accepted: false, comments: "" },
       oemEngineer: { name: "", signature: "", date: "", accepted: false, comments: "" },
       eskomRepresentative: { name: "", signature: "", date: "", accepted: false, comments: "" }
     },
     
-    // Equipment Location
     buildingName: "",
     buildingType: "",
     floorLevel: "",
     roomNumber: "",
     
-    // Access Procedure
     accessRequirements: "",
     securityRequirements: "",
     vehicleType: "",
     
-    // Eskom Site Owner Contacts
     siteOwnerContacts: [
       { name: "", cellphone: "", email: "" }
     ],
     
-    // Equipment Room General
     cableAccess: "",
     roomLighting: "",
     fireProtection: "",
@@ -105,11 +96,9 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     roomTemperature: "",
     roomCondition: "",
     
-    // Equipment Cabinet Space Planning
     numberOfRouters: "",
     cabinetLocationPhoto: "",
     
-    // Transport Platforms
     transportLinks: [
       { linkNumber: "1", linkType: "", direction: "", capacity: "" },
       { linkNumber: "2", linkType: "", direction: "", capacity: "" },
@@ -117,13 +106,11 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       { linkNumber: "4", linkType: "", direction: "", capacity: "" }
     ],
     
-    // DC Power Distribution
     chargerALoadCurrent: "",
     chargerBLoadCurrent: "",
     powerSupplyMethod: "",
     dcCableLength: "",
     
-    // Photos
     equipmentRoomPhotos: "",
     cabinetLocationPhotos: "",
     dcPowerDistributionPhotos: "",
@@ -133,7 +120,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     cableRoutingPhotos: "",
     ceilingHvacPhotos: "",
     
-    // Installation Requirements
     installationRequirements: {
       accessSecurity: "",
       coolingVentilation: "",
@@ -144,10 +130,8 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       powerCables: ""
     },
     
-    // General Remarks
     generalRemarks: "",
     
-    // Annexure Info
     odfDetails: [
       { 
         cabinetName: "", 
@@ -958,3 +942,72 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
                         <Checkbox 
                           id="oemContractorAccepted" 
                           checked={formData.surveyOutcome.oemContractor.accepted}
+                          onCheckedChange={(checked) => 
+                            handleNestedInputChange('surveyOutcome', 'oemContractor', {
+                              ...formData.surveyOutcome.oemContractor, 
+                              accepted: checked === true
+                            })
+                          }
+                        />
+                        <Label htmlFor="oemContractorAccepted">Accepted</Label>
+                      </div>
+                    </div>
+                    <Textarea
+                      placeholder="Comments"
+                      value={formData.surveyOutcome.oemContractor.comments}
+                      onChange={(e) => 
+                        handleNestedInputChange('surveyOutcome', 'oemContractor', {
+                          ...formData.surveyOutcome.oemContractor, 
+                          comments: e.target.value
+                        })
+                      }
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="equipment" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4">Equipment Details</h3>
+              <p className="text-muted-foreground">This tab would contain equipment details.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="power" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4">Power & Transport Details</h3>
+              <p className="text-muted-foreground">This tab would contain power and transport platform details.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="annexures" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4">Annexures</h3>
+              <p className="text-muted-foreground">This tab would contain annexure information.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      <div className="flex justify-end space-x-4 pt-6">
+        <Button type="button" variant="outline" onClick={() => navigate('/')}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          Submit Survey
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default EskomSiteSurveyForm;
