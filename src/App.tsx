@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,11 +22,9 @@ import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import EskomSurvey from "./pages/EskomSurvey";
 import EskomSurveys from "./pages/EskomSurveys";
 import AdminMap from "./pages/AdminMap";
-import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
 
-// ProtectedRoute component to handle authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   
