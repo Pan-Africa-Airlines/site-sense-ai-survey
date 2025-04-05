@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -212,16 +211,18 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     });
   };
 
-  const handleImageCapture = (field: string, imageData: string) => {
+  const handleImageCapture = (type: keyof typeof formData.sitePhotos, imageData: string) => {
     setFormData({
       ...formData,
-      [field]: imageData
+      sitePhotos: {
+        ...formData.sitePhotos,
+        [type]: imageData
+      }
     });
 
-    // If AI assistance is enabled and an image was captured, analyze it
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData, field).then(analysis => {
-        setAiSuggestions({ ...aiSuggestions, [field]: analysis });
+      analyzeImage(imageData, type).then(analysis => {
+        setAiSuggestions({ ...aiSuggestions, [type]: analysis });
       });
     }
   };
@@ -246,10 +247,10 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     }
   };
 
-  const handleEnhanceNotes = async (field: string) => {
-    if (formData[field as keyof typeof formData]) {
-      const enhanced = await enhanceNotes(formData[field as keyof typeof formData] as string, field);
-      setFormData({ ...formData, [field]: enhanced });
+  const handleEnhanceNotes = async () => {
+    if (formData.additionalNotes) {
+      const enhanced = await enhanceNotes(formData.additionalNotes, 'additionalNotes');
+      setFormData({ ...formData, additionalNotes: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
       toast.error("Please add some notes first");
@@ -259,7 +260,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     const requiredFields = ['siteName', 'date', 'region'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
     
@@ -1286,7 +1286,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEnhanceNotes('generalRemarks')}
+                    onClick={() => handleEnhanceNotes()}
                     disabled={isProcessing || !formData.generalRemarks}
                   >
                     Enhance with AI
@@ -1497,7 +1497,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
             type="button" 
             variant="outline"
             onClick={() => {
-              // Reset form would go here
               toast.info("Form reset functionality would go here");
             }}
           >

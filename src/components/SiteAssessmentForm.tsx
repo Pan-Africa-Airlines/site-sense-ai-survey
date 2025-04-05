@@ -153,7 +153,7 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
 
     // If AI assistance is enabled, analyze the image
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData).then(analysis => {
+      analyzeImage(imageData, type).then(analysis => {
         setAiSuggestions({ ...aiSuggestions, [type]: analysis });
       });
     }
@@ -181,7 +181,7 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
 
   const handleEnhanceNotes = async () => {
     if (formData.additionalNotes) {
-      const enhanced = await enhanceNotes(formData.additionalNotes);
+      const enhanced = await enhanceNotes(formData.additionalNotes, 'additionalNotes');
       setFormData({ ...formData, additionalNotes: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {

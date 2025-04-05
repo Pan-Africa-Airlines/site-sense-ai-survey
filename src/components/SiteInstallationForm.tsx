@@ -132,7 +132,7 @@ const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({
 
     // If AI assistance is enabled and an image was captured, analyze it
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData).then(analysis => {
+      analyzeImage(imageData, type).then(analysis => {
         setAiSuggestions({ ...aiSuggestions, [type]: analysis });
       });
     }
@@ -160,7 +160,7 @@ const SiteInstallationForm: React.FC<SiteInstallationFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.additionalNotes) {
-      const enhanced = await enhanceNotes(formData.additionalNotes);
+      const enhanced = await enhanceNotes(formData.additionalNotes, 'additionalNotes');
       setFormData({ ...formData, additionalNotes: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
