@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,119 @@ interface EskomSiteSurveyFormProps {
   showAIRecommendations?: boolean;
 }
 
+type SurveyOutcomeParty = {
+  name: string;
+  signature: string;
+  date: string;
+  accepted: boolean;
+  comments: string;
+};
+
+type FormDataType = {
+  siteName: string;
+  region: string;
+  date: string;
+  siteId: string;
+  siteType: string;
+  address: string;
+  gpsCoordinates: string;
+  buildingPhoto: string;
+  attendees: Array<{
+    date: string;
+    name: string;
+    company: string;
+    department: string;
+    cellphone: string;
+  }>;
+  surveyOutcome: {
+    oemContractor: SurveyOutcomeParty;
+    oemEngineer: SurveyOutcomeParty;
+    eskomRepresentative: SurveyOutcomeParty;
+  };
+  buildingName: string;
+  buildingType: string;
+  floorLevel: string;
+  roomNumber: string;
+  accessRequirements: string;
+  securityRequirements: string;
+  vehicleType: string;
+  siteOwnerContacts: Array<{
+    name: string;
+    cellphone: string;
+    email: string;
+  }>;
+  cableAccess: string;
+  roomLighting: string;
+  fireProtection: string;
+  coolingMethod: string;
+  coolingRating: string;
+  roomTemperature: string;
+  roomCondition: string;
+  numberOfRouters: string;
+  cabinetLocationPhoto: string;
+  transportLinks: Array<{
+    linkNumber: string;
+    linkType: string;
+    direction: string;
+    capacity: string;
+  }>;
+  chargerALoadCurrent: string;
+  chargerBLoadCurrent: string;
+  powerSupplyMethod: string;
+  dcCableLength: string;
+  equipmentRoomPhotos: string;
+  cabinetLocationPhotos: string;
+  dcPowerDistributionPhotos: string;
+  transportEquipmentPhotos: string;
+  odfPhotos: string;
+  accessEquipmentPhotos: string;
+  cableRoutingPhotos: string;
+  ceilingHvacPhotos: string;
+  installationRequirements: {
+    accessSecurity: string;
+    coolingVentilation: string;
+    flooringType: string;
+    fireProtection: string;
+    roomLighting: string;
+    roofType: string;
+    powerCables: string;
+  };
+  generalRemarks: string;
+  odfDetails: Array<{
+    cabinetName: string;
+    direction: string;
+    connectionType: string;
+    numberOfCores: string;
+    cores: Array<{
+      number: number;
+      used: boolean;
+    }>;
+  }>;
+  cabinetLayoutNotes: string;
+  chargerLoadDistribution: {
+    siteName: string;
+    chargerLabel: string;
+    chargerType: string;
+    circuits: {
+      chargerA: Array<{
+        circuit: string;
+        mcbRating: string;
+        used: boolean;
+        label: string;
+      }>;
+      chargerB: Array<{
+        circuit: string;
+        mcbRating: string;
+        used: boolean;
+        label: string;
+      }>;
+    };
+  };
+  roomLayoutDrawing: string;
+  useAIAssistance: boolean;
+  [key: string]: any;
+};
+
 const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ 
   onSubmit, 
   assessmentData, 
@@ -41,6 +155,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const surveyId = searchParams.get('id');
   
+  // Get the active fields from the form configuration
   const getActiveFields = () => {
     if (!formConfig || !formConfig.eskomSurvey || !formConfig.eskomSurvey.fields) {
       return [];
@@ -50,12 +165,13 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const activeFields = getActiveFields();
   
+  // Check if a field is active
   const isFieldActive = (fieldId: string) => {
     if (!activeFields.length) return true; // If no configuration, show all fields
     return activeFields.some((field: FormField) => field.id === fieldId || field.id.endsWith(`_${fieldId}`));
   };
   
-  const initialFormData = {
+  const initialFormData: FormDataType = {
     siteName: assessmentData?.siteName || "",
     region: assessmentData?.region || "",
     date: new Date().toISOString().split('T')[0],
@@ -169,7 +285,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     useAIAssistance: true
   };
   
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState<FormDataType>(initialFormData);
   const [aiSuggestions, setAiSuggestions] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("basic");
   const [draftName, setDraftName] = useState<string>("");
@@ -233,25 +349,25 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     setFormData({
       ...formData,
       [category]: {
-        ...formData[category as keyof typeof formData],
+        ...formData[category as keyof FormDataType],
         [field]: value
       }
     });
   };
 
   const handleArrayItemChange = (arrayName: string, index: number, field: string, value: any) => {
-    const updatedArray = [...(formData[arrayName as keyof typeof formData] as any[])];
+    const updatedArray = [...(formData[arrayName as keyof FormDataType] as any[])];
     updatedArray[index][field] = value;
     setFormData({ ...formData, [arrayName]: updatedArray });
   };
 
   const addArrayItem = (arrayName: string, template: any) => {
-    const updatedArray = [...(formData[arrayName as keyof typeof formData] as any[]), template];
+    const updatedArray = [...(formData[arrayName as keyof FormDataType] as any[]), template];
     setFormData({ ...formData, [arrayName]: updatedArray });
   };
 
   const removeArrayItem = (arrayName: string, index: number) => {
-    const updatedArray = [...(formData[arrayName as keyof typeof formData] as any[])];
+    const updatedArray = [...(formData[arrayName as keyof FormDataType] as any[])];
     updatedArray.splice(index, 1);
     setFormData({ ...formData, [arrayName]: updatedArray });
   };
@@ -264,9 +380,9 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     setFormData({
       ...formData,
       [category]: {
-        ...formData[category as keyof typeof formData],
+        ...formData[category as keyof FormDataType],
         [subCategory]: {
-          ...(formData[category as keyof typeof formData] as any)[subCategory],
+          ...(formData[category as keyof FormDataType] as any)[subCategory],
           [field]: checked
         }
       }
@@ -280,7 +396,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     });
 
     if (formData.useAIAssistance && imageData) {
-      analyzeImage(imageData, type, "Analyze this image").then(analysis => {
+      analyzeImage(imageData, type).then(analysis => {
         if (analysis) {
           setAiSuggestions({ ...aiSuggestions, [type]: analysis });
         }
@@ -310,7 +426,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.generalRemarks) {
-      const enhanced = await enhanceNotes(formData.generalRemarks, "Enhance these notes");
+      const enhanced = await enhanceNotes(formData.generalRemarks);
       setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
