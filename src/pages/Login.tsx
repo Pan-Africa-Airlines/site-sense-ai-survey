@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -105,7 +106,16 @@ const Login = () => {
                   }}
                 />
                 <div className="flex items-center gap-3 mt-2">
-                  <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+                  <div className="h-px w-16 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+                  <img 
+                    src="/lovable-uploads/d67b70d4-e9cc-436f-a32c-4063e2443190.png" 
+                    alt="BCX" 
+                    className="h-8 mx-2"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://via.placeholder.com/80x40?text=BCX";
+                    }}
+                  />
+                  <div className="h-px w-16 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
                   <img 
                     src="/lovable-uploads/79b9a4a2-93ea-4150-a0ff-fe05f4ae326a.png" 
                     alt="Eskom" 
@@ -114,7 +124,7 @@ const Login = () => {
                       e.currentTarget.src = "https://via.placeholder.com/120x45?text=Eskom";
                     }}
                   />
-                  <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
+                  <div className="h-px w-16 bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>
                 </div>
               </div>
               <div className="flex items-center justify-center mb-2">
