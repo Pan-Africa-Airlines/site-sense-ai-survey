@@ -1,200 +1,108 @@
 
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
-interface AIContextType {
-  loading: boolean;
+export interface AIContextType {
   isProcessing: boolean;
-  analyzeImage: (imageData: string, category?: string) => Promise<string>;
-  getSuggestion: (fieldName: string, currentValue?: any, additionalContext?: string) => Promise<string>;
-  enhanceNotes: (notes: string, category?: string) => Promise<string>;
-  detectAnomalies: (data: any) => Promise<any>;
-  recommendMaintenance: (equipmentData: any, imageData?: string) => Promise<any>;
-  optimizeRoute: (startLocation: any, destinations: any[]) => Promise<any[]>;
-  predictETAs: (routes: any[]) => Promise<any[]>;
+  analyzeImage: (imageData: string, context?: string) => Promise<string | null>;
+  getSuggestion: (fieldName: string, currentValue: string) => Promise<string | null>;
+  enhanceNotes: (notes: string, context?: string) => Promise<string>;
 }
 
-const AIContext = createContext<AIContextType | undefined>(undefined);
+const defaultContext: AIContextType = {
+  isProcessing: false,
+  analyzeImage: async () => null,
+  getSuggestion: async () => null,
+  enhanceNotes: async (notes) => notes,
+};
 
-export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [loading, setLoading] = useState(false);
+const AIContext = createContext<AIContextType>(defaultContext);
 
-  // The isProcessing is essentially the same as loading for now
-  const isProcessing = loading;
+interface AIProviderProps {
+  children: ReactNode;
+}
 
-  const analyzeImage = async (imageData: string, category = "general"): Promise<string> => {
-    setLoading(true);
+export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const analyzeImage = async (imageData: string, context: string = "general"): Promise<string | null> => {
+    setIsProcessing(true);
     try {
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate AI analysis with a delayed response
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       
+      // Return a mock analysis based on the context
       let analysis = "";
-      if (category === "site") {
-        analysis = "This appears to be a telecommunications site with proper mounting infrastructure. The equipment is installed correctly according to standards.";
-      } else if (category === "equipment") {
-        analysis = "The equipment shows no visible damage. All connections appear to be properly secured and labeled according to standards.";
-      } else if (category === "vehicle") {
-        analysis = "Vehicle appears to be in good condition. No visible damage or issues detected.";
+      if (context === "site") {
+        analysis = "This appears to be a commercial building with adequate infrastructure for installation.";
+      } else if (context === "equipment") {
+        analysis = "The equipment looks properly installed and in good condition.";
       } else {
-        analysis = "Image analyzed successfully. No issues detected.";
+        analysis = "The image has been analyzed. No specific issues detected.";
       }
       
       return analysis;
     } catch (error) {
       console.error("Error analyzing image:", error);
-      return "Failed to analyze image. Please try again.";
+      return null;
     } finally {
-      setLoading(false);
+      setIsProcessing(false);
     }
   };
 
-  const getSuggestion = async (fieldName: string, currentValue: any = "", additionalContext: string = ""): Promise<string> => {
-    setLoading(true);
+  const getSuggestion = async (fieldName: string, currentValue: string): Promise<string | null> => {
+    setIsProcessing(true);
     try {
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Simulate AI suggestion with a delayed response
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       
-      const suggestions: Record<string, string> = {
-        "siteName": "Site AKH-2023-04",
-        "location": "25.7479° S, 28.2293° E",
-        "equipmentType": "Nokia RRU 4415",
-        "installationNotes": "Equipment mounted on southwest corner of structure, secured with standard mounting brackets. All cables properly labeled and secured.",
-        "workPerformed": "Installed 3 new RRUs, connected fiber backhaul, and configured network settings.",
-        "issuesEncountered": "None. Installation proceeded according to plan.",
-        "default": "No suggestion available for this field."
-      };
+      // Return a mock suggestion based on the field name
+      let suggestion = "";
+      switch (fieldName) {
+        case "siteType":
+          suggestion = "Based on the address, this appears to be a commercial site.";
+          break;
+        case "accessRequirements":
+          suggestion = "Standard security clearance and safety equipment required.";
+          break;
+        case "coolingMethod":
+          suggestion = "Consider active cooling solutions for this location.";
+          break;
+        default:
+          suggestion = "No specific suggestions for this field.";
+      }
       
-      return suggestions[fieldName] || suggestions.default;
+      return suggestion;
     } catch (error) {
       console.error("Error getting suggestion:", error);
-      return "Failed to get suggestion. Please try again.";
+      return null;
     } finally {
-      setLoading(false);
+      setIsProcessing(false);
     }
   };
 
-  const enhanceNotes = async (notes: string, category = "general"): Promise<string> => {
-    setLoading(true);
+  const enhanceNotes = async (notes: string, context: string = "general"): Promise<string> => {
+    setIsProcessing(true);
     try {
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      // Simulate AI enhancement with a delayed response
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       
-      if (!notes || notes.trim() === "") {
-        return "Please provide some initial notes to enhance.";
-      }
-      
-      let enhancedNotes = notes;
-      if (notes.length < 100) {
-        enhancedNotes += " Additional details: All work was performed according to Eskom's standard procedures. Equipment was verified to be functioning according to specifications after installation. Site was left clean and secure.";
-      }
+      // Return enhanced notes with added details
+      const enhancedNotes = notes + "\n\n[AI Enhanced] Additional considerations: Ensure proper documentation of all installation steps. Verify compliance with safety regulations.";
       
       return enhancedNotes;
     } catch (error) {
       console.error("Error enhancing notes:", error);
-      return "Failed to enhance notes. Please try again.";
+      return notes; // Return original notes if enhancement fails
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const detectAnomalies = async (data: any): Promise<any> => {
-    setLoading(true);
-    try {
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return {
-        anomaliesDetected: Math.random() > 0.7,
-        details: "No significant anomalies detected in the provided data.",
-        recommendations: "Continue with standard monitoring procedures."
-      };
-    } catch (error) {
-      console.error("Error detecting anomalies:", error);
-      return { error: "Failed to detect anomalies. Please try again." };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const recommendMaintenance = async (equipmentData: any, imageData?: string): Promise<any> => {
-    setLoading(true);
-    try {
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      
-      return {
-        recommendations: [
-          "Schedule routine inspection in 3 months",
-          "Check cable connections during next site visit",
-          "Verify battery backup systems are functioning properly"
-        ],
-        priority: "Low",
-        estimatedTimeRequired: "2 hours"
-      };
-    } catch (error) {
-      console.error("Error recommending maintenance:", error);
-      return { error: "Failed to recommend maintenance. Please try again." };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const optimizeRoute = async (startLocation: any, destinations: any[]): Promise<any[]> => {
-    setLoading(true);
-    try {
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simply return the destinations in the same order for the mock
-      return [...destinations].sort(() => Math.random() - 0.5);
-    } catch (error) {
-      console.error("Error optimizing route:", error);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const predictETAs = async (routes: any[]): Promise<any[]> => {
-    setLoading(true);
-    try {
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return routes.map(route => ({
-        ...route,
-        eta: new Date(Date.now() + Math.random() * 3600000).toISOString(),
-        minutes: Math.floor(Math.random() * 30) + 10, // Random minutes between 10-40
-        trafficCondition: Math.random() > 0.7 ? "Heavy" : "Normal"
-      }));
-    } catch (error) {
-      console.error("Error predicting ETAs:", error);
-      return [];
-    } finally {
-      setLoading(false);
+      setIsProcessing(false);
     }
   };
 
   return (
-    <AIContext.Provider value={{ 
-      loading,
-      isProcessing,
-      analyzeImage, 
-      getSuggestion, 
-      enhanceNotes,
-      detectAnomalies,
-      recommendMaintenance,
-      optimizeRoute,
-      predictETAs
-    }}>
+    <AIContext.Provider value={{ isProcessing, analyzeImage, getSuggestion, enhanceNotes }}>
       {children}
     </AIContext.Provider>
   );
 };
 
-export const useAI = (): AIContextType => {
-  const context = useContext(AIContext);
-  if (context === undefined) {
-    throw new Error("useAI must be used within an AIProvider");
-  }
-  return context;
-};
+export const useAI = () => useContext(AIContext);

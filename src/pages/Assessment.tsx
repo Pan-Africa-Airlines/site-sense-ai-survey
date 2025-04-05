@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";

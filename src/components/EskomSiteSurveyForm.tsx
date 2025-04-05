@@ -19,6 +19,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FormField } from "./FormFieldsConfiguration";
+import { Json } from "@/integrations/supabase/types";
 
 interface SiteOwnerContact {
   name: string;
@@ -438,7 +439,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, formData[fieldName]);
+    const suggestion = await getSuggestion(fieldName, formData[fieldName] as string);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -473,7 +474,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: surveyData as Record<string, unknown>
+        survey_data: surveyData as Json
       };
       
       let response;
