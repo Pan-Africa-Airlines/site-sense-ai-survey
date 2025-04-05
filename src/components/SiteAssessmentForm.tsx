@@ -13,8 +13,9 @@ import { useAI } from "@/contexts/AIContext";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MapPin, Search, Info, Check, Building, Network, Home, Image, Power, Camera } from "lucide-react";
+import { MapPin, Search, Info, Check, Building, Network, Home, Image, Power, Camera, Save } from "lucide-react";
 import ImageCapture from "./ImageCapture";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 interface SiteAssessmentFormProps {
   onSubmit?: (data: any) => void;
@@ -57,6 +58,8 @@ const saProvinces = {
 const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showAIRecommendations = false }) => {
   const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
   const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
+  const [savedDrafts, setSavedDrafts] = useLocalStorage<Record<string, any>>("assessmentDrafts", {});
+  const [draftName, setDraftName] = useState<string>("");
   
   const [formData, setFormData] = useState({
     // Customer Information
@@ -126,6 +129,18 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
   const [activeTab, setActiveTab] = useState("customer");
   const [availableMunicipalities, setAvailableMunicipalities] = useState<string[]>([]);
 
+  // Check for existing draft when component mounts
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const draftId = urlParams.get('draftId');
+    
+    if (draftId && savedDrafts[draftId]) {
+      setFormData(savedDrafts[draftId]);
+      setDraftName(draftId);
+      toast.success(`Loaded draft: ${draftId}`);
+    }
+  }, [savedDrafts]);
+
   useEffect(() => {
     if (formData.siteProvince) {
       setAvailableMunicipalities(saProvinces[formData.siteProvince as keyof typeof saProvinces] || []);
@@ -189,6 +204,37 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
     }
   };
 
+  const handleSaveDraft = () => {
+    // Generate a unique name if none provided
+    const saveName = draftName || `Draft_${new Date().toISOString().slice(0, 10)}_${Math.floor(Math.random() * 1000)}`;
+    
+    // Save the current form state
+    const updatedDrafts = { 
+      ...savedDrafts,
+      [saveName]: formData 
+    };
+    
+    setSavedDrafts(updatedDrafts);
+    setDraftName(saveName);
+    
+    // Add draft ID to URL for sharing/bookmarking
+    const url = new URL(window.location.href);
+    url.searchParams.set('draftId', saveName);
+    window.history.replaceState({}, '', url.toString());
+    
+    toast.success(`Draft saved as: ${saveName}`);
+  };
+
+  const handleLoadDraft = (draftId: string) => {
+    if (savedDrafts[draftId]) {
+      setFormData(savedDrafts[draftId]);
+      setDraftName(draftId);
+      toast.success(`Loaded draft: ${draftId}`);
+    } else {
+      toast.error(`Draft not found: ${draftId}`);
+    }
+  };
+
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -201,8 +247,14 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
       return;
     }
     
-    onSubmit(formData);
+    onSubmit?.(formData);
     toast.success("Site assessment submitted successfully!");
+    
+    // Remove the draft after successful submission
+    if (draftName && savedDrafts[draftName]) {
+      const { [draftName]: _, ...remainingDrafts } = savedDrafts;
+      setSavedDrafts(remainingDrafts);
+    }
   };
 
   const handleTabChange = (value: string) => {
@@ -214,6 +266,23 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-bcx">Site Assessment Form</h2>
         <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Input
+              placeholder="Draft name (optional)"
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              className="w-48 text-sm"
+            />
+          </div>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleSaveDraft}
+            className="flex items-center gap-1"
+          >
+            <Save className="h-4 w-4" />
+            Save Draft
+          </Button>
           <Switch
             id="ai-mode"
             checked={formData.useAIAssistance}
@@ -1065,19 +1134,36 @@ const SiteAssessmentForm: React.FC<SiteAssessmentFormProps> = ({ onSubmit, showA
           <Button 
             type="button" 
             variant="outline"
-            onClick={() => {
-              // Reset form would go here
-              toast.info("Form reset functionality would go here");
-            }}
+            onClick={handleSaveDraft}
+            className="flex items-center gap-1"
           >
-            Reset
+            <Save className="h-4 w-4" />
+            Save and Continue Later
           </Button>
           <Button type="submit">Submit Assessment</Button>
         </div>
       </div>
+      
+      {Object.keys(savedDrafts).length > 0 && (
+        <div className="mt-4 border rounded-md p-4">
+          <h4 className="font-medium mb-2">Saved Drafts</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {Object.keys(savedDrafts).map((key) => (
+              <Button 
+                key={key}
+                variant="outline" 
+                size="sm"
+                onClick={() => handleLoadDraft(key)}
+                className="text-xs justify-start truncate"
+              >
+                {key}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
     </form>
   );
 };
 
 export default SiteAssessmentForm;
-

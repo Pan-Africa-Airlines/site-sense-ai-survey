@@ -1,5 +1,6 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
 import SiteAssessmentForm from "@/components/SiteAssessmentForm";
@@ -10,6 +11,8 @@ import { Sparkles } from "lucide-react";
 const Assessment = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const { isProcessing } = useAI();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draftId');
 
   return (
     <div className="min-h-screen bg-background">
@@ -21,7 +24,9 @@ const Assessment = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-akhanya">New Site Assessment</h2>
+            <h2 className="text-2xl font-bold text-akhanya">
+              {draftId ? `Edit Draft: ${draftId}` : "New Site Assessment"}
+            </h2>
             <p className="text-gray-600">
               Complete the form below to assess a new installation site
             </p>

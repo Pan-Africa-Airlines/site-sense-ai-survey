@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,9 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAI } from "@/contexts/AIContext";
 import { toast } from "sonner";
-import { MapPin, Info, Check, Calendar, Users, Building, Router, FileText, Power, Radio, Thermometer } from "lucide-react";
+import { MapPin, Info, Check, Calendar, Users, Building, Router, FileText, Power, Radio, Thermometer, Save } from "lucide-react";
 import ImageCapture from "./ImageCapture";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 interface EskomSiteSurveyFormProps {
   onSubmit?: (data: any) => void;
@@ -29,6 +30,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 }) => {
   const { latitude, longitude, address, loading: locationLoading } = useGeolocation();
   const { isProcessing, analyzeImage, getSuggestion, enhanceNotes } = useAI();
+  const [savedDrafts, setSavedDrafts] = useLocalStorage<Record<string, any>>("eskomSurveyDrafts", {});
   
   const initialFormData = {
     // Site Information & Location
@@ -161,6 +163,18 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   const [formData, setFormData] = useState(initialFormData);
   const [aiSuggestions, setAiSuggestions] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("basic");
+  const [draftName, setDraftName] = useState<string>("");
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const draftId = urlParams.get('draftId');
+    
+    if (draftId && savedDrafts[draftId]) {
+      setFormData(savedDrafts[draftId]);
+      setDraftName(draftId);
+      toast.success(`Loaded draft: ${draftId}`);
+    }
+  }, [savedDrafts]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -240,7 +254,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, "Provide a suggestion");
+    const suggestion = await getSuggestion(fieldName, formData);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -253,6 +267,34 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       toast.success("Notes enhanced with AI suggestions");
     } else {
       toast.error("Please add some notes first");
+    }
+  };
+  
+  const handleSaveDraft = () => {
+    const saveName = draftName || `Draft_${new Date().toISOString().slice(0, 10)}_${Math.floor(Math.random() * 1000)}`;
+    
+    const updatedDrafts = { 
+      ...savedDrafts,
+      [saveName]: formData 
+    };
+    
+    setSavedDrafts(updatedDrafts);
+    setDraftName(saveName);
+    
+    const url = new URL(window.location.href);
+    url.searchParams.set('draftId', saveName);
+    window.history.replaceState({}, '', url.toString());
+    
+    toast.success(`Draft saved as: ${saveName}`);
+  };
+
+  const handleLoadDraft = (draftId: string) => {
+    if (savedDrafts[draftId]) {
+      setFormData(savedDrafts[draftId]);
+      setDraftName(draftId);
+      toast.success(`Loaded draft: ${draftId}`);
+    } else {
+      toast.error(`Draft not found: ${draftId}`);
     }
   };
 
@@ -269,6 +311,11 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
     
     onSubmit?.(formData);
     toast.success("Site survey report submitted successfully!");
+    
+    if (draftName && savedDrafts[draftName]) {
+      const { [draftName]: _, ...remainingDrafts } = savedDrafts;
+      setSavedDrafts(remainingDrafts);
+    }
   };
 
   const handleTabChange = (value: string) => {
@@ -283,6 +330,23 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
           <h3 className="text-xl font-semibold">SITE SURVEY REPORT</h3>
         </div>
         <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Input
+              placeholder="Draft name (optional)"
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              className="w-48 text-sm"
+            />
+          </div>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleSaveDraft}
+            className="flex items-center gap-1"
+          >
+            <Save className="h-4 w-4" />
+            Save Draft
+          </Button>
           <Switch
             id="ai-mode-install"
             checked={formData.useAIAssistance}
@@ -944,13 +1008,38 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
       </Tabs>
       
       <div className="flex justify-between mt-6">
-        <Button type="button" variant="outline">
-          Save as Draft
+        <Button 
+          type="button" 
+          variant="outline"
+          onClick={handleSaveDraft}
+          className="flex items-center gap-1"
+        >
+          <Save className="h-4 w-4" />
+          Save and Continue Later
         </Button>
         <Button type="submit">
           Submit Survey
         </Button>
       </div>
+      
+      {Object.keys(savedDrafts).length > 0 && (
+        <div className="mt-4 border rounded-md p-4">
+          <h4 className="font-medium mb-2">Saved Drafts</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {Object.keys(savedDrafts).map((key) => (
+              <Button 
+                key={key}
+                variant="outline" 
+                size="sm"
+                onClick={() => handleLoadDraft(key)}
+                className="text-xs justify-start truncate"
+              >
+                {key}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
     </form>
   );
 };
