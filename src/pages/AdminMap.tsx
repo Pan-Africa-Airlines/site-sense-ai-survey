@@ -7,7 +7,6 @@ import { MapPin, Navigation, Truck, User } from "lucide-react";
 import EngineerAllocationDialog from "@/components/EngineerAllocationDialog";
 import MapView from "@/components/MapView";
 
-// Mock data for engineers in South Africa
 const MOCK_ENGINEERS = [
   { id: 1, name: "John Doe", lat: -26.2041, lng: 28.0473, status: "available", vehicle: "Toyota Hilux", lastUpdate: "2 min ago" },
   { id: 2, name: "Jane Smith", lat: -26.1052, lng: 28.0560, status: "on-site", vehicle: "Ford Ranger", lastUpdate: "5 min ago" },
@@ -15,7 +14,6 @@ const MOCK_ENGINEERS = [
   { id: 4, name: "Mary Williams", lat: -29.8587, lng: 31.0218, status: "available", vehicle: "Toyota Land Cruiser", lastUpdate: "3 min ago" },
 ];
 
-// Mock data for sites in South Africa
 const MOCK_SITES = [
   { id: 1, name: "Eskom Substation A", lat: -26.2741, lng: 27.9073, priority: "high", engineer: null },
   { id: 2, name: "Power Station B", lat: -26.1852, lng: 27.9960, priority: "medium", engineer: 2 },
@@ -41,7 +39,6 @@ const AdminMap = () => {
 
   const handleSelectEngineer = (engineerId: number) => {
     setSelectedEngineer(engineerId);
-    // Get sites already assigned to this engineer
     const assignedSites = sites
       .filter(site => site.engineer === engineerId)
       .map(site => site.id);
@@ -80,12 +77,10 @@ const AdminMap = () => {
       return;
     }
 
-    // Update sites with the allocated engineer
     const updatedSites = sites.map(site => {
       if (selectedSites.includes(site.id)) {
         return { ...site, engineer: selectedEngineer };
       } else if (site.engineer === selectedEngineer && !selectedSites.includes(site.id)) {
-        // Remove engineer from sites that were previously allocated but now deselected
         return { ...site, engineer: null };
       }
       return site;
@@ -99,7 +94,6 @@ const AdminMap = () => {
       description: `Successfully allocated ${selectedSites.length} sites to ${engineers.find(e => e.id === selectedEngineer)?.name}`,
     });
 
-    // Optimize route if there are multiple sites
     if (selectedSites.length > 1) {
       await optimizeRouteForEngineer(selectedEngineer, selectedSites, updatedSites);
     }
@@ -124,10 +118,9 @@ const AdminMap = () => {
         destinations
       );
 
-      // Calculate route metrics (in a real app, you'd use a routing API)
       const routeMetrics = optimizedDestinations.map(() => ({
-        distance: Math.floor(Math.random() * 50) + 5, // Random distance in km
-        traffic: ["light", "moderate", "heavy"][Math.floor(Math.random() * 3)] // Random traffic condition
+        distance: Math.floor(Math.random() * 50) + 5,
+        traffic: ["light", "moderate", "heavy"][Math.floor(Math.random() * 3)]
       }));
 
       const estimatedTimes = await predictETAs(routeMetrics);

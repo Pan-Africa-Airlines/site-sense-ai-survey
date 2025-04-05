@@ -3,12 +3,13 @@ import React, { createContext, useState, useContext } from "react";
 
 interface AIContextType {
   loading: boolean;
+  isProcessing: boolean; // Add this missing property
   analyzeImage: (imageData: string, category?: string) => Promise<string>;
-  getSuggestion: (fieldName: string, currentValue?: string) => Promise<string>;
+  getSuggestion: (fieldName: string, currentValue?: any, additionalContext?: string) => Promise<string>;
   enhanceNotes: (notes: string, category?: string) => Promise<string>;
   detectAnomalies: (data: any) => Promise<any>;
-  recommendMaintenance: (equipmentData: any) => Promise<any>;
-  optimizeRoute: (locations: any[]) => Promise<any[]>;
+  recommendMaintenance: (equipmentData: any, imageData?: string) => Promise<any>;
+  optimizeRoute: (startLocation: any, destinations: any[]) => Promise<any[]>;
   predictETAs: (routes: any[]) => Promise<any[]>;
 }
 
@@ -16,6 +17,9 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [loading, setLoading] = useState(false);
+
+  // The isProcessing is essentially the same as loading for now
+  const isProcessing = loading;
 
   const analyzeImage = async (imageData: string, category = "general"): Promise<string> => {
     setLoading(true);
@@ -43,7 +47,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const getSuggestion = async (fieldName: string, currentValue = ""): Promise<string> => {
+  const getSuggestion = async (fieldName: string, currentValue: any = "", additionalContext: string = ""): Promise<string> => {
     setLoading(true);
     try {
       // Mock implementation
@@ -111,7 +115,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const recommendMaintenance = async (equipmentData: any): Promise<any> => {
+  const recommendMaintenance = async (equipmentData: any, imageData?: string): Promise<any> => {
     setLoading(true);
     try {
       // Mock implementation
@@ -134,14 +138,14 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const optimizeRoute = async (locations: any[]): Promise<any[]> => {
+  const optimizeRoute = async (startLocation: any, destinations: any[]): Promise<any[]> => {
     setLoading(true);
     try {
       // Mock implementation
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Simply return the locations in the same order for the mock
-      return [...locations].sort(() => Math.random() - 0.5);
+      // Simply return the destinations in the same order for the mock
+      return [...destinations].sort(() => Math.random() - 0.5);
     } catch (error) {
       console.error("Error optimizing route:", error);
       return [];
@@ -171,7 +175,8 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   return (
     <AIContext.Provider value={{ 
-      loading, 
+      loading,
+      isProcessing,
       analyzeImage, 
       getSuggestion, 
       enhanceNotes,

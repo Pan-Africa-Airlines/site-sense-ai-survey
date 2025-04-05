@@ -438,7 +438,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    const suggestion = await getSuggestion(fieldName, formData, "Generate suggestion");
+    const suggestion = await getSuggestion(fieldName, formData[fieldName]);
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -473,7 +473,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
         building_photo: buildingPhoto,
         user_id: user?.id,
         status: status,
-        survey_data: surveyData
+        survey_data: surveyData as Record<string, unknown>
       };
       
       let response;

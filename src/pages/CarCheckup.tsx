@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
@@ -78,7 +77,6 @@ const CarCheckup = () => {
       brakes: { image: brakeImage, notes: brakeNotes, analysis: brakeAnalysis },
     };
     
-    // Use the engine image for visual analysis
     const recommendations = await recommendMaintenance(data, engineImage);
     setMaintenanceRecommendations(recommendations);
     toast.success("Maintenance recommendations generated");
