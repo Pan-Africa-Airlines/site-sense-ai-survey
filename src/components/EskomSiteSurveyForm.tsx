@@ -921,4 +921,4 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
                 <div>
                   <Label htmlFor="fireProtection">Fire Protection</Label>
                   <Input
-                    id="fireProtection"
+                    id="fireProtection
