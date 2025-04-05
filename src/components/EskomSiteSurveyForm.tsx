@@ -8,7 +8,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, ChevronDown, ChevronUp, AlertCircle, Calendar, MapPin, Check, MapIcon } from "lucide-react";
+import { 
+  Sparkles, ChevronDown, ChevronUp, AlertCircle, Calendar, MapPin, Check, 
+  MapIcon, User, Network, Router, BatteryCharging, Box, Grounded, 
+  CloudLightning, Zap, Columns, Home, Navigation, Edit
+} from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAI } from "@/contexts/AIContext";
@@ -99,7 +103,7 @@ interface EskomSurveyFormData {
   additionalNotes: string;
 }
 
-const EskomSiteSurveyForm = () => {
+const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const [siteName, setSiteName] = useState("");
   const [region, setRegion] = useState("");
   const [date, setDate] = useState("");
@@ -149,6 +153,81 @@ const EskomSiteSurveyForm = () => {
   const [towerHeight, setTowerHeight] = useState("");
   const [towerComments, setTowerComments] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
+  
+  const [formData, setFormData] = useState<EskomSurveyFormData>({
+    siteName: "",
+    region: "",
+    date: "",
+    siteType: "",
+    siteId: "",
+    address: "",
+    gpsCoordinates: "",
+    buildingPhoto: "",
+    status: "",
+    contactPersonName: "",
+    contactPersonNumber: "",
+    accessToSite: "",
+    siteAccessibilityComments: "",
+    networkAvailability: "",
+    existingNetworkInfrastructure: "",
+    fiberConnections: [
+      {
+        direction: "",
+        connectionType: "",
+        numberOfCores: "",
+        cores: Array.from({ length: 12 }, (_, i) => ({ number: i + 1, used: false }))
+      }
+    ],
+    routerLocation: "",
+    routerPowerAvailability: "",
+    routerRackMounting: "",
+    routerComments: "",
+    upsAvailability: "",
+    upsSpecifications: "",
+    upsComments: "",
+    dbBoxAvailability: "",
+    dbBox: {
+      chargerLabel: "",
+      chargerType: "single",
+      circuits: {
+        chargerA: [
+          { circuit: "Circuit 1", mcbRating: "", used: false, label: "" },
+          { circuit: "Circuit 2", mcbRating: "", used: false, label: "" }
+        ],
+        chargerB: [
+          { circuit: "Circuit 1", mcbRating: "", used: false, label: "" },
+          { circuit: "Circuit 2", mcbRating: "", used: false, label: "" }
+        ]
+      }
+    },
+    dbBoxComments: "",
+    earthingAvailability: "",
+    earthingQuality: "",
+    earthingComments: "",
+    lightningProtectionAvailability: "",
+    lightningProtectionType: "",
+    lightningProtectionComments: "",
+    surgeProtectionAvailability: "",
+    surgeProtectionType: "",
+    surgeProtectionComments: "",
+    poleAvailability: "",
+    poleType: "",
+    poleCondition: "",
+    poleHeight: "",
+    poleComments: "",
+    rooftopAccess: "",
+    rooftopType: "",
+    rooftopCondition: "",
+    rooftopHeight: "",
+    rooftopComments: "",
+    towerAvailability: "",
+    towerType: "",
+    towerCondition: "",
+    towerHeight: "",
+    towerComments: "",
+    additionalNotes: ""
+  });
+  
   const [sectionCompletion, setSectionCompletion] = useState({
     "Site Information": false,
     "Contact Information": false,
@@ -164,10 +243,18 @@ const EskomSiteSurveyForm = () => {
     "Tower Details": false,
     "Additional Notes": false,
   });
+  
   const [aiSuggestions, setAiSuggestions] = useState<{ [key: string]: string }>({});
   const { toast } = useToast();
   const { getSuggestion, isProcessing } = useAI();
   const navigate = useNavigate();
+
+  const updateSectionCompletion = (section: string, isComplete: boolean) => {
+    setSectionCompletion(prev => ({
+      ...prev,
+      [section]: isComplete
+    }));
+  };
 
   const validateSiteInformation = () => {
     return (
@@ -490,13 +577,17 @@ const EskomSiteSurveyForm = () => {
   };
 
   const handleCheckboxChange = (section: string, field: string, value: boolean) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      [section]: {
-        ...prevFormData[section as keyof EskomSurveyFormData],
-        [field]: value
+    setFormData(prevFormData => {
+      const newFormData = { ...prevFormData };
+      if (section in newFormData) {
+        const sectionObj = { ...newFormData[section as keyof EskomSurveyFormData] };
+        if (typeof sectionObj === 'object' && sectionObj !== null) {
+          const newSectionObj = { ...sectionObj, [field]: value };
+          newFormData[section as keyof EskomSurveyFormData] = newSectionObj as any;
+        }
       }
-    }));
+      return newFormData;
+    });
   };
 
   const handleFiberCoreChange = (fiberIndex: number, coreIndex: number, value: boolean) => {
@@ -526,11 +617,12 @@ const EskomSiteSurveyForm = () => {
     });
   };
 
-  const handleGetAISuggestion = async (fieldName: string) => {
-    const currentValue = (formData as any)[fieldName] as string || "";
-    const suggestion = await getSuggestion(fieldName, currentValue);
-    if (suggestion) {
-      setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
+  const handleGetAISuggestion = async (fieldName: string, currentValue: string) => {
+    if (getSuggestion) {
+      const suggestion = await getSuggestion(fieldName, currentValue);
+      if (suggestion) {
+        setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
+      }
     }
   };
 
@@ -600,7 +692,7 @@ const EskomSiteSurveyForm = () => {
       
       const { data, error } = await supabase
         .from('eskom_site_surveys')
-        .insert([surveyRecord]);
+        .insert([surveyRecord as any]);
 
       if (error) {
         toast({
@@ -970,3 +1062,467 @@ const EskomSiteSurveyForm = () => {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="router-details">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Router Details</h2>
+              <div>
+                <Label htmlFor="routerLocation">Router Location</Label>
+                <Input
+                  type="text"
+                  id="routerLocation"
+                  name="routerLocation"
+                  value={routerLocation}
+                  onChange={handleInputChange}
+                  placeholder="Enter router location"
+                />
+              </div>
+              <div>
+                <Label htmlFor="routerPowerAvailability">Router Power Availability</Label>
+                <Input
+                  type="text"
+                  id="routerPowerAvailability"
+                  name="routerPowerAvailability"
+                  value={routerPowerAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter router power availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="routerRackMounting">Router Rack Mounting</Label>
+                <Input
+                  type="text"
+                  id="routerRackMounting"
+                  name="routerRackMounting"
+                  value={routerRackMounting}
+                  onChange={handleInputChange}
+                  placeholder="Enter router rack mounting"
+                />
+              </div>
+              <div>
+                <Label htmlFor="routerComments">Router Comments</Label>
+                <Textarea
+                  id="routerComments"
+                  name="routerComments"
+                  value={routerComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter router comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ups-details">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">UPS Details</h2>
+              <div>
+                <Label htmlFor="upsAvailability">UPS Availability</Label>
+                <Input
+                  type="text"
+                  id="upsAvailability"
+                  name="upsAvailability"
+                  value={upsAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter UPS availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="upsSpecifications">UPS Specifications</Label>
+                <Input
+                  type="text"
+                  id="upsSpecifications"
+                  name="upsSpecifications"
+                  value={upsSpecifications}
+                  onChange={handleInputChange}
+                  placeholder="Enter UPS specifications"
+                />
+              </div>
+              <div>
+                <Label htmlFor="upsComments">UPS Comments</Label>
+                <Textarea
+                  id="upsComments"
+                  name="upsComments"
+                  value={upsComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter UPS comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="db-box-details">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">DB Box Details</h2>
+              <div>
+                <Label htmlFor="dbBoxAvailability">DB Box Availability</Label>
+                <Input
+                  type="text"
+                  id="dbBoxAvailability"
+                  name="dbBoxAvailability"
+                  value={dbBoxAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter DB Box availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="dbBox.chargerLabel">DB Box Charger Label</Label>
+                <Input
+                  type="text"
+                  id="dbBox.chargerLabel"
+                  name="dbBox.chargerLabel"
+                  value={formData.dbBox.chargerLabel}
+                  onChange={handleInputChange}
+                  placeholder="Enter DB Box charger label"
+                />
+              </div>
+              <div>
+                <Label htmlFor="dbBoxComments">DB Box Comments</Label>
+                <Textarea
+                  id="dbBoxComments"
+                  name="dbBoxComments"
+                  value={dbBoxComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter DB Box comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="earthing-details">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Earthing Details</h2>
+              <div>
+                <Label htmlFor="earthingAvailability">Earthing Availability</Label>
+                <Input
+                  type="text"
+                  id="earthingAvailability"
+                  name="earthingAvailability"
+                  value={earthingAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter earthing availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="earthingQuality">Earthing Quality</Label>
+                <Input
+                  type="text"
+                  id="earthingQuality"
+                  name="earthingQuality"
+                  value={earthingQuality}
+                  onChange={handleInputChange}
+                  placeholder="Enter earthing quality"
+                />
+              </div>
+              <div>
+                <Label htmlFor="earthingComments">Earthing Comments</Label>
+                <Textarea
+                  id="earthingComments"
+                  name="earthingComments"
+                  value={earthingComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter earthing comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="lightning-protection">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Lightning Protection</h2>
+              <div>
+                <Label htmlFor="lightningProtectionAvailability">Lightning Protection Availability</Label>
+                <Input
+                  type="text"
+                  id="lightningProtectionAvailability"
+                  name="lightningProtectionAvailability"
+                  value={lightningProtectionAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter lightning protection availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lightningProtectionType">Lightning Protection Type</Label>
+                <Input
+                  type="text"
+                  id="lightningProtectionType"
+                  name="lightningProtectionType"
+                  value={lightningProtectionType}
+                  onChange={handleInputChange}
+                  placeholder="Enter lightning protection type"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lightningProtectionComments">Lightning Protection Comments</Label>
+                <Textarea
+                  id="lightningProtectionComments"
+                  name="lightningProtectionComments"
+                  value={lightningProtectionComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter lightning protection comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="surge-protection">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Surge Protection</h2>
+              <div>
+                <Label htmlFor="surgeProtectionAvailability">Surge Protection Availability</Label>
+                <Input
+                  type="text"
+                  id="surgeProtectionAvailability"
+                  name="surgeProtectionAvailability"
+                  value={surgeProtectionAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter surge protection availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="surgeProtectionType">Surge Protection Type</Label>
+                <Input
+                  type="text"
+                  id="surgeProtectionType"
+                  name="surgeProtectionType"
+                  value={surgeProtectionType}
+                  onChange={handleInputChange}
+                  placeholder="Enter surge protection type"
+                />
+              </div>
+              <div>
+                <Label htmlFor="surgeProtectionComments">Surge Protection Comments</Label>
+                <Textarea
+                  id="surgeProtectionComments"
+                  name="surgeProtectionComments"
+                  value={surgeProtectionComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter surge protection comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="pole-details">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Pole Details</h2>
+              <div>
+                <Label htmlFor="poleAvailability">Pole Availability</Label>
+                <Input
+                  type="text"
+                  id="poleAvailability"
+                  name="poleAvailability"
+                  value={poleAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter pole availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="poleType">Pole Type</Label>
+                <Input
+                  type="text"
+                  id="poleType"
+                  name="poleType"
+                  value={poleType}
+                  onChange={handleInputChange}
+                  placeholder="Enter pole type"
+                />
+              </div>
+              <div>
+                <Label htmlFor="poleCondition">Pole Condition</Label>
+                <Input
+                  type="text"
+                  id="poleCondition"
+                  name="poleCondition"
+                  value={poleCondition}
+                  onChange={handleInputChange}
+                  placeholder="Enter pole condition"
+                />
+              </div>
+              <div>
+                <Label htmlFor="poleHeight">Pole Height</Label>
+                <Input
+                  type="text"
+                  id="poleHeight"
+                  name="poleHeight"
+                  value={poleHeight}
+                  onChange={handleInputChange}
+                  placeholder="Enter pole height"
+                />
+              </div>
+              <div>
+                <Label htmlFor="poleComments">Pole Comments</Label>
+                <Textarea
+                  id="poleComments"
+                  name="poleComments"
+                  value={poleComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter pole comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="rooftop-details">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Rooftop Details</h2>
+              <div>
+                <Label htmlFor="rooftopAccess">Rooftop Access</Label>
+                <Input
+                  type="text"
+                  id="rooftopAccess"
+                  name="rooftopAccess"
+                  value={rooftopAccess}
+                  onChange={handleInputChange}
+                  placeholder="Enter rooftop access"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rooftopType">Rooftop Type</Label>
+                <Input
+                  type="text"
+                  id="rooftopType"
+                  name="rooftopType"
+                  value={rooftopType}
+                  onChange={handleInputChange}
+                  placeholder="Enter rooftop type"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rooftopCondition">Rooftop Condition</Label>
+                <Input
+                  type="text"
+                  id="rooftopCondition"
+                  name="rooftopCondition"
+                  value={rooftopCondition}
+                  onChange={handleInputChange}
+                  placeholder="Enter rooftop condition"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rooftopHeight">Rooftop Height</Label>
+                <Input
+                  type="text"
+                  id="rooftopHeight"
+                  name="rooftopHeight"
+                  value={rooftopHeight}
+                  onChange={handleInputChange}
+                  placeholder="Enter rooftop height"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rooftopComments">Rooftop Comments</Label>
+                <Textarea
+                  id="rooftopComments"
+                  name="rooftopComments"
+                  value={rooftopComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter rooftop comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="tower-details">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Tower Details</h2>
+              <div>
+                <Label htmlFor="towerAvailability">Tower Availability</Label>
+                <Input
+                  type="text"
+                  id="towerAvailability"
+                  name="towerAvailability"
+                  value={towerAvailability}
+                  onChange={handleInputChange}
+                  placeholder="Enter tower availability"
+                />
+              </div>
+              <div>
+                <Label htmlFor="towerType">Tower Type</Label>
+                <Input
+                  type="text"
+                  id="towerType"
+                  name="towerType"
+                  value={towerType}
+                  onChange={handleInputChange}
+                  placeholder="Enter tower type"
+                />
+              </div>
+              <div>
+                <Label htmlFor="towerCondition">Tower Condition</Label>
+                <Input
+                  type="text"
+                  id="towerCondition"
+                  name="towerCondition"
+                  value={towerCondition}
+                  onChange={handleInputChange}
+                  placeholder="Enter tower condition"
+                />
+              </div>
+              <div>
+                <Label htmlFor="towerHeight">Tower Height</Label>
+                <Input
+                  type="text"
+                  id="towerHeight"
+                  name="towerHeight"
+                  value={towerHeight}
+                  onChange={handleInputChange}
+                  placeholder="Enter tower height"
+                />
+              </div>
+              <div>
+                <Label htmlFor="towerComments">Tower Comments</Label>
+                <Textarea
+                  id="towerComments"
+                  name="towerComments"
+                  value={towerComments}
+                  onChange={handleInputChange}
+                  placeholder="Enter tower comments"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="additional-notes">
+          <Card>
+            <CardContent className="grid gap-4">
+              <h2 className="text-lg font-medium">Additional Notes</h2>
+              <div>
+                <Label htmlFor="additionalNotes">Additional Notes</Label>
+                <Textarea
+                  id="additionalNotes"
+                  name="additionalNotes"
+                  value={additionalNotes}
+                  onChange={handleInputChange}
+                  placeholder="Enter additional notes"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </form>
+  );
+};
+
+export default EskomSiteSurveyForm;

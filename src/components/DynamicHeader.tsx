@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, MapPin, Clipboard, Network, FileSpreadsheet, ListChecks, Car } from "lucide-react";
-import { useTheme } from "@/components/ui/use-theme";
+import { Home, MapPin, Clipboard, Network, FileSpreadsheet, ListChecks, Car, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -12,12 +12,31 @@ import {
 } from "@/components/ui/navigation-menu";
 
 const DynamicHeader: React.FC = () => {
-  const { theme, setTheme } = useTheme();
+  const [theme, setTheme] = useState<string>("light");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -151,7 +170,7 @@ const DynamicHeader: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={toggleTheme}
           >
             {theme === "dark" ? "Light" : "Dark"}
           </Button>
