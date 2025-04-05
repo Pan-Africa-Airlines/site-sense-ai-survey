@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -213,15 +212,13 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleImageCapture = (type: string, imageData: string) => {
-    // Fix: Update the type to be a string key of formData
     setFormData({
       ...formData,
       [type]: imageData
     });
 
     if (formData.useAIAssistance && imageData) {
-      // Fix: Pass proper arguments to analyzeImage function
-      analyzeImage(imageData, type).then(analysis => {
+      analyzeImage(imageData, type, "Analyze this image").then(analysis => {
         if (analysis) {
           setAiSuggestions({ ...aiSuggestions, [type]: analysis });
         }
@@ -243,8 +240,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
   };
 
   const handleGetAISuggestion = async (fieldName: string) => {
-    // Fix: Pass proper arguments to getSuggestion function
-    const suggestion = await getSuggestion(fieldName);
+    const suggestion = await getSuggestion(fieldName, "Provide a suggestion");
     if (suggestion) {
       setAiSuggestions({ ...aiSuggestions, [fieldName]: suggestion });
     }
@@ -252,8 +248,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({
 
   const handleEnhanceNotes = async () => {
     if (formData.generalRemarks) {
-      // Fix: Use generalRemarks and pass correct arguments to enhanceNotes
-      const enhanced = await enhanceNotes(formData.generalRemarks);
+      const enhanced = await enhanceNotes(formData.generalRemarks, "Enhance these notes");
       setFormData({ ...formData, generalRemarks: enhanced });
       toast.success("Notes enhanced with AI suggestions");
     } else {
