@@ -918,3 +918,138 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                           onChange={(e) => handleEquipmentLocationChange('roomNumber', e.target.value)}
                         />
                       </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="text-right mt-4">
+                    <p className="text-sm text-gray-500">Page 5 of 17</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="equipment-room" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">3.1. EQUIPMENT ROOM (GENERAL)</h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
+                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <TableInputRow
+                          label="Cable Access"
+                          name="cableAccess"
+                          value={equipmentRoomGeneral.cableAccess}
+                          onChange={(e) => handleEquipmentRoomGeneralChange('cableAccess', e.target.value)}
+                        />
+                        <TableInputRow
+                          label="Room Lighting"
+                          name="roomLighting"
+                          value={equipmentRoomGeneral.roomLighting}
+                          onChange={(e) => handleEquipmentRoomGeneralChange('roomLighting', e.target.value)}
+                        />
+                        <TableInputRow
+                          label="Fire Protection"
+                          name="fireProtection"
+                          value={equipmentRoomGeneral.fireProtection}
+                          onChange={(e) => handleEquipmentRoomGeneralChange('fireProtection', e.target.value)}
+                        />
+                        <TableInputRow
+                          label="Cooling Method"
+                          name="coolingMethod"
+                          value={equipmentRoomGeneral.coolingMethod}
+                          onChange={(e) => handleEquipmentRoomGeneralChange('coolingMethod', e.target.value)}
+                        />
+                        <TableInputRow
+                          label="Cooling Rating"
+                          name="coolingRating"
+                          value={equipmentRoomGeneral.coolingRating}
+                          onChange={(e) => handleEquipmentRoomGeneralChange('coolingRating', e.target.value)}
+                        />
+                        <TableInputRow
+                          label="Room Temperature"
+                          name="roomTemperature"
+                          value={equipmentRoomGeneral.roomTemperature}
+                          onChange={(e) => handleEquipmentRoomGeneralChange('roomTemperature', e.target.value)}
+                        />
+                        <TableInputRow
+                          label="Equipment Room Condition"
+                          name="equipmentRoomCondition"
+                          value={equipmentRoomGeneral.equipmentRoomCondition}
+                          onChange={(e) => handleEquipmentRoomGeneralChange('equipmentRoomCondition', e.target.value)}
+                        />
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center my-6">3.2. CABINET SPACE PLANNING</h3>
+                  
+                  <div className="mb-4">
+                    <Label htmlFor="roomLayoutDrawing" className="block text-sm font-medium text-gray-700 mb-2">
+                      Room Layout Drawing (Prior to site visit, Eskom will supply PDF version, as available). OEM to printout copies and bring to site). Red-lined scanned version to be attached to the site survey report.
+                    </Label>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Where no Room Layout drawing available, a free hand drawing (not to scale) to be provided by the OEM
+                    </p>
+                    <Textarea
+                      id="roomLayoutDrawing"
+                      value={cabinetSpacePlanning.roomLayoutDrawing}
+                      onChange={(e) => handleCabinetSpacePlanningChange('roomLayoutDrawing', e.target.value)}
+                      className="min-h-[300px] resize-y"
+                      placeholder="Please add your room layout drawing notes here..."
+                    />
+                  </div>
+                  
+                  <div className="text-right mt-4">
+                    <p className="text-sm text-gray-500">Page 6 of 17</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <div className="space-x-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
+                  <Save className="mr-2 h-4 w-4" /> Save for Later
+                </Button>
+                <Button type="submit" className="flex items-center bg-akhanya hover:bg-akhanya-dark">
+                  Submit Survey <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </form>
+    </div>
+  );
+};
+
+export default EskomSiteSurveyForm;
