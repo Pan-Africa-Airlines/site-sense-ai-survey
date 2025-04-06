@@ -220,8 +220,10 @@ const EskomSurvey = () => {
   useEffect(() => {
     if (surveyData) {
       setFormData(prevData => {
-        // Fixed: Create a proper object to spread
-        const surveyDataObj = surveyData.survey_data || {};
+        // Ensure survey_data is an object before spreading it
+        const surveyDataObj = typeof surveyData.survey_data === 'object' && surveyData.survey_data !== null 
+          ? surveyData.survey_data 
+          : {};
         
         return {
           ...prevData,
@@ -233,7 +235,7 @@ const EskomSurvey = () => {
           address: surveyData.address || "",
           gpsCoordinates: surveyData.gps_coordinates || "",
           buildingPhoto: surveyData.building_photo || "",
-          ...surveyDataObj  // Now we're spreading a valid object
+          ...surveyDataObj  // Now we're spreading a valid object with a proper type check
         }
       });
     }

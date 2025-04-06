@@ -74,8 +74,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   const breadcrumbHeight = 'h-10';
 
   return (
-    <header className="bg-white border-b border-gray-200 transition-none z-10">
-      <div className={`${headerHeight} w-full`}>
+    <header className="bg-white border-b border-gray-200 !transition-none !duration-0 z-10">
+      <div className={`${headerHeight} w-full !transition-none !duration-0`}>
         <div className="container mx-auto px-4 h-full">
           <div className="flex justify-between items-center h-full">
             <div className="flex items-center">
@@ -110,7 +110,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
                 variant={isActive("/") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate("/")}
-                className={`transition-none ${isActive("/") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
+                className={`!transition-none !duration-0 ${isActive("/") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
               >
                 <Home className={`mr-1 ${iconSize}`} /> Dashboard
               </Button>
@@ -118,7 +118,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
                 variant={isActive("/car-check") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate("/car-check")}
-                className={`transition-none ${isActive("/car-check") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
+                className={`!transition-none !duration-0 ${isActive("/car-check") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
               >
                 <Car className={`mr-1 ${iconSize}`} /> Vehicle Check
               </Button>
@@ -126,7 +126,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
                 variant={isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate("/eskom-site-survey")}
-                className={`transition-none ${isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
+                className={`!transition-none !duration-0 ${isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
               >
                 <FileSpreadsheet className={`mr-1 ${iconSize}`} /> Eskom Site Survey
               </Button>
@@ -134,7 +134,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
                 variant={isActive("/installation") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate("/installation")}
-                className={`transition-none ${isActive("/installation") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
+                className={`!transition-none !duration-0 ${isActive("/installation") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
               >
                 <HardHat className={`mr-1 ${iconSize}`} /> Installation
               </Button>
@@ -153,7 +153,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="rounded-full p-0 h-auto w-auto">
+                  <Button variant="ghost" className="rounded-full p-0 h-auto w-auto !transition-none !duration-0">
                     <Avatar className={avatarSize}>
                       <AvatarImage src="/engineer-profile.jpg" alt="Profile" />
                       <AvatarFallback className="bg-akhanya text-white">
@@ -196,12 +196,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
       </div>
       
       {location.pathname !== "/" && (
-        <div className={`bg-gray-50 border-t border-b border-gray-200 ${breadcrumbHeight}`}>
+        <div className={`bg-gray-50 border-t border-b border-gray-200 ${breadcrumbHeight} !transition-none !duration-0`}>
           <div className="container mx-auto px-4 h-full flex items-center">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink onClick={() => navigate("/")}>Home</BreadcrumbLink>
+                  <BreadcrumbLink onClick={() => navigate("/")} className="!transition-none !duration-0">Home</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>
                   <ChevronRight className="h-4 w-4" />
