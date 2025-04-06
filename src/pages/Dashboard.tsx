@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,7 +61,6 @@ const Dashboard = () => {
     const fetchAllocatedSites = async () => {
       try {
         setIsLoading(true);
-        // In a production app, this would filter by the logged-in user's ID
         const { data, error } = await supabase
           .from('engineer_allocations')
           .select('*');
@@ -142,20 +140,25 @@ const Dashboard = () => {
           <MapPin className="h-5 w-5 text-akhanya" />
           <h2 className="text-xl font-semibold text-akhanya">My Site Allocations</h2>
         </div>
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            {isLoading ? (
-              <div className="py-8 text-center">
-                <p className="text-gray-500">Loading site allocations...</p>
-              </div>
-            ) : (
-              <EngineerSiteList 
-                sites={allocatedSites} 
-                onVehicleCheck={handleVehicleCheck}
-              />
-            )}
-          </CardContent>
-        </Card>
+        
+        {isLoading ? (
+          <div className="py-8 text-center">
+            <p className="text-gray-500">Loading site allocations...</p>
+          </div>
+        ) : (
+          <EngineerSiteList 
+            sites={allocatedSites.map(site => ({
+              id: site.id,
+              name: site.site_name,
+              priority: site.priority,
+              address: site.address,
+              scheduledDate: site.scheduled_date,
+              status: site.status,
+              distance: site.distance
+            }))} 
+            onVehicleCheck={handleVehicleCheck}
+          />
+        )}
       </div>
 
       <div className="mb-12">

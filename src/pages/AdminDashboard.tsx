@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import AdminNavBar from "@/components/AdminNavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { ClipboardList, HardHat, Car, Clock, MapPin } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
 import { supabase } from "@/integrations/supabase/client";
 
 const MOCK_ASSESSMENT_DATA = [
@@ -43,7 +45,7 @@ const AdminDashboard = () => {
       try {
         setIsLoading(true);
         const { data, error } = await supabase
-          .from('engineer_allocations')
+          .from('engineer_allocations') // Fixed table name
           .select('*');
         
         if (error) {
@@ -193,7 +195,7 @@ const AdminDashboard = () => {
                           </TableCell>
                           <TableCell>
                             <Badge variant={
-                              site.status === 'completed' ? 'success' : 
+                              site.status === 'completed' ? 'secondary' : 
                               site.status === 'in-progress' ? 'secondary' : 'outline'
                             }>
                               {site.status}
