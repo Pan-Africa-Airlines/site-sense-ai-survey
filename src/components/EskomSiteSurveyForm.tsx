@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import ImageCapture from "./ImageCapture";
 import { Json } from "@/integrations/supabase/types";
-import { Save, MapPin, ChevronRight, ChevronLeft, PlusCircle } from "lucide-react";
+import { Save, MapPin, ChevronRight, ChevronLeft, PlusCircle, Trash2 } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -109,8 +109,8 @@ interface EquipmentRoomGeneral {
 
 // Interface for cabinet space planning
 interface CabinetSpacePlanning {
-  roomLayoutDrawing: string;
-  roomLayoutImage: string;
+  roomLayoutDrawings: string[];
+  roomLayoutImages: string[];
   numberOfRouters: number;
 }
 
@@ -178,10 +178,13 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
   
   // Cabinet space planning
   const [cabinetSpacePlanning, setCabinetSpacePlanning] = useState<CabinetSpacePlanning>({
-    roomLayoutDrawing: "",
-    roomLayoutImage: "",
+    roomLayoutDrawings: [""],
+    roomLayoutImages: [""],
     numberOfRouters: 0
   });
+  
+  // Current drawing canvas index
+  const [currentDrawingIndex, setCurrentDrawingIndex] = useState(0);
   
   // Approval sections
   const [oemContractor, setOemContractor] = useState<ApprovalSection>({
@@ -310,7 +313,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
   };
 
   // Handle cabinet space planning changes
-  const handleCabinetSpacePlanningChange = (field: keyof CabinetSpacePlanning, value: string | number) => {
+  const handleCabinetSpacePlanningChange = (field: keyof CabinetSpacePlanning, value: string | number | string[]) => {
     setCabinetSpacePlanning({
       ...cabinetSpacePlanning,
       [field]: value
@@ -319,13 +322,71 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
 
   // Handle room layout drawing image save
   const handleRoomLayoutImageSave = (dataUrl: string) => {
+    const updatedImages = [...cabinetSpacePlanning.roomLayoutImages];
+    updatedImages[currentDrawingIndex] = dataUrl;
+    
     setCabinetSpacePlanning({
       ...cabinetSpacePlanning,
-      roomLayoutImage: dataUrl
+      roomLayoutImages: updatedImages
     });
+    
     toast({
       title: "Drawing saved",
-      description: "Your room layout drawing has been saved.",
+      description: `Room layout drawing #${currentDrawingIndex + 1} has been saved.`,
+    });
+  };
+
+  // Add a new drawing canvas
+  const addNewDrawing = () => {
+    const updatedImages = [...cabinetSpacePlanning.roomLayoutImages, ""];
+    const updatedDrawings = [...cabinetSpacePlanning.roomLayoutDrawings, ""];
+    
+    setCabinetSpacePlanning({
+      ...cabinetSpacePlanning,
+      roomLayoutImages: updatedImages,
+      roomLayoutDrawings: updatedDrawings
+    });
+    
+    // Set the current drawing index to the new one
+    setCurrentDrawingIndex(updatedImages.length - 1);
+    
+    toast({
+      title: "New drawing added",
+      description: `Drawing #${updatedImages.length} added. You can now create a new drawing.`,
+    });
+  };
+
+  // Remove a drawing
+  const removeDrawing = (index: number) => {
+    if (cabinetSpacePlanning.roomLayoutImages.length <= 1) {
+      toast({
+        title: "Cannot remove",
+        description: "You must have at least one drawing.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const updatedImages = [...cabinetSpacePlanning.roomLayoutImages];
+    const updatedDrawings = [...cabinetSpacePlanning.roomLayoutDrawings];
+    
+    updatedImages.splice(index, 1);
+    updatedDrawings.splice(index, 1);
+    
+    setCabinetSpacePlanning({
+      ...cabinetSpacePlanning,
+      roomLayoutImages: updatedImages,
+      roomLayoutDrawings: updatedDrawings
+    });
+    
+    // Adjust current drawing index if needed
+    if (currentDrawingIndex >= updatedImages.length) {
+      setCurrentDrawingIndex(updatedImages.length - 1);
+    }
+    
+    toast({
+      title: "Drawing removed",
+      description: `Drawing #${index + 1} has been removed.`,
     });
   };
 
@@ -1039,22 +1100,61 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
                               <p className="mt-2 text-sm text-gray-600">Where no Room Layout drawing available, a free hand drawing (not to scale) to be provided by the OEM.</p>
                             </td>
                             <td className="border border-gray-300 p-2">
-                              <DrawingCanvas onSave={handleRoomLayoutImageSave} initialValue={cabinetSpacePlanning.roomLayoutImage} />
-                              {cabinetSpacePlanning.roomLayoutImage && (
-                                <div className="border-t border-gray-300 pt-4 mt-4">
-                                  <p className="font-medium mb-2">Current Drawing:</p>
-                                  <img 
-                                    src={cabinetSpacePlanning.roomLayoutImage} 
-                                    alt="Room Layout" 
-                                    className="border border-gray-300 rounded max-w-full"
-                                  />
+                              <div className="mb-2">
+                                <div className="flex justify-between items-center mb-4">
+                                  <div className="flex items-center gap-2">
+                                    <h5 className="font-semibold">Drawing #{currentDrawingIndex + 1}</h5>
+                                    {cabinetSpacePlanning.roomLayoutImages.length > 1 && (
+                                      <div className="flex gap-1">
+                                        {cabinetSpacePlanning.roomLayoutImages.map((_, index) => (
+                                          <Button 
+                                            key={index}
+                                            type="button"
+                                            variant={currentDrawingIndex === index ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setCurrentDrawingIndex(index)}
+                                            className="h-7 w-7 p-0"
+                                          >
+                                            {index + 1}
+                                          </Button>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={addNewDrawing}
+                                      className="flex items-center gap-1"
+                                    >
+                                      <PlusCircle className="h-4 w-4" /> Add Drawing
+                                    </Button>
+                                    {cabinetSpacePlanning.roomLayoutImages.length > 1 && (
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => removeDrawing(currentDrawingIndex)}
+                                        className="flex items-center gap-1 text-red-500 hover:text-red-700"
+                                      >
+                                        <Trash2 className="h-4 w-4" /> Remove
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
-                              )}
+                                
+                                <DrawingCanvas 
+                                  onSave={handleRoomLayoutImageSave} 
+                                  initialValue={cabinetSpacePlanning.roomLayoutImages[currentDrawingIndex]}
+                                />
+                              </div>
                             </td>
                           </tr>
                           <tr className="border border-gray-300">
                             <td className="border border-gray-300 p-2 font-medium">
-                              Please indicated number of new routers required?
+                              Please indicate number of new routers required?
                             </td>
                             <td className="border border-gray-300 p-1">
                               <Input 
