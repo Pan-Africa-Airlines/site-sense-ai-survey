@@ -141,7 +141,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                 </Popover>
                 
                 <div className="space-x-2">
-                  {!vehicleCheckCompleted && (
+                  {!vehicleCheckCompleted ? (
                     <Button 
                       variant="default" 
                       size="sm"
@@ -151,18 +151,17 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                       <Car className="h-4 w-4 mr-1" />
                       Vehicle Check Required
                     </Button>
+                  ) : (
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => handleNavigate(site)}
+                      className="bg-akhanya hover:bg-akhanya-dark"
+                    >
+                      <Navigation className="h-4 w-4 mr-1" />
+                      Navigate
+                    </Button>
                   )}
-                  
-                  <Button 
-                    variant="default" 
-                    size="sm"
-                    onClick={() => handleNavigate(site)}
-                    className="bg-akhanya hover:bg-akhanya-dark"
-                    disabled={!vehicleCheckCompleted}
-                  >
-                    <Navigation className="h-4 w-4 mr-1" />
-                    Navigate
-                  </Button>
                 </div>
               </div>
             </CardContent>
