@@ -7,13 +7,28 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface ImageCaptureProps {
   onImageCaptured: (imageUrl: string) => void;
+  label?: string;
+  description?: string;
+  capturedImage?: string;
 }
 
-const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageCaptured }) => {
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+const ImageCapture: React.FC<ImageCaptureProps> = ({ 
+  onImageCaptured,
+  label,
+  description,
+  capturedImage: externalCapturedImage
+}) => {
+  const [capturedImage, setCapturedImage] = useState<string | null>(externalCapturedImage || null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Update internal state when external prop changes
+  React.useEffect(() => {
+    if (externalCapturedImage) {
+      setCapturedImage(externalCapturedImage);
+    }
+  }, [externalCapturedImage]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,10 +78,14 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageCaptured }) => {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    onImageCaptured(""); // Notify parent about cleared image
   };
 
   return (
     <div className="flex flex-col">
+      {label && <h4 className="text-sm font-medium mb-1">{label}</h4>}
+      {description && <p className="text-xs text-muted-foreground mb-2">{description}</p>}
+      
       <div className="flex space-x-2 mb-2">
         <Button
           type="button"
