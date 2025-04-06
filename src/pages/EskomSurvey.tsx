@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { useAI } from "@/contexts/AIContext";
 import { Sparkles, FileText } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import Footer from "@/components/Footer";
 
 const EskomSurvey = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
@@ -18,7 +17,7 @@ const EskomSurvey = () => {
       <NavigationBar />
       <NetworkingBanner
         title="Eskom OT IP/MPLS Network"
-        subtitle="Site Survey Report - Site Information"
+        subtitle="Site Survey Report - Complete Documentation"
       />
       <div className="container mx-auto px-4 py-8 flex-grow">
         <div className="flex justify-between items-center mb-6">
@@ -73,7 +72,6 @@ const EskomSurvey = () => {
           <EskomSiteSurveyForm showAIRecommendations={showAIRecommendations} />
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

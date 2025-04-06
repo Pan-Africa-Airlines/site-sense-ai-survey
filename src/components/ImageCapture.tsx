@@ -10,13 +10,15 @@ export interface ImageCaptureProps {
   label?: string;
   description?: string;
   capturedImage?: string;
+  buttonText?: string;
 }
 
 const ImageCapture: React.FC<ImageCaptureProps> = ({ 
   onImageCaptured,
   label,
   description,
-  capturedImage: externalCapturedImage
+  capturedImage: externalCapturedImage,
+  buttonText
 }) => {
   const [capturedImage, setCapturedImage] = useState<string | null>(externalCapturedImage || null);
   const [uploading, setUploading] = useState(false);
@@ -98,7 +100,7 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({
             "Uploading..."
           ) : (
             <>
-              <Camera className="h-4 w-4 mr-2" /> Capture Photo
+              <Camera className="h-4 w-4 mr-2" /> {buttonText || "Capture Photo"}
             </>
           )}
         </Button>

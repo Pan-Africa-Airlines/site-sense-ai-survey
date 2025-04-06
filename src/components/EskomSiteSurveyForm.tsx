@@ -123,6 +123,14 @@ interface EquipmentRoomPhotos {
   photos: string[];
 }
 
+interface CabinetLocationPhotos {
+  photos: string[];
+}
+
+interface DCPowerDistributionPhotos {
+  photos: string[];
+}
+
 interface EskomSiteSurveyFormProps {
   showAIRecommendations?: boolean;
 }
@@ -232,6 +240,15 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
   });
 
   const [equipmentRoomPhotos, setEquipmentRoomPhotos] = useState<EquipmentRoomPhotos>({
+    photos: [""]
+  });
+
+  // New state for slide 8 - cabinet location photos and DC power distribution photos
+  const [cabinetLocationPhotos, setCabinetLocationPhotos] = useState<CabinetLocationPhotos>({
+    photos: [""]
+  });
+  
+  const [dcPowerDistributionPhotos, setDcPowerDistributionPhotos] = useState<DCPowerDistributionPhotos>({
     photos: [""]
   });
 
@@ -462,14 +479,46 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
   };
 
   const handleEquipmentRoomPhotoUpload = (photoUrl: string) => {
-    setEquipmentRoomPhotos({
-      photos: [...equipmentRoomPhotos.photos, photoUrl]
-    });
-    
-    toast({
-      title: "Photo uploaded",
-      description: "Equipment room photo has been saved.",
-    });
+    if (photoUrl) {
+      const updatedPhotos = equipmentRoomPhotos.photos.filter(p => p).concat(photoUrl);
+      setEquipmentRoomPhotos({
+        photos: updatedPhotos
+      });
+      
+      toast({
+        title: "Photo uploaded",
+        description: "Equipment room photo has been saved.",
+      });
+    }
+  };
+  
+  // New handlers for slide 8
+  const handleCabinetLocationPhotoUpload = (photoUrl: string) => {
+    if (photoUrl) {
+      const updatedPhotos = cabinetLocationPhotos.photos.filter(p => p).concat(photoUrl);
+      setCabinetLocationPhotos({
+        photos: updatedPhotos
+      });
+      
+      toast({
+        title: "Photo uploaded",
+        description: "Cabinet location photo has been saved.",
+      });
+    }
+  };
+  
+  const handleDcPowerDistributionPhotoUpload = (photoUrl: string) => {
+    if (photoUrl) {
+      const updatedPhotos = dcPowerDistributionPhotos.photos.filter(p => p).concat(photoUrl);
+      setDcPowerDistributionPhotos({
+        photos: updatedPhotos
+      });
+      
+      toast({
+        title: "Photo uploaded",
+        description: "DC power distribution photo has been saved.",
+      });
+    }
   };
 
   const removeEquipmentRoomPhoto = (index: number) => {
@@ -477,6 +526,25 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     updatedPhotos.splice(index, 1);
     
     setEquipmentRoomPhotos({
+      photos: updatedPhotos.length ? updatedPhotos : [""]
+    });
+  };
+  
+  // New methods for removing photos in slide 8
+  const removeCabinetLocationPhoto = (index: number) => {
+    const updatedPhotos = [...cabinetLocationPhotos.photos];
+    updatedPhotos.splice(index, 1);
+    
+    setCabinetLocationPhotos({
+      photos: updatedPhotos.length ? updatedPhotos : [""]
+    });
+  };
+  
+  const removeDcPowerDistributionPhoto = (index: number) => {
+    const updatedPhotos = [...dcPowerDistributionPhotos.photos];
+    updatedPhotos.splice(index, 1);
+    
+    setDcPowerDistributionPhotos({
       photos: updatedPhotos.length ? updatedPhotos : [""]
     });
   };
@@ -502,6 +570,8 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         transportPlatforms,
         dcPowerDistribution,
         equipmentRoomPhotos,
+        cabinetLocationPhotos,         // Add new fields for slide 8
+        dcPowerDistributionPhotos,     // Add new fields for slide 8
         approvals: {
           oemContractor,
           oemEngineer,
@@ -571,6 +641,8 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         transportPlatforms,
         dcPowerDistribution,
         equipmentRoomPhotos,
+        cabinetLocationPhotos,         // Add new fields for slide 8
+        dcPowerDistributionPhotos,     // Add new fields for slide 8
         approvals: {
           oemContractor,
           oemEngineer,
@@ -630,12 +702,16 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     } else if (currentTab === "equipment-details") {
       setCurrentTab("equipment-room");
     } else if (currentTab === "equipment-room") {
+      setCurrentTab("additional-photos");  // New tab for slide 8
+    } else if (currentTab === "additional-photos") {
       setCurrentTab("technical-details");
     }
   };
 
   const prevTab = () => {
     if (currentTab === "technical-details") {
+      setCurrentTab("additional-photos");  // New tab transition
+    } else if (currentTab === "additional-photos") {
       setCurrentTab("equipment-room");
     } else if (currentTab === "equipment-room") {
       setCurrentTab("equipment-details");
@@ -656,7 +732,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
 
       <form onSubmit={handleSubmit}>
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="cover" className="flex items-center justify-center gap-2 relative">
               <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">1</div>
               <span>Cover Page</span>
@@ -681,8 +757,12 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
               <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">6</div>
               <span>Room Details</span>
             </TabsTrigger>
-            <TabsTrigger value="technical-details" className="flex items-center justify-center gap-2">
+            <TabsTrigger value="additional-photos" className="flex items-center justify-center gap-2">
               <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">7</div>
+              <span>Photos</span>
+            </TabsTrigger>
+            <TabsTrigger value="technical-details" className="flex items-center justify-center gap-2">
+              <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">8</div>
               <span>Technical</span>
             </TabsTrigger>
           </TabsList>
@@ -1276,12 +1356,110 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
               <Button type="button" onClick={prevTab} className="flex items-center">
                 <ChevronLeft className="mr-2 h-4 w-4" /> Previous
               </Button>
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="additional-photos" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">3.5. NEW CABINET LOCATION PHOTOS</h3>
+                  
+                  <div className="mb-8 border border-gray-300 p-4 rounded-md">
+                    <p className="mb-4 font-medium">
+                      Please provide a clear colour photograph that shows the available floor space and proposed new cabinet locations(s) in the room, indicated with red block(s)
+                    </p>
+                    
+                    {cabinetLocationPhotos.photos.filter(p => p).map((photo, index) => (
+                      <div key={index} className="mb-4 border rounded-md p-4 relative">
+                        <img src={photo} alt={`Cabinet Location ${index + 1}`} className="max-w-full h-auto" />
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          size="sm" 
+                          className="absolute top-2 right-2" 
+                          onClick={() => removeCabinetLocationPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    
+                    <div className="mt-4">
+                      <ImageCapture 
+                        onImageCaptured={handleCabinetLocationPhotoUpload}
+                        buttonText="Take Cabinet Location Photo"
+                      />
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">3.6. DC POWER DISTRIBUTION PHOTOS</h3>
+                  
+                  <div className="mb-8 border border-gray-300 p-4 rounded-md">
+                    <p className="mb-4 font-medium">
+                      Please provide clear photographs of the DC power distribution system
+                    </p>
+                    
+                    {dcPowerDistributionPhotos.photos.filter(p => p).map((photo, index) => (
+                      <div key={index} className="mb-4 border rounded-md p-4 relative">
+                        <img src={photo} alt={`DC Power Distribution ${index + 1}`} className="max-w-full h-auto" />
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          size="sm" 
+                          className="absolute top-2 right-2" 
+                          onClick={() => removeDcPowerDistributionPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    
+                    <div className="mt-4">
+                      <ImageCapture 
+                        onImageCaptured={handleDcPowerDistributionPhotoUpload}
+                        buttonText="Take DC Power Distribution Photo"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between mt-8">
+                    <div className="flex items-center">
+                      <p className="text-sm">Approved by: _________________</p>
+                    </div>
+                    <div className="flex items-center">
+                      <p className="text-sm">Authorized Date: DD/MM/YYYY</p>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right mt-4">
+                    <p className="text-sm text-gray-500">Page 8 of 17</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
               <div className="space-x-3">
                 <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
                   <Save className="mr-2 h-4 w-4" /> Save for Later
                 </Button>
-                <Button type="submit" className="flex items-center bg-akhanya hover:bg-akhanya-dark">
-                  Submit Survey <ChevronRight className="ml-2 h-4 w-4" />
+                <Button type="button" onClick={nextTab} className="flex items-center">
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </div>
