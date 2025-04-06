@@ -1,325 +1,185 @@
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Clipboard, 
-  Car, 
-  MapPin, 
-  Clock, 
-  CalendarCheck, 
-  Navigation,
-  Compass,
-  AlertTriangle,
-  CheckCircle2,
-  Building2,
-  AlertCircle,
-  ShieldOff
-} from "lucide-react";
-import NavigationPopup from "./NavigationPopup";
-import VehicleCheckWizard from "./VehicleCheckWizard";
-import { motion } from "framer-motion";
+import { Calendar, Clock, MapPin, AlertTriangle, Navigation, Car, CheckSquare } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import GoogleMapsNavigationPopup from "./GoogleMapsNavigationPopup";
 
 interface Site {
   id: number;
   name: string;
   priority: string;
-  address?: string;
-  scheduledDate?: string;
-  status?: string;
+  address: string;
+  scheduledDate: string;
+  status: string;
   distance?: number;
 }
 
 interface EngineerSiteListProps {
   sites: Site[];
   onVehicleCheck: () => void;
-  vehicleCheckCompleted?: boolean;
+  vehicleCheckCompleted: boolean;
 }
 
 const EngineerSiteList: React.FC<EngineerSiteListProps> = ({ 
-  sites,
+  sites, 
   onVehicleCheck,
-  vehicleCheckCompleted = false
+  vehicleCheckCompleted
 }) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [navigationOpen, setNavigationOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
-  const [vehicleCheckOpen, setVehicleCheckOpen] = useState(false);
-  const [vehicleCheckProcessing, setVehicleCheckProcessing] = useState(false);
-
-  const handleAssessment = (siteId: number) => {
-    if (!vehicleCheckCompleted) {
-      toast({
-        title: "Vehicle Check Required",
-        description: "You must complete a vehicle safety check before starting assessments",
-        variant: "destructive"
-      });
-      return;
-    }
-    navigate(`/assessment?siteId=${siteId}`);
-  };
-
-  const handleStartRoute = (site: Site) => {
-    if (!vehicleCheckCompleted) {
-      toast({
-        title: "Vehicle Check Required",
-        description: "You must complete a vehicle safety check before starting your route",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!site.address) {
-      toast({
-        title: "Navigation Error",
-        description: "Cannot navigate: The site has no address",
-        variant: "destructive"
-      });
-      return;
-    }
-    
+  const [isNavigationOpen, setIsNavigationOpen] = useState(false);
+  
+  const handleNavigate = (site: Site) => {
     setSelectedSite(site);
-    setNavigationOpen(true);
-    
-    toast({
-      title: "Starting Navigation",
-      description: "Preparing directions to " + site.name
-    });
+    setIsNavigationOpen(true);
   };
-
-  const handleVehicleCheckStart = () => {
-    setVehicleCheckOpen(true);
-  };
-
-  const handleVehicleCheckConfirm = () => {
-    setVehicleCheckProcessing(true);
-    
-    // Simulate processing
-    setTimeout(() => {
-      setVehicleCheckProcessing(false);
-      setVehicleCheckOpen(false);
-      
-      // Call the parent handler
-      onVehicleCheck();
-      
-      toast({
-        title: "Vehicle Check Completed",
-        description: "Your vehicle has been verified as safe for travel"
-      });
-    }, 1500);
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return (
-          <BadgeWithAnimation 
-            variant="destructive" 
-            className="flex items-center gap-1 animate-pulse">
-            <AlertTriangle className="h-3 w-3" />
-            High Priority
-          </BadgeWithAnimation>
-        );
-      case 'medium':
-        return (
-          <BadgeWithAnimation variant="default" className="flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" />
-            Medium Priority
-          </BadgeWithAnimation>
-        );
-      case 'low':
-        return (
-          <BadgeWithAnimation variant="outline" className="flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" />
-            Low Priority
-          </BadgeWithAnimation>
-        );
-      default:
-        return (
-          <BadgeWithAnimation variant="outline" className="flex items-center gap-1">
-            {priority}
-          </BadgeWithAnimation>
-        );
-    }
-  };
-
-  const getStatusBadge = (status?: string) => {
-    if (!status) return null;
-    
-    switch (status) {
-      case 'pending':
-        return (
-          <BadgeWithAnimation variant="outline" className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Pending
-          </BadgeWithAnimation>
-        );
-      case 'in-progress':
-        return (
-          <BadgeWithAnimation variant="secondary" className="flex items-center gap-1">
-            <Navigation className="h-3 w-3" />
-            In Progress
-          </BadgeWithAnimation>
-        );
-      case 'completed':
-        return (
-          <BadgeWithAnimation variant="success" className="flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" />
-            Completed
-          </BadgeWithAnimation>
-        );
-      default:
-        return (
-          <BadgeWithAnimation variant="outline">
-            {status}
-          </BadgeWithAnimation>
-        );
-    }
-  };
-
-  return (
-    <Card className="w-full overflow-hidden border-akhanya/20">
-      <CardHeader className="pb-2 bg-akhanya/5">
-        <CardTitle className="text-xl text-akhanya flex items-center">
-          <Clipboard className="mr-2 h-5 w-5" />
-          Allocated Sites
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        {sites.length === 0 ? (
-          <div className="py-8 text-center">
-            <p className="text-gray-500">No sites allocated yet</p>
-          </div>
-        ) : (
-          <div className="p-4 space-y-4">
-            {!vehicleCheckCompleted && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-blue-50 border border-blue-100 p-4 rounded-md mb-4 flex items-center shadow-sm"
-              >
-                <Car className="text-blue-600 mr-3 h-5 w-5" />
-                <div>
-                  <p className="text-blue-800 font-medium">Vehicle Safety Check Required</p>
-                  <p className="text-blue-600 text-sm">Complete a vehicle check before starting assessments</p>
-                </div>
-                <Button 
-                  onClick={handleVehicleCheckStart} 
-                  className="ml-auto bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow transition-all"
-                  size="sm"
-                >
-                  Start Vehicle Check
-                </Button>
-              </motion.div>
-            )}
-
-            {/* Site list */}
-            <div className="space-y-4">
-              {sites.map((site, index) => (
-                <motion.div
-                  key={site.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <Card className={`border-l-4 ${vehicleCheckCompleted ? 'border-l-akhanya' : 'border-l-gray-300'} hover:shadow-md transition-shadow duration-300`}>
-                    <CardContent className="p-4">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                        <div>
-                          <h3 className="font-medium text-lg flex items-center">
-                            <Building2 className="h-4 w-4 mr-2 text-akhanya" />
-                            {site.name}
-                          </h3>
-                          <div className="flex flex-wrap gap-2 mt-2 mb-3">
-                            {getPriorityBadge(site.priority)}
-                            {site.status && getStatusBadge(site.status)}
-                            {!vehicleCheckCompleted && (
-                              <BadgeWithAnimation variant="outline" className="flex items-center gap-1 border-orange-400 text-orange-700 bg-orange-50">
-                                <ShieldOff className="h-3 w-3" />
-                                Vehicle Check Required
-                              </BadgeWithAnimation>
-                            )}
-                          </div>
-                          {site.address && (
-                            <div className="flex items-center text-gray-600 text-sm mt-2 group">
-                              <MapPin className="h-3.5 w-3.5 mr-1 text-akhanya-secondary group-hover:text-akhanya transition-colors duration-200" />
-                              <span className="group-hover:text-gray-800 transition-colors duration-200">{site.address}</span>
-                            </div>
-                          )}
-                          {site.scheduledDate && (
-                            <div className="flex items-center text-gray-600 text-sm mt-2 group">
-                              <CalendarCheck className="h-3.5 w-3.5 mr-1 text-akhanya-secondary group-hover:text-akhanya transition-colors duration-200" />
-                              <span className="group-hover:text-gray-800 transition-colors duration-200">Scheduled: {site.scheduledDate}</span>
-                            </div>
-                          )}
-                          {site.distance && (
-                            <div className="flex items-center text-blue-600 text-sm mt-2">
-                              <Clock className="h-3.5 w-3.5 mr-1" />
-                              <span>{site.distance} km away</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                          <Button
-                            onClick={() => handleStartRoute(site)}
-                            variant="outline"
-                            className={`${
-                              vehicleCheckCompleted 
-                                ? "text-akhanya border-akhanya hover:bg-akhanya/10" 
-                                : "text-gray-500 border-gray-300 opacity-70"
-                            } transition-colors duration-200 group`}
-                            disabled={!vehicleCheckCompleted}
-                          >
-                            <Compass className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
-                            Start Route
-                          </Button>
-                          <Button
-                            onClick={() => handleAssessment(site.id)}
-                            className={`${
-                              vehicleCheckCompleted 
-                                ? "bg-akhanya hover:bg-akhanya-dark" 
-                                : "bg-gray-400 hover:bg-gray-500"
-                            } transition-all duration-200 hover:shadow-lg`}
-                            disabled={!vehicleCheckCompleted}
-                          >
-                            Complete Assessment
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+  
+  if (sites.length === 0) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8">
+            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <MapPin className="h-6 w-6 text-gray-400" />
             </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">No site allocations found</h3>
+            <p className="text-gray-500 mb-4">You don't have any sites allocated to you at the moment.</p>
           </div>
-        )}
-
-        {/* Popups */}
-        {selectedSite && (
-          <NavigationPopup
-            open={navigationOpen}
-            onOpenChange={setNavigationOpen}
-            siteName={selectedSite.name}
-            siteAddress={selectedSite.address || ""}
-            siteDistance={selectedSite.distance}
-          />
-        )}
-        
-        <VehicleCheckWizard
-          open={vehicleCheckOpen}
-          onClose={() => setVehicleCheckOpen(false)}
-          onConfirm={handleVehicleCheckConfirm}
-          vehicle="Toyota Land Cruiser (ABC-123)"
-          isProcessing={vehicleCheckProcessing}
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {sites.map((site) => (
+          <Card key={site.id} className="flex flex-col h-full">
+            <CardContent className="flex flex-col h-full p-0">
+              <div className="p-4">
+                <div className="flex justify-between mb-2">
+                  <Badge 
+                    variant={
+                      site.priority === 'high' ? 'destructive' : 
+                      site.priority === 'medium' ? 'default' : 'outline'
+                    }
+                    className="capitalize"
+                  >
+                    {site.priority} priority
+                  </Badge>
+                  <Badge 
+                    variant={
+                      site.status === 'completed' ? 'outline' : 
+                      site.status === 'in progress' ? 'secondary' : 
+                      'outline'
+                    }
+                    className="capitalize"
+                  >
+                    {site.status}
+                  </Badge>
+                </div>
+                
+                <h3 className="font-bold text-lg mb-2 text-akhanya">{site.name}</h3>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-start text-sm">
+                    <MapPin className="h-4 w-4 text-gray-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{site.address}</span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm">
+                    <Calendar className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
+                    <span className="text-gray-700">{site.scheduledDate}</span>
+                  </div>
+                  
+                  {site.distance && (
+                    <div className="flex items-center text-sm">
+                      <Clock className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
+                      <span className="text-gray-700">~{site.distance} km away</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="mt-auto border-t p-3 bg-gray-50 flex justify-between">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Details
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Site Requirements</h4>
+                      <p className="text-sm text-gray-500">
+                        This site requires a safety assessment before installation can begin.
+                        Ensure you have appropriate safety gear.
+                      </p>
+                      
+                      <div className="pt-2">
+                        <h4 className="font-medium mb-1">Equipment Needed:</h4>
+                        <ul className="text-sm text-gray-500 space-y-1">
+                          <li className="flex items-center">
+                            <CheckSquare className="h-3 w-3 mr-1 text-green-500" />
+                            Voltage tester
+                          </li>
+                          <li className="flex items-center">
+                            <CheckSquare className="h-3 w-3 mr-1 text-green-500" />
+                            Signal analyzer
+                          </li>
+                          <li className="flex items-center">
+                            <CheckSquare className="h-3 w-3 mr-1 text-green-500" />
+                            Protective equipment
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
+                <div className="space-x-2">
+                  {!vehicleCheckCompleted && (
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={onVehicleCheck}
+                      className="bg-amber-500 hover:bg-amber-600"
+                    >
+                      <Car className="h-4 w-4 mr-1" />
+                      Vehicle Check Required
+                    </Button>
+                  )}
+                  
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => handleNavigate(site)}
+                    className="bg-akhanya hover:bg-akhanya-dark"
+                    disabled={!vehicleCheckCompleted}
+                  >
+                    <Navigation className="h-4 w-4 mr-1" />
+                    Navigate
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {selectedSite && (
+        <GoogleMapsNavigationPopup
+          open={isNavigationOpen}
+          onOpenChange={setIsNavigationOpen}
+          siteName={selectedSite.name}
+          siteAddress={selectedSite.address}
+          siteDistance={selectedSite.distance}
         />
-      </CardContent>
-    </Card>
+      )}
+    </>
   );
 };
 
