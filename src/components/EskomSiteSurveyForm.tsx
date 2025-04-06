@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -939,3 +940,647 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="equipment-details" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">2. EQUIPMENT LOCATION</h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
+                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Building Name</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentLocation.buildingName}
+                              onChange={(e) => handleEquipmentLocationChange('buildingName', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Building Name"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Building Type</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentLocation.buildingType}
+                              onChange={(e) => handleEquipmentLocationChange('buildingType', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Building Type"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Floor Level</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentLocation.floorLevel}
+                              onChange={(e) => handleEquipmentLocationChange('floorLevel', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Floor Level"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Room Number</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentLocation.roomNumber}
+                              onChange={(e) => handleEquipmentLocationChange('roomNumber', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Room Number"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold mt-8 mb-4">3. ACCESS PROCEDURE</h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
+                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Requirements</td>
+                          <td className="border border-gray-300 p-1">
+                            <Textarea 
+                              value={accessProcedure.requirements}
+                              onChange={(e) => handleAccessProcedureChange('requirements', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full min-h-[100px]"
+                              placeholder="Describe access requirements..."
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Security Requirements</td>
+                          <td className="border border-gray-300 p-1">
+                            <Textarea 
+                              value={accessProcedure.securityRequirements}
+                              onChange={(e) => handleAccessProcedureChange('securityRequirements', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full min-h-[100px]"
+                              placeholder="Describe security requirements..."
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Type of Vehicle Required</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={accessProcedure.vehicleType}
+                              onChange={(e) => handleAccessProcedureChange('vehicleType', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Vehicle Type"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold mt-8 mb-4">4. SITE OWNER CONTACTS</h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2 text-left">Name</th>
+                          <th className="border border-gray-300 p-2 text-left">Cellphone</th>
+                          <th className="border border-gray-300 p-2 text-left">Email</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {siteOwnerContacts.map((contact, index) => (
+                          <tr key={index} className="border border-gray-300">
+                            <td className="border border-gray-300 p-1">
+                              <Input
+                                type="text"
+                                value={contact.name}
+                                onChange={(e) => handleSiteOwnerContactChange(index, 'name', e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                                placeholder="Name"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input
+                                type="tel"
+                                value={contact.cellphone}
+                                onChange={(e) => handleSiteOwnerContactChange(index, 'cellphone', e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                                placeholder="Cellphone"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input
+                                type="email"
+                                value={contact.email}
+                                onChange={(e) => handleSiteOwnerContactChange(index, 'email', e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                                placeholder="Email"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="text-right mt-4">
+                    <p className="text-sm text-gray-500">Page 4 of 17</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="equipment-room" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">5. EQUIPMENT ROOM (GENERAL)</h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
+                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Cable Access Routes</td>
+                          <td className="border border-gray-300 p-1">
+                            <Textarea 
+                              value={equipmentRoomGeneral.cableAccess}
+                              onChange={(e) => handleEquipmentRoomGeneralChange('cableAccess', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full min-h-[100px]"
+                              placeholder="Describe cable access routes..."
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Room Lighting</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentRoomGeneral.roomLighting}
+                              onChange={(e) => handleEquipmentRoomGeneralChange('roomLighting', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Room lighting details"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Fire Protection</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentRoomGeneral.fireProtection}
+                              onChange={(e) => handleEquipmentRoomGeneralChange('fireProtection', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Fire protection details"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Cooling Method</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentRoomGeneral.coolingMethod}
+                              onChange={(e) => handleEquipmentRoomGeneralChange('coolingMethod', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Cooling method"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Cooling Rating (BTU)</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentRoomGeneral.coolingRating}
+                              onChange={(e) => handleEquipmentRoomGeneralChange('coolingRating', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Cooling rating"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Room Temperature</td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={equipmentRoomGeneral.roomTemperature}
+                              onChange={(e) => handleEquipmentRoomGeneralChange('roomTemperature', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                              placeholder="Room temperature"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Equipment Room Condition</td>
+                          <td className="border border-gray-300 p-1">
+                            <Textarea 
+                              value={equipmentRoomGeneral.equipmentRoomCondition}
+                              onChange={(e) => handleEquipmentRoomGeneralChange('equipmentRoomCondition', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full min-h-[100px]"
+                              placeholder="Describe equipment room condition..."
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold mt-8 mb-4">6. EQUIPMENT CABINET SPACE PLANNING</h3>
+                  
+                  <div className="mb-4">
+                    <Label htmlFor="numberOfRouters" className="block text-sm font-medium text-gray-700 mb-1">
+                      Number of Routers
+                    </Label>
+                    <Input
+                      type="number"
+                      id="numberOfRouters"
+                      value={cabinetSpacePlanning.numberOfRouters}
+                      onChange={(e) => handleCabinetSpacePlanningChange('numberOfRouters', parseInt(e.target.value) || 0)}
+                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      min="0"
+                    />
+                  </div>
+                  
+                  <div className="mb-8">
+                    <Label className="block text-sm font-medium text-gray-700 mb-2">
+                      Room Layout Drawing
+                    </Label>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex space-x-2">
+                        {cabinetSpacePlanning.roomLayoutImages.map((_, index) => (
+                          <Button
+                            key={index}
+                            type="button"
+                            variant={currentDrawingIndex === index ? "default" : "outline"}
+                            onClick={() => setCurrentDrawingIndex(index)}
+                            size="sm"
+                          >
+                            Drawing {index + 1}
+                          </Button>
+                        ))}
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={addNewDrawing}
+                          className="flex items-center"
+                        >
+                          <PlusCircle className="h-4 w-4 mr-1" /> Add Drawing
+                        </Button>
+                        {cabinetSpacePlanning.roomLayoutImages.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeDrawing(currentDrawingIndex)}
+                            className="flex items-center text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" /> Remove
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <DrawingCanvas 
+                      onSave={handleRoomLayoutImageSave}
+                      initialValue={cabinetSpacePlanning.roomLayoutImages[currentDrawingIndex]}
+                    />
+                  </div>
+
+                  <div className="mt-8 mb-8">
+                    <Label className="block text-lg font-semibold text-gray-700 mb-2">
+                      Please red-line Room Layout Drawing to indicate:
+                    </Label>
+                    <ul className="list-disc pl-5 mb-4 text-sm text-gray-600">
+                      <li>Location of new IP/MPLS Cabinet(s).</li>
+                      <li>Location of existing ODFs needed for project.</li>
+                      <li>Location of existing Ericsson ADM.</li>
+                      <li>Location of the OTN Box.</li>
+                      <li>Location of existing BME (Transmission sites).</li>
+                      <li>Location of existing FOX.</li>
+                      <li>Location of existing OT Router (ASR Network).</li>
+                      <li>Location of existing DC Chargers.</li>
+                      <li>Location of existing EOA DB board.</li>
+                      <li>Location of air-conditioners.</li>
+                    </ul>
+                    <DrawingCanvas 
+                      onSave={handleRedlineDrawingSave}
+                      initialValue={cabinetSpacePlanning.redlineDrawing}
+                    />
+                  </div>
+                  
+                  <div className="mt-8">
+                    <h3 className="text-xl font-semibold mb-4">13. APPROVAL</h3>
+                    
+                    <div className="mb-6">
+                      <h4 className="font-medium mb-2">OEM Contractor:</h4>
+                      <div className="flex flex-col space-y-4">
+                        <div className="flex space-x-4">
+                          <div className="flex-1">
+                            <Label htmlFor="oemContractorName" className="text-sm">Name</Label>
+                            <Input
+                              id="oemContractorName"
+                              value={oemContractor.name}
+                              onChange={(e) => handleApprovalChange('oemContractor', 'name', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Label htmlFor="oemContractorSignature" className="text-sm">Signature</Label>
+                            <Input
+                              id="oemContractorSignature"
+                              value={oemContractor.signature}
+                              onChange={(e) => handleApprovalChange('oemContractor', 'signature', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="w-32">
+                            <Label htmlFor="oemContractorDate" className="text-sm">Date</Label>
+                            <Input
+                              id="oemContractorDate"
+                              type="date"
+                              value={oemContractor.date}
+                              onChange={(e) => handleApprovalChange('oemContractor', 'date', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex space-x-4 items-center">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="oemContractorAccepted"
+                              checked={oemContractor.accepted}
+                              onCheckedChange={(checked) => handleApprovalChange('oemContractor', 'accepted', !!checked)}
+                            />
+                            <label
+                              htmlFor="oemContractorAccepted"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Accepted
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="oemContractorRejected"
+                              checked={oemContractor.rejected}
+                              onCheckedChange={(checked) => handleApprovalChange('oemContractor', 'rejected', !!checked)}
+                            />
+                            <label
+                              htmlFor="oemContractorRejected"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Rejected
+                            </label>
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="oemContractorComments" className="text-sm">Comments</Label>
+                          <Textarea
+                            id="oemContractorComments"
+                            value={oemContractor.comments}
+                            onChange={(e) => handleApprovalChange('oemContractor', 'comments', e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <h4 className="font-medium mb-2">OEM Engineer:</h4>
+                      <div className="flex flex-col space-y-4">
+                        <div className="flex space-x-4">
+                          <div className="flex-1">
+                            <Label htmlFor="oemEngineerName" className="text-sm">Name</Label>
+                            <Input
+                              id="oemEngineerName"
+                              value={oemEngineer.name}
+                              onChange={(e) => handleApprovalChange('oemEngineer', 'name', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Label htmlFor="oemEngineerSignature" className="text-sm">Signature</Label>
+                            <Input
+                              id="oemEngineerSignature"
+                              value={oemEngineer.signature}
+                              onChange={(e) => handleApprovalChange('oemEngineer', 'signature', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="w-32">
+                            <Label htmlFor="oemEngineerDate" className="text-sm">Date</Label>
+                            <Input
+                              id="oemEngineerDate"
+                              type="date"
+                              value={oemEngineer.date}
+                              onChange={(e) => handleApprovalChange('oemEngineer', 'date', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex space-x-4 items-center">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="oemEngineerAccepted"
+                              checked={oemEngineer.accepted}
+                              onCheckedChange={(checked) => handleApprovalChange('oemEngineer', 'accepted', !!checked)}
+                            />
+                            <label
+                              htmlFor="oemEngineerAccepted"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Accepted
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="oemEngineerRejected"
+                              checked={oemEngineer.rejected}
+                              onCheckedChange={(checked) => handleApprovalChange('oemEngineer', 'rejected', !!checked)}
+                            />
+                            <label
+                              htmlFor="oemEngineerRejected"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Rejected
+                            </label>
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="oemEngineerComments" className="text-sm">Comments</Label>
+                          <Textarea
+                            id="oemEngineerComments"
+                            value={oemEngineer.comments}
+                            onChange={(e) => handleApprovalChange('oemEngineer', 'comments', e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <h4 className="font-medium mb-2">Eskom Representative:</h4>
+                      <div className="flex flex-col space-y-4">
+                        <div className="flex space-x-4">
+                          <div className="flex-1">
+                            <Label htmlFor="eskomRepName" className="text-sm">Name</Label>
+                            <Input
+                              id="eskomRepName"
+                              value={eskomRepresentative.name}
+                              onChange={(e) => handleApprovalChange('eskomRepresentative', 'name', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Label htmlFor="eskomRepSignature" className="text-sm">Signature</Label>
+                            <Input
+                              id="eskomRepSignature"
+                              value={eskomRepresentative.signature}
+                              onChange={(e) => handleApprovalChange('eskomRepresentative', 'signature', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="w-32">
+                            <Label htmlFor="eskomRepDate" className="text-sm">Date</Label>
+                            <Input
+                              id="eskomRepDate"
+                              type="date"
+                              value={eskomRepresentative.date}
+                              onChange={(e) => handleApprovalChange('eskomRepresentative', 'date', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex space-x-4 items-center">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="eskomRepAccepted"
+                              checked={eskomRepresentative.accepted}
+                              onCheckedChange={(checked) => handleApprovalChange('eskomRepresentative', 'accepted', !!checked)}
+                            />
+                            <label
+                              htmlFor="eskomRepAccepted"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Accepted
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="eskomRepRejected"
+                              checked={eskomRepresentative.rejected}
+                              onCheckedChange={(checked) => handleApprovalChange('eskomRepresentative', 'rejected', !!checked)}
+                            />
+                            <label
+                              htmlFor="eskomRepRejected"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Rejected
+                            </label>
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="eskomRepComments" className="text-sm">Comments</Label>
+                          <Textarea
+                            id="eskomRepComments"
+                            value={eskomRepresentative.comments}
+                            onChange={(e) => handleApprovalChange('eskomRepresentative', 'comments', e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right mt-4">
+                    <p className="text-sm text-gray-500">Page 17 of 17</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <div className="flex space-x-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
+                  <Save className="mr-2 h-4 w-4" /> Save for Later
+                </Button>
+                <Button type="submit" className="bg-akhanya hover:bg-akhanya-dark">Submit Survey</Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </form>
+    </div>
+  );
+};
+
+export default EskomSiteSurveyForm;
