@@ -18,14 +18,14 @@ const EskomSurvey = () => {
       <NavigationBar />
       <NetworkingBanner
         title="Eskom OT IP/MPLS Network"
-        subtitle="Site Survey Report for Comprehensive Network Infrastructure Assessment"
+        subtitle="Site Survey Report - Site Information"
       />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-akhanya">Eskom OT IP/MPLS Network Site Survey</h2>
             <p className="text-gray-600">
-              Complete the form below to document the comprehensive site survey information
+              Complete the form below to document the site information
             </p>
           </div>
           <div className="flex space-x-3">
@@ -83,7 +83,7 @@ const EskomSurvey = () => {
         </div>
         
         <div className="text-sm text-gray-500 mt-4 text-right">
-          <p>Page 1 of 17</p>
+          <p>Page 1 of 1</p>
         </div>
       </div>
     </div>
