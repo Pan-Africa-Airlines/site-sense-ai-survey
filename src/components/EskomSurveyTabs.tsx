@@ -225,9 +225,9 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     const header = document.createElement('div');
     header.innerHTML = `
       <div style="text-align: center; margin-bottom: 20px;">
-        <div id="bcx-logo-container" style="margin-bottom: 15px;"></div>
-        <h1 style="margin-top: 10px; color: #333;">Eskom OT IP/MPLS Network Site Survey</h1>
-        <h2 style="color: #666; font-weight: normal;">${formData.siteName || 'Site'} - ${formData.siteId || 'ID'}</h2>
+        <div id="logo-container" style="margin-bottom: 15px;"></div>
+        <h1 style="margin-top: 10px; color: #333;">ESKOM OT IP/MPLS NETWORK</h1>
+        <h2 style="color: #333; font-weight: bold;">SITE SURVEY REPORT</h2>
         <p style="margin-top: 5px; color: #888;">Survey Date: ${formData.date || new Date().toLocaleDateString()}</p>
       </div>
     `;
@@ -578,36 +578,14 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     
     document.body.appendChild(fullContent);
     
-    const logoContainer = fullContent.querySelector('#bcx-logo-container');
+    const logoContainer = fullContent.querySelector('#logo-container');
     if (logoContainer) {
-      const logoSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      logoSvg.setAttribute("width", "120");
-      logoSvg.setAttribute("height", "60");
-      logoSvg.setAttribute("viewBox", "0 0 120 60");
-      logoSvg.setAttribute("fill", "none");
-      
-      const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path1.setAttribute("d", "M43.5 15H64C69.5 15 74 19.5 74 25C74 30.5 69.5 35 64 35H43.5V15Z");
-      path1.setAttribute("fill", "#747474");
-      
-      const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path2.setAttribute("d", "M43.5 40H69C74.5 40 79 44.5 79 50C79 55.5 74.5 60 69 60H43.5V40Z");
-      path2.setAttribute("fill", "#747474");
-      
-      const path3 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path3.setAttribute("d", "M84 15H104.5C110 15 114.5 19.5 114.5 25C114.5 30.5 110 35 104.5 35H84V15Z");
-      path3.setAttribute("fill", "#747474");
-      
-      const path4 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path4.setAttribute("d", "M99 40H104.5L114.5 60H104.5L99 40Z");
-      path4.setAttribute("fill", "#d33a37");
-      
-      logoSvg.appendChild(path1);
-      logoSvg.appendChild(path2);
-      logoSvg.appendChild(path3);
-      logoSvg.appendChild(path4);
-      
-      logoContainer.appendChild(logoSvg);
+      const logoImg = document.createElement('img');
+      logoImg.src = 'public/lovable-uploads/f4bbbf20-b8f5-4f87-8a68-bd14981cef3e.png';
+      logoImg.alt = 'BCX Logo';
+      logoImg.style.maxHeight = '80px';
+      logoImg.style.objectFit = 'contain';
+      logoContainer.appendChild(logoImg);
     }
     
     const opt = {

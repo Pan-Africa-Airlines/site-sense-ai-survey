@@ -51,7 +51,7 @@ const RequirementsRemarks: React.FC<RequirementsRemarksProps> = ({
     <div className="space-y-6">
       <div className="flex justify-center mb-6">
         <img 
-          src="public/lovable-uploads/f3b0d24a-bde2-40c2-84a6-ed83f7605bce.png" 
+          src="public/lovable-uploads/f4bbbf20-b8f5-4f87-8a68-bd14981cef3e.png" 
           alt="BCX Logo" 
           className="h-20 object-contain" 
         />

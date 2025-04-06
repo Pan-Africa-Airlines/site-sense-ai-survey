@@ -1,11 +1,9 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ImageCapture from "@/components/ImageCapture";
-import { Camera, MapPin } from "lucide-react";
 
 interface SiteInformationProps {
   formData: any;
@@ -22,7 +20,7 @@ const SiteInformation: React.FC<SiteInformationProps> = ({
     <div className="space-y-6">
       <div className="flex justify-center mb-6">
         <img 
-          src="public/lovable-uploads/f3b0d24a-bde2-40c2-84a6-ed83f7605bce.png" 
+          src="public/lovable-uploads/f4bbbf20-b8f5-4f87-8a68-bd14981cef3e.png" 
           alt="BCX Logo" 
           className="h-20 object-contain" 
         />
