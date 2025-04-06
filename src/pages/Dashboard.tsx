@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -9,11 +8,7 @@ import EngineerSiteList from "@/components/EngineerSiteList";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-interface DashboardProps {
-  vehicleCheckCompleted?: boolean;
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) => {
+const Dashboard: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [allocatedSites, setAllocatedSites] = useState([]);
@@ -198,8 +193,6 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) 
               status: site.status,
               distance: site.distance
             }))} 
-            onVehicleCheck={handleVehicleCheck}
-            vehicleCheckCompleted={vehicleCheckCompleted}
           />
         )}
       </div>

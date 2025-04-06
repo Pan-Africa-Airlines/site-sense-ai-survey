@@ -1,13 +1,12 @@
 
 import React, { useEffect, useState } from "react";
-import AdminNavBar from "@/components/AdminNavBar";
+import NavigationBar from "@/components/NavigationBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { ClipboardList, HardHat, Car, Clock, MapPin } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
 import { supabase } from "@/integrations/supabase/client";
 
 const MOCK_ASSESSMENT_DATA = [
@@ -45,7 +44,7 @@ const AdminDashboard = () => {
       try {
         setIsLoading(true);
         const { data, error } = await supabase
-          .from('engineer_allocations') // Fixed table name
+          .from('engineer_allocations')
           .select('*');
         
         if (error) {
@@ -94,10 +93,10 @@ const AdminDashboard = () => {
   const recentInstallations = MOCK_INSTALLATION_DATA.slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AdminNavBar />
+    <div className="min-h-screen bg-gray-50">
+      <NavigationBar isCompact={true} />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-6 text-akhanya">Admin Dashboard</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -158,8 +157,8 @@ const AdminDashboard = () => {
         </div>
         
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4 flex items-center">
-            <MapPin className="mr-2 h-5 w-5 text-blue-600" />
+          <h2 className="text-2xl font-bold mb-4 flex items-center text-akhanya">
+            <MapPin className="mr-2 h-5 w-5" />
             Engineer Site Allocations
           </h2>
           <Card>
@@ -221,7 +220,7 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Assessments by Region</CardTitle>
+              <CardTitle className="text-akhanya">Assessments by Region</CardTitle>
               <CardDescription>Distribution of site assessments across regions</CardDescription>
             </CardHeader>
             <CardContent>
@@ -235,7 +234,7 @@ const AdminDashboard = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="count" fill="#3b82f6" />
+                    <Bar dataKey="count" fill="#E13B45" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -244,7 +243,7 @@ const AdminDashboard = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Status Distribution</CardTitle>
+              <CardTitle className="text-akhanya">Status Distribution</CardTitle>
               <CardDescription>Overall status of site activities</CardDescription>
             </CardHeader>
             <CardContent>
@@ -258,7 +257,7 @@ const AdminDashboard = () => {
                       labelLine={false}
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
-                      fill="#8884d8"
+                      fill="#E13B45"
                       dataKey="value"
                     >
                       {statusData.map((entry, index) => (
@@ -273,11 +272,11 @@ const AdminDashboard = () => {
           </Card>
         </div>
         
-        <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
+        <h2 className="text-2xl font-bold mb-4 text-akhanya">Recent Activity</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Assessments</CardTitle>
+              <CardTitle className="text-akhanya">Recent Assessments</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
@@ -305,7 +304,7 @@ const AdminDashboard = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Recent Installations</CardTitle>
+              <CardTitle className="text-akhanya">Recent Installations</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
