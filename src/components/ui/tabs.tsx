@@ -51,4 +51,20 @@ const TabsContent = React.forwardRef<
 ))
 TabsContent.displayName = TabsPrimitive.Content.displayName
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+// Create a vertical tabs list component
+const TabsListVertical = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn(
+      "flex flex-col h-auto items-start justify-start rounded-md bg-muted p-2 text-muted-foreground",
+      className
+    )}
+    {...props}
+  />
+))
+TabsListVertical.displayName = "TabsListVertical"
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsListVertical }
