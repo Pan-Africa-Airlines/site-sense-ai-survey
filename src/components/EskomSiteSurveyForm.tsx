@@ -131,6 +131,14 @@ interface DCPowerDistributionPhotos {
   photos: string[];
 }
 
+interface ElectricalDCDistributionPhotos {
+  photos: string[];
+}
+
+interface TransportEquipmentPhotos {
+  photos: string[];
+}
+
 interface EskomSiteSurveyFormProps {
   showAIRecommendations?: boolean;
 }
@@ -243,12 +251,19 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     photos: [""]
   });
 
-  // New state for slide 8 - cabinet location photos and DC power distribution photos
   const [cabinetLocationPhotos, setCabinetLocationPhotos] = useState<CabinetLocationPhotos>({
     photos: [""]
   });
   
   const [dcPowerDistributionPhotos, setDcPowerDistributionPhotos] = useState<DCPowerDistributionPhotos>({
+    photos: [""]
+  });
+
+  const [electricalDCDistributionPhotos, setElectricalDCDistributionPhotos] = useState<ElectricalDCDistributionPhotos>({
+    photos: [""]
+  });
+  
+  const [transportEquipmentPhotos, setTransportEquipmentPhotos] = useState<TransportEquipmentPhotos>({
     photos: [""]
   });
 
@@ -492,7 +507,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     }
   };
   
-  // New handlers for slide 8
   const handleCabinetLocationPhotoUpload = (photoUrl: string) => {
     if (photoUrl) {
       const updatedPhotos = cabinetLocationPhotos.photos.filter(p => p).concat(photoUrl);
@@ -521,6 +535,34 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     }
   };
 
+  const handleElectricalDCDistributionPhotoUpload = (photoUrl: string) => {
+    if (photoUrl) {
+      const updatedPhotos = electricalDCDistributionPhotos.photos.filter(p => p).concat(photoUrl);
+      setElectricalDCDistributionPhotos({
+        photos: updatedPhotos
+      });
+      
+      toast({
+        title: "Photo uploaded",
+        description: "Electrical DC distribution photo has been saved.",
+      });
+    }
+  };
+  
+  const handleTransportEquipmentPhotoUpload = (photoUrl: string) => {
+    if (photoUrl) {
+      const updatedPhotos = transportEquipmentPhotos.photos.filter(p => p).concat(photoUrl);
+      setTransportEquipmentPhotos({
+        photos: updatedPhotos
+      });
+      
+      toast({
+        title: "Photo uploaded",
+        description: "Transport equipment photo has been saved.",
+      });
+    }
+  };
+
   const removeEquipmentRoomPhoto = (index: number) => {
     const updatedPhotos = [...equipmentRoomPhotos.photos];
     updatedPhotos.splice(index, 1);
@@ -530,7 +572,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
   
-  // New methods for removing photos in slide 8
   const removeCabinetLocationPhoto = (index: number) => {
     const updatedPhotos = [...cabinetLocationPhotos.photos];
     updatedPhotos.splice(index, 1);
@@ -545,6 +586,24 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     updatedPhotos.splice(index, 1);
     
     setDcPowerDistributionPhotos({
+      photos: updatedPhotos.length ? updatedPhotos : [""]
+    });
+  };
+
+  const removeElectricalDCDistributionPhoto = (index: number) => {
+    const updatedPhotos = [...electricalDCDistributionPhotos.photos];
+    updatedPhotos.splice(index, 1);
+    
+    setElectricalDCDistributionPhotos({
+      photos: updatedPhotos.length ? updatedPhotos : [""]
+    });
+  };
+  
+  const removeTransportEquipmentPhoto = (index: number) => {
+    const updatedPhotos = [...transportEquipmentPhotos.photos];
+    updatedPhotos.splice(index, 1);
+    
+    setTransportEquipmentPhotos({
       photos: updatedPhotos.length ? updatedPhotos : [""]
     });
   };
@@ -570,8 +629,10 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         transportPlatforms,
         dcPowerDistribution,
         equipmentRoomPhotos,
-        cabinetLocationPhotos,         // Add new fields for slide 8
-        dcPowerDistributionPhotos,     // Add new fields for slide 8
+        cabinetLocationPhotos,
+        dcPowerDistributionPhotos,
+        electricalDCDistributionPhotos,
+        transportEquipmentPhotos,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -641,8 +702,10 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         transportPlatforms,
         dcPowerDistribution,
         equipmentRoomPhotos,
-        cabinetLocationPhotos,         // Add new fields for slide 8
-        dcPowerDistributionPhotos,     // Add new fields for slide 8
+        cabinetLocationPhotos,
+        dcPowerDistributionPhotos,
+        electricalDCDistributionPhotos,
+        transportEquipmentPhotos,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -702,7 +765,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     } else if (currentTab === "equipment-details") {
       setCurrentTab("equipment-room");
     } else if (currentTab === "equipment-room") {
-      setCurrentTab("additional-photos");  // New tab for slide 8
+      setCurrentTab("additional-photos");
     } else if (currentTab === "additional-photos") {
       setCurrentTab("technical-details");
     }
@@ -710,7 +773,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
 
   const prevTab = () => {
     if (currentTab === "technical-details") {
-      setCurrentTab("additional-photos");  // New tab transition
+      setCurrentTab("additional-photos");
     } else if (currentTab === "additional-photos") {
       setCurrentTab("equipment-room");
     } else if (currentTab === "equipment-room") {
@@ -806,843 +869,4 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
                       name="region"
                       value={region}
                       onChange={handleInputChange}
-                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
-                      placeholder="Enter region"
-                    />
-                  </div>
-                  
-                  <div className="mb-4">
-                    <Label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                      Date
-                    </Label>
-                    <Input
-                      type="date"
-                      id="date"
-                      name="date"
-                      value={date}
-                      onChange={handleInputChange}
-                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700 mb-2">
-                      Building Photo
-                    </Label>
-                    <ImageCapture 
-                      onImageCaptured={handleBuildingPhotoUpload} 
-                    />
-                    {buildingPhoto && (
-                      <div className="mt-2">
-                        <img src={buildingPhoto} alt="Building Preview" className="max-w-xs rounded-md" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 1 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-end mt-4">
-              <Button type="button" onClick={nextTab} className="ml-auto flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="attendees" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">1. SITE VISIT ATTENDEES</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left">Date</th>
-                          <th className="border border-gray-300 p-2 text-left">Name</th>
-                          <th className="border border-gray-300 p-2 text-left">Company</th>
-                          <th className="border border-gray-300 p-2 text-left">Department</th>
-                          <th className="border border-gray-300 p-2 text-left">Cellphone</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {attendees.map((attendee, index) => (
-                          <tr key={index} className="border border-gray-300">
-                            <td className="border border-gray-300 p-1">
-                              <Input
-                                type="date"
-                                value={attendee.date}
-                                onChange={(e) => handleAttendeeChange(index, 'date', e.target.value)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                              />
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <Input
-                                type="text"
-                                value={attendee.name}
-                                onChange={(e) => handleAttendeeChange(index, 'name', e.target.value)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                                placeholder="Name"
-                              />
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <Input
-                                type="text"
-                                value={attendee.company}
-                                onChange={(e) => handleAttendeeChange(index, 'company', e.target.value)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                                placeholder="Company"
-                              />
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <Input
-                                type="text"
-                                value={attendee.department}
-                                onChange={(e) => handleAttendeeChange(index, 'department', e.target.value)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                                placeholder="Department"
-                              />
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <Input
-                                type="tel"
-                                value={attendee.cellphone}
-                                onChange={(e) => handleAttendeeChange(index, 'cellphone', e.target.value)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                                placeholder="Cellphone"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 2 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="contents" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">TABLE OF CONTENTS</h3>
-                  
-                  <div className="mb-4">
-                    <ol className="list-decimal pl-5">
-                      <li>SITE VISIT ATTENDEES</li>
-                      <li>EQUIPMENT ROOM (GENERAL)</li>
-                      <li>DETAILED SITE RECORDS
-                        <ol className="list-decimal pl-5 mt-2">
-                          <li>Equipment Cabinet Space Planning</li>
-                          <li>Power Requirements</li>
-                          <li>Earthing</li>
-                          <li>Optical Fibre</li>
-                          <li>Ethernet</li>
-                          <li>Microwave</li>
-                          <li>Satellite</li>
-                          <li>Security</li>
-                          <li>Other</li>
-                        </ol>
-                      </li>
-                      <li>APPROVAL</li>
-                    </ol>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 3 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="site-info" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                
-                  <h3 className="text-2xl font-semibold text-center mb-6">1. SITE INFORMATION</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <TableInputRow
-                          label="Site ID"
-                          name="siteId"
-                          value={siteId}
-                          onChange={handleInputChange}
-                        />
-                        <TableInputRow
-                          label="Site Type"
-                          name="siteType"
-                          value={siteType}
-                          onChange={handleInputChange}
-                        />
-                        <TableInputRow
-                          label="Address"
-                          name="address"
-                          value={address}
-                          onChange={handleInputChange}
-                        />
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">GPS Coordinates</td>
-                          <td className="border border-gray-300 p-1 relative">
-                            <Input
-                              type="text"
-                              name="gpsCoordinates"
-                              value={gpsCoordinates}
-                              onChange={handleInputChange}
-                              className="border-0 focus-visible:ring-0 h-full w-full"
-                              placeholder="Latitude, Longitude"
-                            />
-                            {!loading && !gpsCoordinates && (
-                              <Button
-                                type="button"
-                                onClick={retry}
-                                disabled={loading}
-                                className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-md shadow-sm px-3 py-1.5 text-sm font-semibold text-white bg-akhanya hover:bg-akhanya-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-akhanya focus-visible:ring-offset-2"
-                              >
-                                Get Location
-                              </Button>
-                            )}
-                            {loading && <span className="location-badge">Detecting location...</span>}
-                            {error && <span className="location-badge">Error: {error}</span>}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 4 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="equipment-details" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">1. EQUIPMENT DETAILS</h3>
-                  
-                  <h4 className="text-xl font-semibold mt-4 mb-3">1.1. Equipment Location</h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <TableInputRow
-                          label="Building Name"
-                          name="buildingName"
-                          value={equipmentLocation.buildingName}
-                          onChange={(e) => handleEquipmentLocationChange('buildingName', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Building Type"
-                          name="buildingType"
-                          value={equipmentLocation.buildingType}
-                          onChange={(e) => handleEquipmentLocationChange('buildingType', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Floor Level"
-                          name="floorLevel"
-                          value={equipmentLocation.floorLevel}
-                          onChange={(e) => handleEquipmentLocationChange('floorLevel', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Room Number"
-                          name="roomNumber"
-                          value={equipmentLocation.roomNumber}
-                          onChange={(e) => handleEquipmentLocationChange('roomNumber', e.target.value)}
-                        />
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 5 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="equipment-room" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">2. EQUIPMENT ROOM (GENERAL)</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <TableInputRow
-                          label="Cable access to the cabinet (Underfloor, Overhead)"
-                          name="cableAccess"
-                          value={equipmentRoomGeneral.cableAccess}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('cableAccess', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Room lighting (Indicate if any lights are faulty)"
-                          name="roomLighting"
-                          value={equipmentRoomGeneral.roomLighting}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('roomLighting', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Fire Protection"
-                          name="fireProtection"
-                          value={equipmentRoomGeneral.fireProtection}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('fireProtection', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Cooling Method (Air-conditioning, Fans etc)"
-                          name="coolingMethod"
-                          value={equipmentRoomGeneral.coolingMethod}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('coolingMethod', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Cooling Rating (BTU or Central Controlled)"
-                          name="coolingRating"
-                          value={equipmentRoomGeneral.coolingRating}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('coolingRating', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Measured room temperature (Deg C)"
-                          name="roomTemperature"
-                          value={equipmentRoomGeneral.roomTemperature}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('roomTemperature', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="General condition of equipment room"
-                          name="equipmentRoomCondition"
-                          value={equipmentRoomGeneral.equipmentRoomCondition}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('equipmentRoomCondition', e.target.value)}
-                        />
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center my-6">3. DETAILED SITE RECORDS</h3>
-                  <h4 className="text-xl font-semibold mt-4 mb-3">3.1. Equipment Cabinet Space Planning</h4>
-                  
-                  <div className="mb-4">
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse border border-gray-300 mb-6">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                            <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border border-gray-300">
-                            <td className="border border-gray-300 p-2">
-                              <p className="font-medium">Room Layout Drawing (Prior to site visit, Eskom will supply PDF version, as available). OEM to printout copies and bring to site). Red-lined scanned version to be attached to the site survey report.</p>
-                              <p className="mt-2 text-sm text-gray-600">Where no Room Layout drawing available, a free hand drawing (not to scale) to be provided by the OEM.</p>
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                              <div className="mb-2">
-                                <div className="flex justify-between items-center mb-4">
-                                  <div className="flex items-center gap-2">
-                                    <h5 className="font-semibold">Drawing #{currentDrawingIndex + 1}</h5>
-                                    {cabinetSpacePlanning.roomLayoutImages.length > 1 && (
-                                      <div className="flex gap-1">
-                                        {cabinetSpacePlanning.roomLayoutImages.map((_, index) => (
-                                          <Button 
-                                            key={index}
-                                            type="button"
-                                            variant={currentDrawingIndex === index ? "default" : "outline"}
-                                            size="sm"
-                                            onClick={() => setCurrentDrawingIndex(index)}
-                                            className="h-7 w-7 p-0"
-                                          >
-                                            {index + 1}
-                                          </Button>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={addNewDrawing}
-                                      className="flex items-center gap-1"
-                                    >
-                                      <PlusCircle className="h-4 w-4" /> Add Drawing
-                                    </Button>
-                                    {cabinetSpacePlanning.roomLayoutImages.length > 1 && (
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => removeDrawing(currentDrawingIndex)}
-                                        className="flex items-center gap-1 text-red-500 hover:text-red-700"
-                                      >
-                                        <Trash2 className="h-4 w-4" /> Remove
-                                      </Button>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                <DrawingCanvas 
-                                  onSave={handleRoomLayoutImageSave} 
-                                  initialValue={cabinetSpacePlanning.roomLayoutImages[currentDrawingIndex]}
-                                />
-                              </div>
-                            </td>
-                          </tr>
-                          <tr className="border border-gray-300">
-                            <td className="border border-gray-300 p-2 font-medium">
-                              Please indicate number of new routers required?
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <Input 
-                                type="number" 
-                                name="numberOfRouters"
-                                value={cabinetSpacePlanning.numberOfRouters.toString()}
-                                onChange={(e) => handleCabinetSpacePlanningChange('numberOfRouters', parseInt(e.target.value) || 0)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                              />
-                            </td>
-                          </tr>
-                          <tr className="border border-gray-300">
-                            <td className="border border-gray-300 p-2">
-                              <p className="font-medium">Please red-line Room Layout Drawing to indicate:</p>
-                              <ul className="list-disc pl-6 mt-2 space-y-1">
-                                <li>Location of new IP/MPLS Cabinet(s).</li>
-                                <li>Location of existing ODFs needed for project.</li>
-                                <li>Location of existing Ericsson ADM.</li>
-                                <li>Location of the OTN Box.</li>
-                                <li>Location of existing BME (Transmission sites).</li>
-                                <li>Location of existing FOX.</li>
-                                <li>Location of existing OT Router (ASR Network).</li>
-                                <li>Location of existing DC Chargers.</li>
-                                <li>Location of existing EOA DB board.</li>
-                                <li>Location of air-conditioners.</li>
-                              </ul>
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                              <div className="mb-2">
-                                <h5 className="font-semibold mb-4">Red-line Drawing</h5>
-                                <DrawingCanvas 
-                                  onSave={handleRedlineDrawingSave} 
-                                  initialValue={redlineDrawing}
-                                />
-                                <p className="text-sm text-gray-600 mt-2">
-                                  Use the drawing tool above to mark the location of all equipment items. 
-                                  We recommend using red color for visibility.
-                                </p>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 6 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="additional-photos" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">3.5. NEW CABINET LOCATION PHOTOS</h3>
-                  
-                  <div className="mb-8 border border-gray-300 p-4 rounded-md">
-                    <p className="mb-4 font-medium">
-                      Please provide a clear colour photograph that shows the available floor space and proposed new cabinet locations(s) in the room, indicated with red block(s)
-                    </p>
-                    
-                    {cabinetLocationPhotos.photos.filter(p => p).map((photo, index) => (
-                      <div key={index} className="mb-4 border rounded-md p-4 relative">
-                        <img src={photo} alt={`Cabinet Location ${index + 1}`} className="max-w-full h-auto" />
-                        <Button 
-                          type="button" 
-                          variant="outline"
-                          size="sm" 
-                          className="absolute top-2 right-2" 
-                          onClick={() => removeCabinetLocationPhoto(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    
-                    <div className="mt-4">
-                      <ImageCapture 
-                        onImageCaptured={handleCabinetLocationPhotoUpload}
-                        buttonText="Take Cabinet Location Photo"
-                      />
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">3.6. DC POWER DISTRIBUTION PHOTOS</h3>
-                  
-                  <div className="mb-8 border border-gray-300 p-4 rounded-md">
-                    <p className="mb-4 font-medium">
-                      Please provide clear photographs of the DC power distribution system
-                    </p>
-                    
-                    {dcPowerDistributionPhotos.photos.filter(p => p).map((photo, index) => (
-                      <div key={index} className="mb-4 border rounded-md p-4 relative">
-                        <img src={photo} alt={`DC Power Distribution ${index + 1}`} className="max-w-full h-auto" />
-                        <Button 
-                          type="button" 
-                          variant="outline"
-                          size="sm" 
-                          className="absolute top-2 right-2" 
-                          onClick={() => removeDcPowerDistributionPhoto(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    
-                    <div className="mt-4">
-                      <ImageCapture 
-                        onImageCaptured={handleDcPowerDistributionPhotoUpload}
-                        buttonText="Take DC Power Distribution Photo"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between mt-8">
-                    <div className="flex items-center">
-                      <p className="text-sm">Approved by: _________________</p>
-                    </div>
-                    <div className="flex items-center">
-                      <p className="text-sm">Authorized Date: DD/MM/YYYY</p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 8 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <div className="space-x-3">
-                <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
-                  <Save className="mr-2 h-4 w-4" /> Save for Later
-                </Button>
-                <Button type="button" onClick={nextTab} className="flex items-center">
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="technical-details" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">3.2. TRANSPORT PLATFORMS</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300 mb-8">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {transportPlatforms.map((platform, index) => (
-                          <tr key={index} className="border border-gray-300">
-                            <td className="border border-gray-300 p-2 font-medium">
-                              Link {platform.linkNumber} – Link Type, Direction, Capacity
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <Input 
-                                type="text" 
-                                value={platform.linkTypeDirectionCapacity}
-                                onChange={(e) => handleTransportPlatformChange(index, e.target.value)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">3.3. 50V DC POWER DISTRIBUTION</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300 mb-8">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">
-                            50V Charger A: DC Load Current (Total Amps)
-                          </td>
-                          <td className="border border-gray-300 p-1">
-                            <Input 
-                              type="text" 
-                              value={dcPowerDistribution.chargerALoadCurrent}
-                              onChange={(e) => handleDcPowerDistributionChange('chargerALoadCurrent', e.target.value)}
-                              className="border-0 focus-visible:ring-0 h-full w-full"
-                            />
-                          </td>
-                        </tr>
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">
-                            50V Charger B: DC Load Current (Total Amps)
-                          </td>
-                          <td className="border border-gray-300 p-1">
-                            <Input 
-                              type="text" 
-                              value={dcPowerDistribution.chargerBLoadCurrent}
-                              onChange={(e) => handleDcPowerDistributionChange('chargerBLoadCurrent', e.target.value)}
-                              className="border-0 focus-visible:ring-0 h-full w-full"
-                            />
-                          </td>
-                        </tr>
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">
-                            Are cabinets supplied by the 50V DC Charger direct or via End of Aisle (EOA) DB boards?
-                          </td>
-                          <td className="border border-gray-300 p-1">
-                            <Input 
-                              type="text" 
-                              value={dcPowerDistribution.cabinetsDirect}
-                              onChange={(e) => handleDcPowerDistributionChange('cabinetsDirect', e.target.value)}
-                              className="border-0 focus-visible:ring-0 h-full w-full"
-                            />
-                          </td>
-                        </tr>
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">
-                            Measure DC Cable length required to OTN cabinet
-                          </td>
-                          <td className="border border-gray-300 p-1">
-                            <Input 
-                              type="text" 
-                              value={dcPowerDistribution.cableLength}
-                              onChange={(e) => handleDcPowerDistributionChange('cableLength', e.target.value)}
-                              className="border-0 focus-visible:ring-0 h-full w-full"
-                            />
-                          </td>
-                        </tr>
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">
-                            Where cabinets are supplied via EOA DB, please complete End of Aisle DB Layout, Annexure D
-                          </td>
-                          <td className="border border-gray-300 p-1">
-                            <Input 
-                              type="text" 
-                              value={dcPowerDistribution.eoaDbLayout}
-                              onChange={(e) => handleDcPowerDistributionChange('eoaDbLayout', e.target.value)}
-                              className="border-0 focus-visible:ring-0 h-full w-full"
-                            />
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">3.4. ESKOM EQUIPMENT ROOM PHOTOS</h3>
-                  
-                  <div className="mb-4">
-                    <p className="mb-4">
-                      Please provide clear colour photographs that shows general equipment room layout, including Telecomms
-                      equipment cabinets, front and back (BME, ADM, Bearer Comms, Fibre Optic, 50V Charger, etc)
-                    </p>
-                    
-                    {equipmentRoomPhotos.photos.filter(p => p).map((photo, index) => (
-                      <div key={index} className="mb-4 border rounded-md p-4 relative">
-                        <img src={photo} alt={`Equipment Room ${index + 1}`} className="max-w-full h-auto" />
-                        <Button 
-                          type="button" 
-                          variant="outline"
-                          size="sm" 
-                          className="absolute top-2 right-2" 
-                          onClick={() => removeEquipmentRoomPhoto(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    
-                    <div className="mt-4">
-                      <ImageCapture 
-                        onImageCaptured={handleEquipmentRoomPhotoUpload}
-                        buttonText="Take Equipment Room Photo"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 7 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <div className="space-x-3">
-                <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
-                  <Save className="mr-2 h-4 w-4" /> Save for Later
-                </Button>
-                <Button type="submit" className="flex items-center bg-akhanya hover:bg-akhanya-dark">
-                  Submit Survey <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </form>
-    </div>
-  );
-};
-
-export default EskomSiteSurveyForm;
+                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block
