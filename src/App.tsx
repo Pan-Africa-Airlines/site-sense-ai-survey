@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -105,6 +104,24 @@ const App = () => {
                 {/* Eskom Survey Routes */}
                 <Route 
                   path="/eskom-survey" 
+                  element={
+                    <ProtectedRoute>
+                      <EskomSurveys />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/eskom-survey/new" 
+                  element={
+                    <ProtectedRoute>
+                      <EskomSurvey />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/eskom-survey/:id" 
                   element={
                     <ProtectedRoute>
                       <EskomSurvey />

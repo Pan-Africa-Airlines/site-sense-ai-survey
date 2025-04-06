@@ -1,14 +1,25 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Plus, Edit, Download, Eye, ClipboardList, Loader, Filter, CheckCircle2 } from "lucide-react";
+import { Plus, Edit, Download, Eye, ClipboardList, Loader, Filter, CheckCircle2, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface SiteSurvey {
   id: string;
@@ -34,17 +45,27 @@ const EskomSurveys = () => {
   const [regionFilter, setRegionFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [regions, setRegions] = useState<string[]>([]);
+  const [dateFilter, setDateFilter] = useState<string>("");
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
 
   useEffect(() => {
     fetchSurveys();
-  }, [statusFilter, regionFilter, searchQuery]);
+  }, [statusFilter, regionFilter, searchQuery, dateFilter]);
 
   const fetchSurveys = async () => {
     setLoading(true);
     try {
+      // Get user ID from localStorage
+      const userId = localStorage.getItem("userId") || "";
+      
       let query = supabase
         .from('site_surveys')
         .select('*');
+      
+      // Filter by current user if we have a userId
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
       
       if (statusFilter) {
         query = query.eq('status', statusFilter);
@@ -56,6 +77,10 @@ const EskomSurveys = () => {
       
       if (searchQuery) {
         query = query.ilike('site_name', `%${searchQuery}%`);
+      }
+      
+      if (dateFilter) {
+        query = query.eq('date', dateFilter);
       }
       
       const { data, error } = await query.order('updated_at', { ascending: false });
@@ -70,6 +95,7 @@ const EskomSurveys = () => {
       }
     } catch (error) {
       console.error('Error fetching surveys:', error);
+      toast.error("Failed to load surveys. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -98,21 +124,29 @@ const EskomSurveys = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
 
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
+
   const handleCreateNew = () => {
-    navigate('/eskom-survey');
+    navigate('/eskom-survey/new');
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/eskom-survey?id=${id}`);
+    navigate(`/eskom-survey/${id}`);
   };
 
   const clearFilters = () => {
     setStatusFilter("");
     setRegionFilter("");
     setSearchQuery("");
+    setDateFilter("");
   };
 
   return (
@@ -130,15 +164,24 @@ const EskomSurveys = () => {
               View and manage your Eskom site survey reports
             </p>
           </div>
-          <Button onClick={handleCreateNew} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Create New Survey
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
+              className="flex items-center gap-2"
+            >
+              {viewMode === "grid" ? "Table View" : "Grid View"}
+            </Button>
+            <Button onClick={handleCreateNew} className="flex items-center gap-2 bg-akhanya hover:bg-akhanya-dark">
+              <Plus className="h-4 w-4" />
+              Create New Survey
+            </Button>
+          </div>
         </div>
         
         <div className="bg-white p-4 rounded-lg shadow mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="w-full md:w-1/3">
+            <div className="w-full md:w-1/4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
               <Input
                 placeholder="Search by site name..."
@@ -146,7 +189,7 @@ const EskomSurveys = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="w-full md:w-1/4">
+            <div className="w-full md:w-1/5">
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
@@ -159,7 +202,7 @@ const EskomSurveys = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-full md:w-1/4">
+            <div className="w-full md:w-1/5">
               <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
               <Select value={regionFilter} onValueChange={setRegionFilter}>
                 <SelectTrigger>
@@ -173,7 +216,16 @@ const EskomSurveys = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" onClick={clearFilters}>
+            <div className="w-full md:w-1/5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <Input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+              />
+            </div>
+            <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
               Clear Filters
             </Button>
           </div>
@@ -184,7 +236,7 @@ const EskomSurveys = () => {
             <Loader className="h-8 w-8 animate-spin text-primary mr-2" />
             <span>Loading surveys...</span>
           </div>
-        ) : (
+        ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {surveys.length > 0 ? (
               surveys.map(survey => (
@@ -200,7 +252,8 @@ const EskomSurveys = () => {
                       <p><span className="font-medium">Region:</span> {survey.region}</p>
                       <p><span className="font-medium">Site ID:</span> {survey.site_id || 'N/A'}</p>
                       <p><span className="font-medium">Date:</span> {survey.date}</p>
-                      <p><span className="font-medium">Last Updated:</span> {formatDate(survey.updated_at)}</p>
+                      <p><span className="font-medium">Created:</span> {formatDateTime(survey.created_at)}</p>
+                      <p><span className="font-medium">Last Updated:</span> {formatDateTime(survey.updated_at)}</p>
                       {survey.survey_data?.approved && (
                         <p className="flex items-center text-green-600">
                           <CheckCircle2 className="h-4 w-4 mr-1" />
@@ -232,6 +285,62 @@ const EskomSurveys = () => {
                 </Button>
               </div>
             )}
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <Table>
+              <TableCaption>A list of your Eskom site surveys</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Site Name</TableHead>
+                  <TableHead>Region</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Updated</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {surveys.length > 0 ? (
+                  surveys.map((survey) => (
+                    <TableRow key={survey.id}>
+                      <TableCell className="font-medium">{survey.site_name}</TableCell>
+                      <TableCell>{survey.region}</TableCell>
+                      <TableCell>{survey.date}</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(survey.status, survey.survey_data?.approved)}>
+                          {getStatusDisplay(survey.status, survey.survey_data?.approved)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{formatDateTime(survey.updated_at)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(survey.id)}>
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <ClipboardList className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-500 mb-4">No surveys found</p>
+                      <Button size="sm" onClick={handleCreateNew} className="mx-auto">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create New Survey
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>

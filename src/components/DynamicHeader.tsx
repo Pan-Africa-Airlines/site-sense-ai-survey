@@ -75,8 +75,8 @@ const DynamicHeader: React.FC = () => {
                       },
                       {
                         title: "Eskom Site Survey",
-                        href: "/eskom-site-survey",
-                        description: "Complete Eskom site survey",
+                        href: "/eskom-survey",
+                        description: "View and manage Eskom site surveys",
                         icon: <FileSpreadsheet className="h-4 w-4" />,
                       },
                       {
@@ -86,9 +86,9 @@ const DynamicHeader: React.FC = () => {
                         icon: <Network className="h-4 w-4" />,
                       },
                       {
-                        title: "Eskom Survey",
-                        href: "/eskom-survey",
-                        description: "Complete Eskom site survey",
+                        title: "Create New Survey",
+                        href: "/eskom-survey/new",
+                        description: "Create a new Eskom site survey",
                         icon: <FileSpreadsheet className="h-4 w-4" />,
                       },
                       {
@@ -142,7 +142,7 @@ const DynamicHeader: React.FC = () => {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavLink 
-                  to="/eskom-site-survey" 
+                  to="/eskom-survey" 
                   className={({ isActive }) => 
                     `group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground ${
                       isActive ? 'bg-accent text-accent-foreground' : ''
