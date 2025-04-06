@@ -74,10 +74,10 @@ const DynamicHeader: React.FC = () => {
                         icon: <MapPin className="h-4 w-4" />,
                       },
                       {
-                        title: "Site Assessment",
-                        href: "/assessment",
-                        description: "Complete a new site assessment form",
-                        icon: <Clipboard className="h-4 w-4" />,
+                        title: "Eskom Site Survey",
+                        href: "/eskom-site-survey",
+                        description: "Complete Eskom site survey",
+                        icon: <FileSpreadsheet className="h-4 w-4" />,
                       },
                       {
                         title: "Installation",
@@ -142,14 +142,14 @@ const DynamicHeader: React.FC = () => {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavLink 
-                  to="/assessment" 
+                  to="/eskom-site-survey" 
                   className={({ isActive }) => 
                     `group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground ${
                       isActive ? 'bg-accent text-accent-foreground' : ''
                     }`
                   }
                 >
-                  Assessment
+                  Eskom Site Survey
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>

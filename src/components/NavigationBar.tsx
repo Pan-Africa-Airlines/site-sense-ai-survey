@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert, Badge } from "lucide-react";
+import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert, Badge, FileSpreadsheet } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -55,9 +56,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
     switch(location.pathname) {
       case "/": return "Dashboard";
       case "/car-check": return "Vehicle Check";
-      case "/assessment": return "Site Assessment";
+      case "/eskom-site-survey": return "Eskom Site Survey";
+      case "/eskom-survey": return "Eskom Site Survey";
       case "/installation": return "Installation";
-      case "/eskom-survey": return "Eskom Survey";
       case "/eskom-surveys": return "Eskom Surveys";
       default: return "";
     }
@@ -112,12 +113,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               <Car className={`mr-1 transition-all duration-300 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Vehicle Check
             </Button>
             <Button
-              variant={isActive("/assessment") ? "default" : "ghost"}
+              variant={isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "default" : "ghost"}
               size={isCompact ? "xs" : "sm"}
-              onClick={() => navigate("/assessment")}
-              className={`transition-all duration-300 ${isActive("/assessment") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
+              onClick={() => navigate("/eskom-site-survey")}
+              className={`transition-all duration-300 ${isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
             >
-              <ClipboardList className={`mr-1 transition-all duration-300 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Site Assessment
+              <FileSpreadsheet className={`mr-1 transition-all duration-300 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Eskom Site Survey
             </Button>
             <Button
               variant={isActive("/installation") ? "default" : "ghost"}

@@ -7,7 +7,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AIProvider } from "@/contexts/AIContext";
 import Index from "./pages/Index";
-import Assessment from "./pages/Assessment";
 import Installation from "./pages/Installation";
 import CarCheckup from "./pages/CarCheckup";
 import Configuration from "./pages/Configuration";
@@ -131,17 +130,12 @@ const App = () => {
                   } 
                 />
                 
+                {/* Remove the /assessment route and redirect to /eskom-survey */}
                 <Route 
                   path="/assessment" 
-                  element={
-                    <ProtectedRoute>
-                      <div className="flex flex-col min-h-screen">
-                        <Assessment />
-                        <Footer />
-                      </div>
-                    </ProtectedRoute>
-                  } 
+                  element={<Navigate to="/eskom-survey" replace />} 
                 />
+                
                 <Route 
                   path="/installation" 
                   element={
