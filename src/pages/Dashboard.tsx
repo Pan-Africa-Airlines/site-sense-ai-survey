@@ -51,6 +51,27 @@ const chartConfig = {
   }
 };
 
+const aiInsights = [
+  {
+    type: "predictive",
+    title: "Predictive Analysis",
+    description: "Equipment at site B12 showing early signs of performance degradation. Maintenance recommended within 14 days.",
+    icon: <TrendingUp className="h-5 w-5 text-blue-500" />
+  },
+  {
+    type: "alert",
+    title: "Network Anomaly Detected",
+    description: "Unusual traffic pattern detected in Sandton branch. Possible security concern.",
+    icon: <AlertTriangle className="h-5 w-5 text-amber-500" />
+  },
+  {
+    type: "optimization",
+    title: "Resource Optimization",
+    description: "Team C deployment efficiency increased by 12% this month. Review best practices for implementation across teams.",
+    icon: <Check className="h-5 w-5 text-green-500" />
+  }
+];
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -89,27 +110,6 @@ const Dashboard = () => {
     navigate("/car-check");
   };
 
-  const aiInsights = [
-    {
-      type: "predictive",
-      title: "Predictive Analysis",
-      description: "Equipment at site B12 showing early signs of performance degradation. Maintenance recommended within 14 days.",
-      icon: <TrendingUp className="h-5 w-5 text-blue-500" />
-    },
-    {
-      type: "alert",
-      title: "Network Anomaly Detected",
-      description: "Unusual traffic pattern detected in Sandton branch. Possible security concern.",
-      icon: <AlertTriangle className="h-5 w-5 text-amber-500" />
-    },
-    {
-      type: "optimization",
-      title: "Resource Optimization",
-      description: "Team C deployment efficiency increased by 12% this month. Review best practices for implementation across teams.",
-      icon: <Check className="h-5 w-5 text-green-500" />
-    }
-  ];
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -134,7 +134,28 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Site Allocations Section */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          <Brain className="h-5 w-5 text-akhanya" />
+          <h2 className="text-xl font-semibold text-akhanya">AI Insights</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {aiInsights.map((insight, index) => (
+            <Card key={index} className="border-l-4 border-l-akhanya">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-md">{insight.title}</CardTitle>
+                  {insight.icon}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">{insight.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="h-5 w-5 text-akhanya" />
@@ -159,28 +180,6 @@ const Dashboard = () => {
             onVehicleCheck={handleVehicleCheck}
           />
         )}
-      </div>
-
-      <div className="mb-12">
-        <div className="flex items-center gap-2 mb-4">
-          <Brain className="h-5 w-5 text-akhanya" />
-          <h2 className="text-xl font-semibold text-akhanya">AI Insights</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {aiInsights.map((insight, index) => (
-            <Card key={index} className="border-l-4 border-l-akhanya">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-md">{insight.title}</CardTitle>
-                  {insight.icon}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">{insight.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">

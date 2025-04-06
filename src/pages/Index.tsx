@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import DynamicHeader from "@/components/DynamicHeader";
+import NavigationBar from "@/components/NavigationBar";
 import Dashboard from "./Dashboard";
 import { useNavigate } from "react-router-dom";
 
@@ -16,7 +16,7 @@ const Index = () => {
   
   return (
     <>
-      <DynamicHeader />
+      <NavigationBar />
       <Dashboard />
     </>
   );

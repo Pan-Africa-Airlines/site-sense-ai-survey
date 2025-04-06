@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert } from "lucide-react";
+import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert, Badge } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -39,6 +39,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   };
   
   const userEmail = localStorage.getItem("userEmail") || "User";
+  const userName = userEmail.split('@')[0].split('.').map(name => 
+    name.charAt(0).toUpperCase() + name.slice(1)
+  ).join(' ');
   
   // Get initials from email for the avatar fallback
   const getInitials = (email: string) => {
@@ -132,7 +135,16 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
           </div>
           
           <div className="flex items-center gap-3">
-            <div className="text-sm text-gray-600 hidden md:block">{userEmail}</div>
+            {/* Engineer name and role section */}
+            <div className="hidden md:flex items-center gap-2 mr-2">
+              <div className="text-right">
+                <div className="font-medium text-akhanya">{userName}</div>
+                <div className="text-xs text-gray-500 flex items-center">
+                  <Badge className="h-3 w-3 mr-1" />
+                  Field Engineer
+                </div>
+              </div>
+            </div>
             
             {/* Profile dropdown menu */}
             <DropdownMenu>
