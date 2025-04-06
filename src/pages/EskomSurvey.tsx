@@ -1,17 +1,52 @@
 
 import React, { useState } from "react";
 import NavigationBar from "@/components/NavigationBar";
-import EskomSiteSurveyForm from "@/components/EskomSiteSurveyForm";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { Button } from "@/components/ui/button";
 import { useAI } from "@/contexts/AIContext";
-import { Sparkles, FileText } from "lucide-react";
+import { Sparkles, FileText, Save } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 import Footer from "@/components/Footer";
+import EskomSurveyTabs from "@/components/EskomSurveyTabs";
 
 const EskomSurvey = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const { isProcessing } = useAI();
+  
+  const [formData, setFormData] = useState({
+    // Site Information
+    siteName: "",
+    region: "",
+    date: "",
+    
+    // Equipment Room General
+    cableAccess: "",
+    roomLighting: "",
+    fireProtection: "",
+    coolingMethod: "",
+    coolingRating: "",
+    roomTemperature: "",
+    equipmentRoomCondition: "",
+    
+    // Cabinet Space Planning
+    roomLayoutDrawing: "",
+    numberOfRouters: "",
+    roomLayoutMarkup: ""
+  });
+  
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  const handleSave = () => {
+    // Here you would normally save the data to a database
+    console.log("Saving form data:", formData);
+    toast.success("Survey data saved successfully!");
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -66,11 +101,23 @@ const EskomSurvey = () => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            
+            <Button 
+              onClick={handleSave}
+              className="flex items-center gap-2 bg-akhanya hover:bg-akhanya-dark"
+            >
+              <Save className="h-4 w-4" />
+              Save Survey
+            </Button>
           </div>
         </div>
         
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <EskomSiteSurveyForm showAIRecommendations={showAIRecommendations} />
+          <EskomSurveyTabs 
+            formData={formData} 
+            onInputChange={handleInputChange} 
+            showAIRecommendations={showAIRecommendations} 
+          />
         </div>
       </div>
       <Footer />
