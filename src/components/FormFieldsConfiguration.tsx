@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,7 +40,7 @@ export interface FormConfig {
   };
 }
 
-// Initial configuration with some example fields
+// Initial configuration with some example fields and our new Eskom survey fields
 const defaultConfig: FormConfig = {
   assessment: {
     sections: ["Basic Information", "Site Details", "Requirements", "Technical Details"],
@@ -91,8 +92,23 @@ const defaultConfig: FormConfig = {
     ]
   },
   eskomSurvey: {
-    sections: ["Site Information", "Site Visit Attendees", "Equipment Details", "Power & Transport", "Annexures"],
+    sections: [
+      "Site Information", 
+      "Site Visit Attendees", 
+      "Site Survey Outcome",
+      "Site Identification",
+      "Equipment Location",
+      "Access Procedure",
+      "Equipment Room General",
+      "Cabinet Space Planning",
+      "Transport Platforms",
+      "DC Power Distribution",
+      "Installation Requirements",
+      "Optical Distribution Frame",
+      "Annexures"
+    ],
     fields: [
+      // Site Information section
       {
         id: "siteName",
         type: "text",
@@ -105,12 +121,732 @@ const defaultConfig: FormConfig = {
       },
       {
         id: "region",
-        type: "text",
+        type: "select",
         label: "Region",
-        placeholder: "Enter region",
         required: true,
+        options: ["Gauteng", "Western Cape", "KwaZulu-Natal", "Eastern Cape", "Limpopo", "Mpumalanga", "North West", "Free State", "Northern Cape"],
         section: "Site Information",
         order: 1,
+        active: true
+      },
+      {
+        id: "date",
+        type: "date",
+        label: "Date",
+        required: true,
+        section: "Site Information",
+        order: 2,
+        active: true
+      },
+      {
+        id: "buildingPhoto",
+        type: "text",
+        label: "Building Photo",
+        placeholder: "Full front view photo of building where IP/MPLS equipment will be situated",
+        required: true,
+        section: "Site Information",
+        order: 3,
+        active: true
+      },
+
+      // Site Visit Attendees section
+      {
+        id: "attendeeName1",
+        type: "text",
+        label: "Attendee 1 Name",
+        placeholder: "Enter name",
+        required: true,
+        section: "Site Visit Attendees",
+        order: 0,
+        active: true
+      },
+      {
+        id: "attendeeCompany1",
+        type: "text",
+        label: "Attendee 1 Company",
+        placeholder: "Enter company",
+        required: true,
+        section: "Site Visit Attendees",
+        order: 1,
+        active: true
+      },
+      {
+        id: "attendeeDepartment1",
+        type: "text",
+        label: "Attendee 1 Department",
+        placeholder: "Enter department",
+        required: true,
+        section: "Site Visit Attendees",
+        order: 2,
+        active: true
+      },
+      {
+        id: "attendeeCellphone1",
+        type: "text",
+        label: "Attendee 1 Cellphone",
+        placeholder: "Enter cellphone",
+        required: true,
+        section: "Site Visit Attendees",
+        order: 3,
+        active: true
+      },
+
+      // Site Survey Outcome section
+      {
+        id: "oemContractorName",
+        type: "text",
+        label: "OEM Contractor Name",
+        placeholder: "Enter name",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 0,
+        active: true
+      },
+      {
+        id: "oemContractorSignature",
+        type: "text",
+        label: "OEM Contractor Signature",
+        placeholder: "Enter signature",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 1,
+        active: true
+      },
+      {
+        id: "oemContractorDate",
+        type: "date",
+        label: "OEM Contractor Date",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 2,
+        active: true
+      },
+      {
+        id: "oemContractorStatus",
+        type: "select",
+        label: "OEM Contractor Status",
+        required: true,
+        options: ["Accepted", "Rejected"],
+        section: "Site Survey Outcome",
+        order: 3,
+        active: true
+      },
+      {
+        id: "oemContractorComments",
+        type: "textarea",
+        label: "OEM Contractor Comments",
+        placeholder: "Enter comments",
+        required: false,
+        section: "Site Survey Outcome",
+        order: 4,
+        active: true
+      },
+      {
+        id: "oemEngineerName",
+        type: "text",
+        label: "OEM Engineer Name",
+        placeholder: "Enter name",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 5,
+        active: true
+      },
+      {
+        id: "oemEngineerSignature",
+        type: "text",
+        label: "OEM Engineer Signature",
+        placeholder: "Enter signature",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 6,
+        active: true
+      },
+      {
+        id: "oemEngineerDate",
+        type: "date",
+        label: "OEM Engineer Date",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 7,
+        active: true
+      },
+      {
+        id: "oemEngineerStatus",
+        type: "select",
+        label: "OEM Engineer Status",
+        required: true,
+        options: ["Accepted", "Rejected"],
+        section: "Site Survey Outcome",
+        order: 8,
+        active: true
+      },
+      {
+        id: "oemEngineerComments",
+        type: "textarea",
+        label: "OEM Engineer Comments",
+        placeholder: "Enter comments",
+        required: false,
+        section: "Site Survey Outcome",
+        order: 9,
+        active: true
+      },
+      {
+        id: "eskomRepresentativeName",
+        type: "text",
+        label: "Eskom Representative Name",
+        placeholder: "Enter name",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 10,
+        active: true
+      },
+      {
+        id: "eskomRepresentativeSignature",
+        type: "text",
+        label: "Eskom Representative Signature",
+        placeholder: "Enter signature",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 11,
+        active: true
+      },
+      {
+        id: "eskomRepresentativeDate",
+        type: "date",
+        label: "Eskom Representative Date",
+        required: true,
+        section: "Site Survey Outcome",
+        order: 12,
+        active: true
+      },
+      {
+        id: "eskomRepresentativeStatus",
+        type: "select",
+        label: "Eskom Representative Status",
+        required: true,
+        options: ["Accepted", "Rejected"],
+        section: "Site Survey Outcome",
+        order: 13,
+        active: true
+      },
+      {
+        id: "eskomRepresentativeComments",
+        type: "textarea",
+        label: "Eskom Representative Comments",
+        placeholder: "Enter comments",
+        required: false,
+        section: "Site Survey Outcome",
+        order: 14,
+        active: true
+      },
+
+      // Site Identification section
+      {
+        id: "siteID",
+        type: "text",
+        label: "Site ID (WorkPlace ID)",
+        placeholder: "Enter site ID",
+        required: true,
+        section: "Site Identification",
+        order: 0,
+        active: true
+      },
+      {
+        id: "siteType",
+        type: "text",
+        label: "Site Type",
+        placeholder: "Sub-TX, RS, PS-Coal",
+        required: true,
+        section: "Site Identification",
+        order: 1,
+        active: true
+      },
+      {
+        id: "addressLocation",
+        type: "textarea",
+        label: "Address/Location Description",
+        placeholder: "Enter address/location description",
+        required: true,
+        section: "Site Identification",
+        order: 2,
+        active: true
+      },
+      {
+        id: "gpsCoordinates",
+        type: "text",
+        label: "GPS coordinates WGS84 (Lat/Long)",
+        placeholder: "Enter GPS coordinates",
+        required: true,
+        section: "Site Identification",
+        order: 3,
+        active: true
+      },
+      {
+        id: "siteLocationMap",
+        type: "text",
+        label: "Site Location Map",
+        placeholder: "Please provide a Google Map view of the site location with coordinates",
+        required: true,
+        section: "Site Identification",
+        order: 4,
+        active: true
+      },
+
+      // Equipment Location section
+      {
+        id: "buildingName",
+        type: "text",
+        label: "Building name",
+        placeholder: "Enter building name",
+        required: true,
+        section: "Equipment Location",
+        order: 0,
+        active: true
+      },
+      {
+        id: "buildingType",
+        type: "text",
+        label: "Building type",
+        placeholder: "e.g. Container, Brick",
+        required: true,
+        section: "Equipment Location",
+        order: 1,
+        active: true
+      },
+      {
+        id: "floorLevel",
+        type: "text",
+        label: "Floor level",
+        placeholder: "Enter floor level",
+        required: true,
+        section: "Equipment Location",
+        order: 2,
+        active: true
+      },
+      {
+        id: "equipmentRoomNumber",
+        type: "text",
+        label: "Equipment Room number / name",
+        placeholder: "Enter equipment room number/name",
+        required: true,
+        section: "Equipment Location",
+        order: 3,
+        active: true
+      },
+
+      // Access Procedure section
+      {
+        id: "siteAccessRequirements",
+        type: "textarea",
+        label: "Requirements for site access",
+        placeholder: "Enter requirements for site access",
+        required: true,
+        section: "Access Procedure",
+        order: 0,
+        active: true
+      },
+      {
+        id: "siteSecurityRequirements",
+        type: "textarea",
+        label: "Site security requirements",
+        placeholder: "Enter site security requirements",
+        required: true,
+        section: "Access Procedure",
+        order: 1,
+        active: true
+      },
+      {
+        id: "vehicleTypeToReachSite",
+        type: "text",
+        label: "Vehicle type to reach site",
+        placeholder: "Enter vehicle type to reach site",
+        required: true,
+        section: "Access Procedure",
+        order: 2,
+        active: true
+      },
+      {
+        id: "contactName1",
+        type: "text",
+        label: "Contact name 1",
+        placeholder: "Enter contact name",
+        required: true,
+        section: "Access Procedure",
+        order: 3,
+        active: true
+      },
+      {
+        id: "contactCellphone1",
+        type: "text",
+        label: "Contact cellphone 1",
+        placeholder: "Enter contact cellphone",
+        required: true,
+        section: "Access Procedure",
+        order: 4,
+        active: true
+      },
+      {
+        id: "contactEmail1",
+        type: "text",
+        label: "Contact email 1",
+        placeholder: "Enter contact email",
+        required: true,
+        section: "Access Procedure",
+        order: 5,
+        active: true
+      },
+
+      // Equipment Room General section
+      {
+        id: "cableAccess",
+        type: "text",
+        label: "Cable access to the cabinet",
+        placeholder: "Underfloor, Overhead",
+        required: true,
+        section: "Equipment Room General",
+        order: 0,
+        active: true
+      },
+      {
+        id: "roomLighting",
+        type: "text",
+        label: "Room lighting",
+        placeholder: "Indicate if any lights are faulty",
+        required: true,
+        section: "Equipment Room General",
+        order: 1,
+        active: true
+      },
+      {
+        id: "fireProtection",
+        type: "text",
+        label: "Fire Protection",
+        placeholder: "Enter fire protection details",
+        required: true,
+        section: "Equipment Room General",
+        order: 2,
+        active: true
+      },
+      {
+        id: "coolingMethod",
+        type: "text",
+        label: "Cooling Method",
+        placeholder: "Air-conditioning, Fans etc",
+        required: true,
+        section: "Equipment Room General",
+        order: 3,
+        active: true
+      },
+      {
+        id: "coolingRating",
+        type: "text",
+        label: "Cooling Rating",
+        placeholder: "BTU or Central Controlled",
+        required: true,
+        section: "Equipment Room General",
+        order: 4,
+        active: true
+      },
+      {
+        id: "roomTemperature",
+        type: "text",
+        label: "Measured room temperature (Deg C)",
+        placeholder: "Enter room temperature",
+        required: true,
+        section: "Equipment Room General",
+        order: 5,
+        active: true
+      },
+      {
+        id: "equipmentRoomCondition",
+        type: "textarea",
+        label: "General condition of equipment room",
+        placeholder: "Enter general condition of equipment room",
+        required: true,
+        section: "Equipment Room General",
+        order: 6,
+        active: true
+      },
+
+      // Cabinet Space Planning section
+      {
+        id: "roomLayoutDrawing",
+        type: "textarea",
+        label: "Room Layout Drawing",
+        placeholder: "Description of room layout drawing",
+        required: true,
+        section: "Cabinet Space Planning",
+        order: 0,
+        active: true
+      },
+      {
+        id: "numberOfRouters",
+        type: "number",
+        label: "Number of new routers required",
+        placeholder: "Enter number of routers",
+        required: true,
+        section: "Cabinet Space Planning",
+        order: 1,
+        active: true
+      },
+      {
+        id: "roomLayoutMarkup",
+        type: "textarea",
+        label: "Room Layout Markup",
+        placeholder: "Please red-line Room Layout Drawing to indicate locations of equipment",
+        required: true,
+        section: "Cabinet Space Planning",
+        order: 2,
+        active: true
+      },
+
+      // Transport Platforms section
+      {
+        id: "link1",
+        type: "text",
+        label: "Link 1 – Link Type, Direction, Capacity",
+        placeholder: "Enter link details",
+        required: true,
+        section: "Transport Platforms",
+        order: 0,
+        active: true
+      },
+      {
+        id: "link2",
+        type: "text",
+        label: "Link 2 – Link Type, Direction, Capacity",
+        placeholder: "Enter link details",
+        required: false,
+        section: "Transport Platforms",
+        order: 1,
+        active: true
+      },
+      {
+        id: "link3",
+        type: "text",
+        label: "Link 3 – Link Type, Direction, Capacity",
+        placeholder: "Enter link details",
+        required: false,
+        section: "Transport Platforms",
+        order: 2,
+        active: true
+      },
+      {
+        id: "link4",
+        type: "text",
+        label: "Link 4 – Link Type, Direction, Capacity",
+        placeholder: "Enter link details",
+        required: false,
+        section: "Transport Platforms",
+        order: 3,
+        active: true
+      },
+
+      // DC Power Distribution section
+      {
+        id: "chargerALoadCurrent",
+        type: "text",
+        label: "50V Charger A: DC Load Current (Total Amps)",
+        placeholder: "Enter load current",
+        required: true,
+        section: "DC Power Distribution",
+        order: 0,
+        active: true
+      },
+      {
+        id: "chargerBLoadCurrent",
+        type: "text",
+        label: "50V Charger B: DC Load Current (Total Amps)",
+        placeholder: "Enter load current",
+        required: true,
+        section: "DC Power Distribution",
+        order: 1,
+        active: true
+      },
+      {
+        id: "cabinetsSupplyMethod",
+        type: "text",
+        label: "Cabinets supply method",
+        placeholder: "Are cabinets supplied by the 50V DC Charger direct or via End of Aisle (EOA) DB boards?",
+        required: true,
+        section: "DC Power Distribution",
+        order: 2,
+        active: true
+      },
+      {
+        id: "dcCableLength",
+        type: "text",
+        label: "DC Cable length required to OTN cabinet",
+        placeholder: "Enter cable length",
+        required: true,
+        section: "DC Power Distribution",
+        order: 3,
+        active: true
+      },
+
+      // Installation Requirements section
+      {
+        id: "accessSecurity",
+        type: "textarea",
+        label: "Access & Security",
+        placeholder: "Enter access and security requirements",
+        required: true,
+        section: "Installation Requirements",
+        order: 0,
+        active: true
+      },
+      {
+        id: "coolingVentilation",
+        type: "textarea",
+        label: "Cooling & Ventilation",
+        placeholder: "Enter cooling and ventilation details",
+        required: true,
+        section: "Installation Requirements",
+        order: 1,
+        active: true
+      },
+      {
+        id: "flooringType",
+        type: "text",
+        label: "Flooring Type",
+        placeholder: "Enter flooring type",
+        required: true,
+        section: "Installation Requirements",
+        order: 2,
+        active: true
+      },
+      {
+        id: "installFireProtection",
+        type: "text",
+        label: "Fire Protection",
+        placeholder: "Enter fire protection details",
+        required: true,
+        section: "Installation Requirements",
+        order: 3,
+        active: true
+      },
+      {
+        id: "installRoomLighting",
+        type: "text",
+        label: "Room Lighting",
+        placeholder: "Enter room lighting details",
+        required: true,
+        section: "Installation Requirements",
+        order: 4,
+        active: true
+      },
+      {
+        id: "roofType",
+        type: "text",
+        label: "Roof type",
+        placeholder: "Enter roof type",
+        required: true,
+        section: "Installation Requirements",
+        order: 5,
+        active: true
+      },
+      {
+        id: "powerCables",
+        type: "textarea",
+        label: "Power cable(s)",
+        placeholder: "Enter power cable details",
+        required: true,
+        section: "Installation Requirements",
+        order: 6,
+        active: true
+      },
+      {
+        id: "generalRemarks",
+        type: "textarea",
+        label: "General Remarks",
+        placeholder: "Enter any general remarks",
+        required: false,
+        section: "Installation Requirements",
+        order: 7,
+        active: true
+      },
+
+      // Optical Distribution Frame section 
+      {
+        id: "odfCabinetName1",
+        type: "text",
+        label: "ODF Cabinet Name 1",
+        placeholder: "Enter cabinet name",
+        required: true,
+        section: "Optical Distribution Frame",
+        order: 0,
+        active: true
+      },
+      {
+        id: "odfDirection1",
+        type: "text",
+        label: "ODF Direction 1",
+        placeholder: "Enter direction",
+        required: true,
+        section: "Optical Distribution Frame",
+        order: 1,
+        active: true
+      },
+      {
+        id: "odfConnectionType1",
+        type: "text",
+        label: "ODF Connection Type 1",
+        placeholder: "Enter connection type",
+        required: true,
+        section: "Optical Distribution Frame",
+        order: 2,
+        active: true
+      },
+      {
+        id: "odfNumberOfCores1",
+        type: "text",
+        label: "ODF Number of Cores 1",
+        placeholder: "Enter number of cores",
+        required: true,
+        section: "Optical Distribution Frame",
+        order: 3,
+        active: true
+      },
+
+      // Annexures section
+      {
+        id: "annexureBCabinetLayout",
+        type: "textarea",
+        label: "Annexure B – Cabinet Layout",
+        placeholder: "Enter cabinet layout details",
+        required: false,
+        section: "Annexures",
+        order: 0,
+        active: true
+      },
+      {
+        id: "annexureCChargerLabel",
+        type: "text",
+        label: "Charger Label/Name",
+        placeholder: "Enter charger label/name",
+        required: false,
+        section: "Annexures",
+        order: 1,
+        active: true
+      },
+      {
+        id: "annexureCChargerType",
+        type: "select",
+        label: "Single or Dual Charger",
+        options: ["Single", "Dual"],
+        required: false,
+        section: "Annexures",
+        order: 2,
+        active: true
+      },
+      {
+        id: "annexureFRoomLayout",
+        type: "textarea",
+        label: "Annexure F: Room Layout Drawing",
+        placeholder: "Enter room layout details",
+        required: false,
+        section: "Annexures",
+        order: 3,
         active: true
       }
     ]
