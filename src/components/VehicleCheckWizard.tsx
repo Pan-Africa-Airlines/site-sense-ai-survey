@@ -137,7 +137,7 @@ const VehicleCheckWizard: React.FC<VehicleCheckWizardProps> = ({
       toast({
         title: "Check Complete",
         description: "All vehicle checks completed successfully!",
-        variant: "success"
+        variant: "default" // Changed from "success" to "default"
       });
     }
   };
