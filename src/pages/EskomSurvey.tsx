@@ -70,20 +70,7 @@ const EskomSurvey = () => {
         </div>
         
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex justify-end mb-4">
-            <BCXLogo className="w-24 h-12" />
-          </div>
-          
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold mb-2">ESKOM OT IP/MPLS NETWORK</h1>
-            <h2 className="text-2xl font-bold">SITE SURVEY REPORT</h2>
-          </div>
-          
           <EskomSiteSurveyForm showAIRecommendations={showAIRecommendations} />
-        </div>
-        
-        <div className="text-sm text-gray-500 mt-4 text-right">
-          <p>Page 1 of 1</p>
         </div>
       </div>
     </div>

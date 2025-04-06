@@ -11,9 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import ImageCapture from "./ImageCapture";
 import { Json } from "@/integrations/supabase/types";
-import { Save, MapPin, ChevronRight, ChevronLeft } from "lucide-react";
+import { Save, MapPin, ChevronRight, ChevronLeft, PlusCircle } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 interface FormTabProps {
   children: React.ReactNode;
@@ -52,6 +54,25 @@ const TableInputRow: React.FC<TableInputRowProps> = ({ label, name, value, onCha
   );
 };
 
+// Interface for site attendee
+interface SiteAttendee {
+  date: string;
+  name: string;
+  company: string;
+  department: string;
+  cellphone: string;
+}
+
+// Interface for approval section
+interface ApprovalSection {
+  name: string;
+  signature: string;
+  date: string;
+  accepted: boolean;
+  rejected: boolean;
+  comments: string;
+}
+
 const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const [currentTab, setCurrentTab] = useState("cover");
   const [formProgress, setFormProgress] = useState(0);
@@ -66,6 +87,44 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const [address, setAddress] = useState("");
   const [gpsCoordinates, setGpsCoordinates] = useState("");
   const [engineerId, setEngineerId] = useState("");
+  
+  // Site visit attendees
+  const [attendees, setAttendees] = useState<SiteAttendee[]>([
+    { date: "", name: "", company: "", department: "", cellphone: "" },
+    { date: "", name: "", company: "", department: "", cellphone: "" },
+    { date: "", name: "", company: "", department: "", cellphone: "" },
+    { date: "", name: "", company: "", department: "", cellphone: "" },
+    { date: "", name: "", company: "", department: "", cellphone: "" },
+    { date: "", name: "", company: "", department: "", cellphone: "" },
+  ]);
+  
+  // Approval sections
+  const [oemContractor, setOemContractor] = useState<ApprovalSection>({
+    name: "",
+    signature: "",
+    date: "",
+    accepted: false,
+    rejected: false,
+    comments: ""
+  });
+  
+  const [oemEngineer, setOemEngineer] = useState<ApprovalSection>({
+    name: "",
+    signature: "",
+    date: "",
+    accepted: false,
+    rejected: false,
+    comments: ""
+  });
+  
+  const [eskomRepresentative, setEskomRepresentative] = useState<ApprovalSection>({
+    name: "",
+    signature: "",
+    date: "",
+    accepted: false,
+    rejected: false,
+    comments: ""
+  });
   
   // Use the geolocation hook
   const { latitude, longitude, loading, error, retry, address: geoAddress } = useGeolocation();
@@ -141,6 +200,35 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     }
   };
 
+  // Handle attendee changes
+  const handleAttendeeChange = (index: number, field: keyof SiteAttendee, value: string) => {
+    const updatedAttendees = [...attendees];
+    updatedAttendees[index] = {
+      ...updatedAttendees[index],
+      [field]: value
+    };
+    setAttendees(updatedAttendees);
+  };
+
+  // Handle approval section changes
+  const handleApprovalChange = (
+    section: "oemContractor" | "oemEngineer" | "eskomRepresentative",
+    field: keyof ApprovalSection,
+    value: string | boolean
+  ) => {
+    switch (section) {
+      case "oemContractor":
+        setOemContractor({ ...oemContractor, [field]: value });
+        break;
+      case "oemEngineer":
+        setOemEngineer({ ...oemEngineer, [field]: value });
+        break;
+      case "eskomRepresentative":
+        setEskomRepresentative({ ...eskomRepresentative, [field]: value });
+        break;
+    }
+  };
+
   const handleBuildingPhotoUpload = (photoUrl: string) => {
     setBuildingPhoto(photoUrl);
   };
@@ -166,7 +254,13 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
           lastUpdated: new Date().toISOString(),
           approved: false,  // Initial approval status
           approvedBy: null, // Will be filled by admin later
-          approvalDate: null // Will be filled by admin later
+          approvalDate: null, // Will be filled by admin later
+          attendees,
+          approvals: {
+            oemContractor,
+            oemEngineer,
+            eskomRepresentative
+          }
         } as Json
       };
       
@@ -218,7 +312,13 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
           formProgress,
           approved: false,
           approvedBy: null,
-          approvalDate: null
+          approvalDate: null,
+          attendees,
+          approvals: {
+            oemContractor,
+            oemEngineer,
+            eskomRepresentative
+          }
         } as Json
       };
       
@@ -251,12 +351,16 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const nextTab = () => {
     if (currentTab === "cover") {
       setCurrentTab("site-info");
+    } else if (currentTab === "site-info") {
+      setCurrentTab("attendees");
     }
   };
 
   const prevTab = () => {
     if (currentTab === "site-info") {
       setCurrentTab("cover");
+    } else if (currentTab === "attendees") {
+      setCurrentTab("site-info");
     }
   };
 
@@ -266,9 +370,10 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
 
       <form onSubmit={handleSubmit}>
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="cover">Cover Page</TabsTrigger>
             <TabsTrigger value="site-info">Site Information</TabsTrigger>
+            <TabsTrigger value="attendees">Attendees & Approval</TabsTrigger>
           </TabsList>
           
           <TabsContent value="cover" className="mt-4">
@@ -277,7 +382,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                 <div className="text-center mb-8 relative">
                   <div className="flex justify-end mb-4">
                     <img 
-                      src="/public/lovable-uploads/890a7ff6-5612-4deb-b38a-5d8492c4f971.png" 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
                       alt="BCX Logo" 
                       className="w-32"
                     />
@@ -349,7 +454,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                 </div>
                 
                 <div className="text-right mt-4">
-                  <p className="text-sm text-gray-500">Page 1 of 2</p>
+                  <p className="text-sm text-gray-500">Page 1 of 3</p>
                 </div>
               </CardContent>
             </Card>
@@ -486,9 +591,363 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
               )}
               
               <div className="text-right mt-4">
-                <p className="text-sm text-gray-500">Page 2 of 2</p>
+                <p className="text-sm text-gray-500">Page 2 of 3</p>
               </div>
             </div>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} variant="outline" className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="attendees" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold text-center mb-4">Site visit attendee's information</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-300">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="border border-gray-300 p-2 text-left">Date</th>
+                            <th className="border border-gray-300 p-2 text-left">Name</th>
+                            <th className="border border-gray-300 p-2 text-left">Company</th>
+                            <th className="border border-gray-300 p-2 text-left">Department</th>
+                            <th className="border border-gray-300 p-2 text-left">Cellphone</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {attendees.map((attendee, index) => (
+                            <tr key={index} className="border border-gray-300">
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="date"
+                                  value={attendee.date}
+                                  onChange={(e) => handleAttendeeChange(index, 'date', e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="text"
+                                  value={attendee.name}
+                                  onChange={(e) => handleAttendeeChange(index, 'name', e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="text"
+                                  value={attendee.company}
+                                  onChange={(e) => handleAttendeeChange(index, 'company', e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="text"
+                                  value={attendee.department}
+                                  onChange={(e) => handleAttendeeChange(index, 'department', e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="text"
+                                  value={attendee.cellphone}
+                                  onChange={(e) => handleAttendeeChange(index, 'cellphone', e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div className="mt-8">
+                    <h3 className="text-xl font-semibold text-center mb-4">Site survey outcome</h3>
+                    
+                    {/* OEM Contractor Section */}
+                    <div className="mb-6">
+                      <table className="w-full border-collapse border border-gray-300">
+                        <tbody>
+                          <tr className="bg-gray-100">
+                            <td colSpan={3} className="border border-gray-300 p-2 font-bold">OEM Contractor</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-2">Name</td>
+                            <td className="border border-gray-300 p-2">Signature</td>
+                            <td className="border border-gray-300 p-2">Date</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={oemContractor.name}
+                                onChange={(e) => handleApprovalChange("oemContractor", "name", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={oemContractor.signature}
+                                onChange={(e) => handleApprovalChange("oemContractor", "signature", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                                placeholder="Electronic signature"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="date"
+                                value={oemContractor.date}
+                                onChange={(e) => handleApprovalChange("oemContractor", "date", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="oem-contractor-accepted"
+                                    checked={oemContractor.accepted}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("oemContractor", "accepted", checked === true);
+                                      if (checked === true) handleApprovalChange("oemContractor", "rejected", false);
+                                    }}
+                                  />
+                                  <label htmlFor="oem-contractor-accepted">Accepted</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="oem-contractor-rejected"
+                                    checked={oemContractor.rejected}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("oemContractor", "rejected", checked === true);
+                                      if (checked === true) handleApprovalChange("oemContractor", "accepted", false);
+                                    }}
+                                  />
+                                  <label htmlFor="oem-contractor-rejected">Rejected</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 font-medium text-center">Comments</td>
+                          </tr>
+                          <tr>
+                            <td colSpan={3} className="border border-gray-300 p-1">
+                              <Textarea 
+                                value={oemContractor.comments}
+                                onChange={(e) => handleApprovalChange("oemContractor", "comments", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full min-h-[80px]"
+                                placeholder="Enter comments here"
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {/* OEM Engineer Section */}
+                    <div className="mb-6">
+                      <table className="w-full border-collapse border border-gray-300">
+                        <tbody>
+                          <tr className="bg-gray-100">
+                            <td colSpan={3} className="border border-gray-300 p-2 font-bold">OEM Engineer</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-2">Name</td>
+                            <td className="border border-gray-300 p-2">Signature</td>
+                            <td className="border border-gray-300 p-2">Date</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={oemEngineer.name}
+                                onChange={(e) => handleApprovalChange("oemEngineer", "name", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={oemEngineer.signature}
+                                onChange={(e) => handleApprovalChange("oemEngineer", "signature", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                                placeholder="Electronic signature"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="date"
+                                value={oemEngineer.date}
+                                onChange={(e) => handleApprovalChange("oemEngineer", "date", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="oem-engineer-accepted"
+                                    checked={oemEngineer.accepted}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("oemEngineer", "accepted", checked === true);
+                                      if (checked === true) handleApprovalChange("oemEngineer", "rejected", false);
+                                    }}
+                                  />
+                                  <label htmlFor="oem-engineer-accepted">Accepted</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="oem-engineer-rejected"
+                                    checked={oemEngineer.rejected}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("oemEngineer", "rejected", checked === true);
+                                      if (checked === true) handleApprovalChange("oemEngineer", "accepted", false);
+                                    }}
+                                  />
+                                  <label htmlFor="oem-engineer-rejected">Rejected</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 font-medium text-center">Comments</td>
+                          </tr>
+                          <tr>
+                            <td colSpan={3} className="border border-gray-300 p-1">
+                              <Textarea 
+                                value={oemEngineer.comments}
+                                onChange={(e) => handleApprovalChange("oemEngineer", "comments", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full min-h-[80px]"
+                                placeholder="Enter comments here"
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {/* Eskom Representative Section */}
+                    <div className="mb-6">
+                      <table className="w-full border-collapse border border-gray-300">
+                        <tbody>
+                          <tr className="bg-gray-100">
+                            <td colSpan={3} className="border border-gray-300 p-2 font-bold">Eskom Representative</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-2">Name</td>
+                            <td className="border border-gray-300 p-2">Signature</td>
+                            <td className="border border-gray-300 p-2">Date</td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={eskomRepresentative.name}
+                                onChange={(e) => handleApprovalChange("eskomRepresentative", "name", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={eskomRepresentative.signature}
+                                onChange={(e) => handleApprovalChange("eskomRepresentative", "signature", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                                placeholder="Electronic signature"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="date"
+                                value={eskomRepresentative.date}
+                                onChange={(e) => handleApprovalChange("eskomRepresentative", "date", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="eskom-representative-accepted"
+                                    checked={eskomRepresentative.accepted}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("eskomRepresentative", "accepted", checked === true);
+                                      if (checked === true) handleApprovalChange("eskomRepresentative", "rejected", false);
+                                    }}
+                                  />
+                                  <label htmlFor="eskom-representative-accepted">Accepted</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="eskom-representative-rejected"
+                                    checked={eskomRepresentative.rejected}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("eskomRepresentative", "rejected", checked === true);
+                                      if (checked === true) handleApprovalChange("eskomRepresentative", "accepted", false);
+                                    }}
+                                  />
+                                  <label htmlFor="eskom-representative-rejected">Rejected</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 font-medium text-center">Comments</td>
+                          </tr>
+                          <tr>
+                            <td colSpan={3} className="border border-gray-300 p-1">
+                              <Textarea 
+                                value={eskomRepresentative.comments}
+                                onChange={(e) => handleApprovalChange("eskomRepresentative", "comments", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full min-h-[80px]"
+                                placeholder="Enter comments here"
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-right mt-4">
+                  <p className="text-sm text-gray-500">Page 3 of 3</p>
+                </div>
+              </CardContent>
+            </Card>
             
             <div className="flex justify-between mt-4">
               <Button type="button" onClick={prevTab} variant="outline" className="flex items-center">
