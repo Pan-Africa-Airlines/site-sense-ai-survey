@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -6,6 +7,7 @@ import { Brain, TrendingUp, AlertTriangle, Check, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import EngineerSiteList from "@/components/EngineerSiteList";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardProps {
   vehicleCheckCompleted?: boolean;
@@ -13,6 +15,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [allocatedSites, setAllocatedSites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [engineerData, setEngineerData] = useState({
