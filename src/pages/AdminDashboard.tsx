@@ -1,12 +1,13 @@
-
 import React, { useEffect, useState } from "react";
 import AdminNavBar from "@/components/AdminNavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { ClipboardList, HardHat, Car, Clock } from "lucide-react";
+import { ClipboardList, HardHat, Car, Clock, MapPin } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock data for demonstration
 const MOCK_ASSESSMENT_DATA = [
   { id: 1, siteName: "Eskom Substation A", region: "Gauteng", date: "2025-04-01", status: "completed" },
   { id: 2, siteName: "Power Station B", region: "Western Cape", date: "2025-04-02", status: "pending" },
@@ -25,6 +26,8 @@ const MOCK_INSTALLATION_DATA = [
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean | null>(null);
+  const [engineerAllocations, setEngineerAllocations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
@@ -35,6 +38,31 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    const fetchEngineerAllocations = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('engineer_allocations')
+          .select('*');
+        
+        if (error) {
+          console.error("Error fetching allocations:", error);
+        } else {
+          setEngineerAllocations(data || []);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (isAdminAuthenticated) {
+      fetchEngineerAllocations();
+    }
+  }, [isAdminAuthenticated]);
+
   if (isAdminAuthenticated === null) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -43,7 +71,6 @@ const AdminDashboard = () => {
     return null;
   }
 
-  // Data for the region chart
   const regionData = [
     { name: "Gauteng", count: 12 },
     { name: "Western Cape", count: 8 },
@@ -53,7 +80,6 @@ const AdminDashboard = () => {
     { name: "Northern Cape", count: 3 },
   ];
 
-  // Data for the status chart
   const statusData = [
     { name: "Completed", value: 18 },
     { name: "Pending", value: 8 },
@@ -62,7 +88,6 @@ const AdminDashboard = () => {
 
   const COLORS = ["#00C49F", "#FFBB28", "#FF8042"];
 
-  // Calculate recent activity
   const recentAssessments = MOCK_ASSESSMENT_DATA.slice(0, 3);
   const recentInstallations = MOCK_INSTALLATION_DATA.slice(0, 2);
 
@@ -72,7 +97,6 @@ const AdminDashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
         
-        {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
@@ -131,7 +155,67 @@ const AdminDashboard = () => {
           </Card>
         </div>
         
-        {/* Charts */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center">
+            <MapPin className="mr-2 h-5 w-5 text-blue-600" />
+            Engineer Site Allocations
+          </h2>
+          <Card>
+            <CardContent className="p-6">
+              {isLoading ? (
+                <div className="py-4 text-center">
+                  <p className="text-gray-500">Loading allocations...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Site Name</TableHead>
+                      <TableHead>Region</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Scheduled Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {engineerAllocations.length > 0 ? (
+                      engineerAllocations.map((site) => (
+                        <TableRow key={site.id}>
+                          <TableCell className="font-medium">{site.site_name}</TableCell>
+                          <TableCell>{site.region}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              site.priority === 'high' ? 'destructive' : 
+                              site.priority === 'medium' ? 'default' : 'outline'
+                            }>
+                              {site.priority}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              site.status === 'completed' ? 'success' : 
+                              site.status === 'in-progress' ? 'secondary' : 'outline'
+                            }>
+                              {site.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{site.scheduled_date}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4">
+                          No site allocations found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader>
@@ -187,7 +271,6 @@ const AdminDashboard = () => {
           </Card>
         </div>
         
-        {/* Recent Activity */}
         <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>

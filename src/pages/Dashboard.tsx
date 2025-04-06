@@ -1,10 +1,14 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart, LineChart, PieChart, Bar, Line, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Brain, TrendingUp, AlertTriangle, Check } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Check, MapPin } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import EngineerSiteList from "@/components/EngineerSiteList";
+import { useToast } from "@/hooks/use-toast";
 
 const assessmentData = [
   { month: 'Jan', completed: 12, pending: 3 },
@@ -50,13 +54,42 @@ const chartConfig = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [allocatedSites, setAllocatedSites] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  React.useEffect(() => {
-    const loggedIn = localStorage.getItem("loggedIn");
-    if (!loggedIn) {
-      navigate("/login");
-    }
-  }, [navigate]);
+  useEffect(() => {
+    const fetchAllocatedSites = async () => {
+      try {
+        setIsLoading(true);
+        // In a production app, this would filter by the logged-in user's ID
+        const { data, error } = await supabase
+          .from('engineer_allocations')
+          .select('*');
+        
+        if (error) {
+          console.error("Error fetching allocations:", error);
+          toast({
+            title: "Error fetching site allocations",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          setAllocatedSites(data || []);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAllocatedSites();
+  }, [toast]);
+
+  const handleVehicleCheck = () => {
+    navigate("/car-check");
+  };
 
   const aiInsights = [
     {
@@ -101,6 +134,28 @@ const Dashboard = () => {
             New Assessment
           </Button>
         </div>
+      </div>
+
+      {/* Site Allocations Section */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin className="h-5 w-5 text-akhanya" />
+          <h2 className="text-xl font-semibold text-akhanya">My Site Allocations</h2>
+        </div>
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            {isLoading ? (
+              <div className="py-8 text-center">
+                <p className="text-gray-500">Loading site allocations...</p>
+              </div>
+            ) : (
+              <EngineerSiteList 
+                sites={allocatedSites} 
+                onVehicleCheck={handleVehicleCheck}
+              />
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="mb-12">

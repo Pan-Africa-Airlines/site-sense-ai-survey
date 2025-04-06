@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      engineer_allocations: {
+        Row: {
+          address: string | null
+          created_at: string
+          distance: number | null
+          id: string
+          priority: string
+          region: string
+          scheduled_date: string | null
+          site_id: string
+          site_name: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          distance?: number | null
+          id?: string
+          priority?: string
+          region: string
+          scheduled_date?: string | null
+          site_id: string
+          site_name: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          distance?: number | null
+          id?: string
+          priority?: string
+          region?: string
+          scheduled_date?: string | null
+          site_id?: string
+          site_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       site_surveys: {
         Row: {
           address: string | null

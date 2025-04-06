@@ -2,16 +2,22 @@
 import React from "react";
 import DynamicHeader from "@/components/DynamicHeader";
 import Dashboard from "./Dashboard";
-import NetworkingBanner from "@/components/NetworkingBanner";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("loggedIn");
+    if (!loggedIn) {
+      navigate("/login");
+    }
+  }, [navigate]);
+  
   return (
     <>
       <DynamicHeader />
-      <NetworkingBanner 
-        title="EskomSiteIQ Network Monitoring" 
-        subtitle="AI-powered real-time insights for your network infrastructure"
-      />
       <Dashboard />
     </>
   );
