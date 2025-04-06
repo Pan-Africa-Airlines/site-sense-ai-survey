@@ -4,13 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Camera, Import, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
 
 export interface ImageCaptureProps {
   onImageCaptured: (imageUrl: string) => void;
+  label?: string;
+  description?: string;
+  onCapture?: (imageUrl: string) => void;
+  capturedImage?: string;
 }
 
-const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageCaptured }) => {
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+const ImageCapture: React.FC<ImageCaptureProps> = ({ 
+  onImageCaptured, 
+  label, 
+  description,
+  onCapture,
+  capturedImage: externalCapturedImage
+}) => {
+  const [capturedImage, setCapturedImage] = useState<string | null>(externalCapturedImage || null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -36,8 +47,14 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageCaptured }) => {
         .from('lovable-uploads')
         .getPublicUrl(data.path);
       
-      setCapturedImage(publicUrlData.publicUrl);
-      onImageCaptured(publicUrlData.publicUrl);
+      const imageUrl = publicUrlData.publicUrl;
+      setCapturedImage(imageUrl);
+      onImageCaptured(imageUrl);
+      
+      // Call the alternate onCapture if provided
+      if (onCapture) {
+        onCapture(imageUrl);
+      }
       
       toast({
         title: "Image uploaded",
@@ -67,6 +84,16 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageCaptured }) => {
 
   return (
     <div className="flex flex-col">
+      {label && (
+        <Label className="block text-sm font-medium text-gray-700 mb-2">
+          {label}
+        </Label>
+      )}
+      
+      {description && (
+        <p className="text-sm text-gray-500 mb-2">{description}</p>
+      )}
+      
       <div className="flex space-x-2 mb-2">
         <Button
           type="button"
