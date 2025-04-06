@@ -80,14 +80,6 @@ const EquipmentPhotos: React.FC<EquipmentPhotosProps> = ({
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-center mb-6">
-        <img 
-          src="public/lovable-uploads/f4bbbf20-b8f5-4f87-8a68-bd14981cef3e.png" 
-          alt="BCX Logo" 
-          className="h-20 object-contain" 
-        />
-      </div>
-      
       <h2 className="text-xl font-bold border-b pb-2 mb-4">3. DETAILED SITE RECORDS - Equipment Photos</h2>
       
       {renderPhotoSection(
