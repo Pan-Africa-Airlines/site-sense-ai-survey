@@ -17,8 +17,32 @@ const EskomSurvey = () => {
   const [formData, setFormData] = useState({
     // Site Information
     siteName: "",
+    siteId: "",
+    siteType: "",
     region: "",
     date: "",
+    address: "",
+    gpsCoordinates: "",
+    buildingPhoto: "",
+    googleMapView: "",
+    
+    // Building Information
+    buildingName: "",
+    buildingType: "",
+    floorLevel: "",
+    equipmentRoomName: "",
+    
+    // Access Procedure
+    accessRequirements: "",
+    securityRequirements: "",
+    vehicleType: "",
+    
+    // Site Contacts
+    siteContacts: [
+      { name: "", cellphone: "", email: "" },
+      { name: "", cellphone: "", email: "" },
+      { name: "", cellphone: "", email: "" }
+    ],
     
     // Equipment Room General
     cableAccess: "",
@@ -32,14 +56,156 @@ const EskomSurvey = () => {
     // Cabinet Space Planning
     roomLayoutDrawing: "",
     numberOfRouters: "",
-    roomLayoutMarkup: ""
+    roomLayoutMarkup: "",
+    additionalDrawings: [""],
+    
+    // Transport Platforms
+    transportLinks: [
+      { linkNumber: "1", linkType: "", direction: "", capacity: "" },
+      { linkNumber: "2", linkType: "", direction: "", capacity: "" },
+      { linkNumber: "3", linkType: "", direction: "", capacity: "" },
+      { linkNumber: "4", linkType: "", direction: "", capacity: "" }
+    ],
+    
+    // DC Power
+    chargerA: "",
+    chargerB: "",
+    powerSupplyMethod: "",
+    cableLength: "",
+    endOfAisleLayout: "",
+    
+    // Photos
+    equipmentRoomPhotos: [""],
+    cabinetLocationPhotos: [""],
+    powerDistributionPhotos: [""],
+    transportEquipmentPhotos: [""],
+    opticalFramePhotos: [""],
+    accessEquipmentPhotos: [""],
+    cableRoutingPhotos: [""],
+    ceilingHVACPhotos: [""],
+    
+    // Requirements
+    accessSecurity: "",
+    coolingVentilation: "",
+    flooringType: "",
+    fireProt: "",
+    lighting: "",
+    roofType: "",
+    powerCables: "",
+    
+    // General Remarks
+    remarks: "",
+    
+    // ODF Layout
+    odfCabinets: [
+      {
+        name: "Cabinet 1",
+        direction: "",
+        connectionType: "",
+        cores: "",
+        usedPorts: {}
+      },
+      {
+        name: "Cabinet 2",
+        direction: "",
+        connectionType: "",
+        cores: "",
+        usedPorts: {}
+      },
+      {
+        name: "Cabinet 3",
+        direction: "",
+        connectionType: "",
+        cores: "",
+        usedPorts: {}
+      },
+      {
+        name: "Cabinet 4",
+        direction: "",
+        connectionType: "",
+        cores: "",
+        usedPorts: {}
+      }
+    ],
+    
+    // Cabinet Layout
+    cabinetLayoutDrawing: "",
+    
+    // 50V Charger Layout
+    chargerDetails: {
+      siteName: "",
+      chargerLabel: "",
+      chargerType: "Single",
+      chargerA: Array.from({ length: 26 }, (_, i) => ({
+        circuit: String.fromCharCode(65 + i),
+        mcbRating: "",
+        used: false,
+        label: ""
+      })),
+      chargerB: Array.from({ length: 26 }, (_, i) => ({
+        circuit: String.fromCharCode(65 + i),
+        mcbRating: "",
+        used: false,
+        label: ""
+      }))
+    },
+    
+    // Attendee Information
+    attendees: [
+      { date: "", name: "", company: "", department: "", cellphone: "" },
+      { date: "", name: "", company: "", department: "", cellphone: "" },
+      { date: "", name: "", company: "", department: "", cellphone: "" },
+      { date: "", name: "", company: "", department: "", cellphone: "" },
+      { date: "", name: "", company: "", department: "", cellphone: "" }
+    ],
+    
+    // Survey Outcome
+    oemContractor: {
+      name: "",
+      signature: "",
+      date: "",
+      accepted: false,
+      comments: ""
+    },
+    oemEngineer: {
+      name: "",
+      signature: "",
+      date: "",
+      accepted: false,
+      comments: ""
+    },
+    eskomRepresentative: {
+      name: "",
+      signature: "",
+      date: "",
+      accepted: false,
+      comments: ""
+    },
+    
+    // Room Layout Scanned Drawing
+    scannedRoomLayout: ""
   });
   
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      // Handle nested fields with dot notation (e.g., "oemContractor.name")
+      if (field.includes('.')) {
+        const [parentField, childField] = field.split('.');
+        return {
+          ...prev,
+          [parentField]: {
+            ...prev[parentField as keyof typeof prev],
+            [childField]: value
+          }
+        };
+      }
+      
+      // Handle regular fields
+      return {
+        ...prev,
+        [field]: value
+      };
+    });
   };
   
   const handleSave = () => {
@@ -53,7 +219,7 @@ const EskomSurvey = () => {
       <NavigationBar />
       <NetworkingBanner
         title="Eskom OT IP/MPLS Network"
-        subtitle="Site Survey Report - Site Information"
+        subtitle="Site Survey Report"
       />
       <div className="container mx-auto px-4 py-8 flex-grow">
         <div className="flex justify-between items-center mb-6">
