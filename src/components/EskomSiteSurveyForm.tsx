@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -73,6 +72,28 @@ interface ApprovalSection {
   comments: string;
 }
 
+// Interface for equipment location
+interface EquipmentLocation {
+  buildingName: string;
+  buildingType: string;
+  floorLevel: string;
+  roomNumber: string;
+}
+
+// Interface for access procedure
+interface AccessProcedure {
+  requirements: string;
+  securityRequirements: string;
+  vehicleType: string;
+}
+
+// Interface for site owner contact
+interface SiteOwnerContact {
+  name: string;
+  cellphone: string;
+  email: string;
+}
+
 const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const [currentTab, setCurrentTab] = useState("cover");
   const [formProgress, setFormProgress] = useState(0);
@@ -96,6 +117,28 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     { date: "", name: "", company: "", department: "", cellphone: "" },
     { date: "", name: "", company: "", department: "", cellphone: "" },
     { date: "", name: "", company: "", department: "", cellphone: "" },
+  ]);
+  
+  // Equipment location information
+  const [equipmentLocation, setEquipmentLocation] = useState<EquipmentLocation>({
+    buildingName: "",
+    buildingType: "",
+    floorLevel: "",
+    roomNumber: ""
+  });
+
+  // Access procedure information
+  const [accessProcedure, setAccessProcedure] = useState<AccessProcedure>({
+    requirements: "",
+    securityRequirements: "",
+    vehicleType: ""
+  });
+
+  // Site owner contacts
+  const [siteOwnerContacts, setSiteOwnerContacts] = useState<SiteOwnerContact[]>([
+    { name: "", cellphone: "", email: "" },
+    { name: "", cellphone: "", email: "" },
+    { name: "", cellphone: "", email: "" }
   ]);
   
   // Approval sections
@@ -200,6 +243,32 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     }
   };
 
+  // Handle equipment location changes
+  const handleEquipmentLocationChange = (field: keyof EquipmentLocation, value: string) => {
+    setEquipmentLocation({
+      ...equipmentLocation,
+      [field]: value
+    });
+  };
+
+  // Handle access procedure changes
+  const handleAccessProcedureChange = (field: keyof AccessProcedure, value: string) => {
+    setAccessProcedure({
+      ...accessProcedure,
+      [field]: value
+    });
+  };
+
+  // Handle site owner contact changes
+  const handleSiteOwnerContactChange = (index: number, field: keyof SiteOwnerContact, value: string) => {
+    const updatedContacts = [...siteOwnerContacts];
+    updatedContacts[index] = {
+      ...updatedContacts[index],
+      [field]: value
+    };
+    setSiteOwnerContacts(updatedContacts);
+  };
+
   // Handle attendee changes
   const handleAttendeeChange = (index: number, field: keyof SiteAttendee, value: string) => {
     const updatedAttendees = [...attendees];
@@ -245,6 +314,9 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
         approvedBy: null, // Will be filled by admin later
         approvalDate: null, // Will be filled by admin later
         attendees,
+        equipmentLocation,
+        accessProcedure,
+        siteOwnerContacts,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -305,6 +377,9 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
         approvedBy: null,
         approvalDate: null,
         attendees,
+        equipmentLocation,
+        accessProcedure,
+        siteOwnerContacts,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -356,16 +431,20 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     if (currentTab === "cover") {
       setCurrentTab("attendees");
     } else if (currentTab === "attendees") {
+      setCurrentTab("contents");
+    } else if (currentTab === "contents") {
       setCurrentTab("site-info");
     } else if (currentTab === "site-info") {
-      setCurrentTab("contents");
+      setCurrentTab("equipment-details");
     }
   };
 
   const prevTab = () => {
-    if (currentTab === "contents") {
+    if (currentTab === "equipment-details") {
       setCurrentTab("site-info");
     } else if (currentTab === "site-info") {
+      setCurrentTab("contents");
+    } else if (currentTab === "contents") {
       setCurrentTab("attendees");
     } else if (currentTab === "attendees") {
       setCurrentTab("cover");
@@ -378,7 +457,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
 
       <form onSubmit={handleSubmit}>
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="cover" className="flex items-center justify-center gap-2 relative">
               <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">1</div>
               <span>Cover Page</span>
@@ -394,6 +473,10 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
             <TabsTrigger value="site-info" className="flex items-center justify-center gap-2">
               <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">4</div>
               <span>Site Information</span>
+            </TabsTrigger>
+            <TabsTrigger value="equipment-details" className="flex items-center justify-center gap-2">
+              <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">5</div>
+              <span>Equipment Details</span>
             </TabsTrigger>
           </TabsList>
           
@@ -475,7 +558,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                 </div>
                 
                 <div className="text-right mt-4">
-                  <p className="text-sm text-gray-500">Page 1 of 4</p>
+                  <p className="text-sm text-gray-500">Page 1 of 5</p>
                 </div>
               </CardContent>
             </Card>
@@ -778,319 +861,4 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                           </tr>
                           <tr>
                             <td className="border border-gray-300 p-2 text-center">
-                              <div className="flex items-center justify-center space-x-2">
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    id="eskom-representative-accepted"
-                                    checked={eskomRepresentative.accepted}
-                                    onCheckedChange={(checked) => {
-                                      handleApprovalChange("eskomRepresentative", "accepted", checked === true);
-                                      if (checked === true) handleApprovalChange("eskomRepresentative", "rejected", false);
-                                    }}
-                                  />
-                                  <label htmlFor="eskom-representative-accepted">Accepted</label>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="border border-gray-300 p-2 text-center">
-                              <div className="flex items-center justify-center space-x-2">
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    id="eskom-representative-rejected"
-                                    checked={eskomRepresentative.rejected}
-                                    onCheckedChange={(checked) => {
-                                      handleApprovalChange("eskomRepresentative", "rejected", checked === true);
-                                      if (checked === true) handleApprovalChange("eskomRepresentative", "accepted", false);
-                                    }}
-                                  />
-                                  <label htmlFor="eskom-representative-rejected">Rejected</label>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="border border-gray-300 p-2 font-medium text-center">Comments</td>
-                          </tr>
-                          <tr>
-                            <td colSpan={3} className="border border-gray-300 p-1">
-                              <Textarea 
-                                value={eskomRepresentative.comments}
-                                onChange={(e) => handleApprovalChange("eskomRepresentative", "comments", e.target.value)}
-                                className="border-0 focus-visible:ring-0 h-full w-full min-h-[80px]"
-                                placeholder="Enter comments here"
-                              />
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="text-right mt-4">
-                  <p className="text-sm text-gray-500">Page 2 of 4</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} variant="outline" className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="site-info" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold mb-4">1. SITE INFORMATION & LOCATION</h3>
-                  
-                  <div>
-                    <h4 className="text-md font-semibold mb-2">1.1. Site Identification</h4>
-                    <table className="w-full border-collapse border border-gray-300">
-                      <tbody>
-                        <TableInputRow 
-                          label="Site Name" 
-                          name="siteName" 
-                          value={siteName} 
-                          onChange={handleInputChange}
-                        />
-                        <TableInputRow 
-                          label="Site ID (WorkPlace ID)" 
-                          name="siteId" 
-                          value={siteId} 
-                          onChange={handleInputChange}
-                        />
-                        <TableInputRow 
-                          label="Site Type (Sub-TX, RS, PS-Coal)" 
-                          name="siteType" 
-                          value={siteType} 
-                          onChange={handleInputChange}
-                        />
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">Region:</td>
-                          <td className="border border-gray-300 p-1">
-                            <Select value={region} onValueChange={(value) => setRegion(value)}>
-                              <SelectTrigger className="border-0 focus:ring-0 h-full w-full">
-                                <SelectValue placeholder="Select a region" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Gauteng">Gauteng</SelectItem>
-                                <SelectItem value="Western Cape">Western Cape</SelectItem>
-                                <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
-                                <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
-                                <SelectItem value="Free State">Free State</SelectItem>
-                                <SelectItem value="North West">North West</SelectItem>
-                                <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
-                                <SelectItem value="Limpopo">Limpopo</SelectItem>
-                                <SelectItem value="Northern Cape">Northern Cape</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </td>
-                        </tr>
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">Date:</td>
-                          <td className="border border-gray-300 p-1">
-                            <Input 
-                              type="date"
-                              name="date"
-                              value={date}
-                              onChange={handleInputChange}
-                              className="border-0 focus-visible:ring-0 h-full w-full"
-                            />
-                          </td>
-                        </tr>
-                        <TableInputRow 
-                          label="Address/Location Description" 
-                          name="address" 
-                          value={address} 
-                          onChange={handleInputChange}
-                        />
-                        <tr className="border border-gray-300">
-                          <td className="border border-gray-300 p-2 font-medium">GPS coordinates WGS84 (Lat/Long)</td>
-                          <td className="border border-gray-300 p-1">
-                            <div className="flex items-center space-x-2">
-                              <Input 
-                                type="text" 
-                                name="gpsCoordinates" 
-                                value={gpsCoordinates} 
-                                onChange={handleInputChange}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                                placeholder="e.g., -26.195246, 28.034088"
-                              />
-                              <Button 
-                                type="button" 
-                                variant="outline" 
-                                size="sm" 
-                                className="flex-shrink-0 h-8"
-                                onClick={retry}
-                                disabled={loading}
-                              >
-                                <MapPin className="h-4 w-4 mr-1" />
-                                {loading ? "Getting..." : "Get Location"}
-                              </Button>
-                            </div>
-                            {error && (
-                              <p className="text-xs text-red-500 mt-1">{error}</p>
-                            )}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="mt-8">
-                    <p className="font-medium mb-2">Full front view photo of building where IP/MPLS equipment will be situated.</p>
-                    <div className="min-h-[300px]">
-                      <ImageCapture 
-                        onCapture={handleBuildingPhotoUpload} 
-                        label="Building Photo"
-                        description="Take a photo of the front view of the building."
-                        capturedImage={buildingPhoto}
-                      />
-                    </div>
-                  </div>
-                  
-                  {showAIRecommendations && (
-                    <Card className="bg-akhanya-light/20 border-akhanya/30 mt-4">
-                      <CardContent className="pt-4">
-                        <h4 className="font-semibold text-akhanya mb-2">AI Recommendations</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-sm">
-                          <li>Make sure the entire building facade is clearly visible in your photo.</li>
-                          <li>Use the "Get Location" button to automatically fill in your current GPS coordinates.</li>
-                          <li>For Site Type, use standard Eskom abbreviations (Sub-TX for Substation Transmission, RS for Repeater Station, etc.).</li>
-                          <li>Include nearby landmarks in the Address field to help locate the site.</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-                
-                <div className="text-right mt-4">
-                  <p className="text-sm text-gray-500">Page 3 of 4</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} variant="outline" className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="contents" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <div className="border-b border-gray-300 pb-6 mb-8">
-                    <h2 className="text-2xl text-blue-700 mb-8">Contents</h2>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <p className="font-semibold">1. SITE INFORMATION & LOCATION<span className="float-right">4</span></p>
-                        <p className="ml-4">1.1. Site Identification<span className="float-right">4</span></p>
-                        <p className="ml-4">1.2. Eskom Site Location<span className="float-right">4</span></p>
-                        <p className="ml-4">1.3. Equipment Location<span className="float-right">5</span></p>
-                        <p className="ml-4">1.4. Access Procedure<span className="float-right">5</span></p>
-                        <p className="ml-4">1.5. Eskom site owner contact details<span className="float-right">5</span></p>
-                      </div>
-                      
-                      <div>
-                        <p className="font-semibold">2. EQUIPMENT ROOM (GENERAL)<span className="float-right">6</span></p>
-                      </div>
-                      
-                      <div>
-                        <p className="font-semibold">3. DETAILED SITE RECORDS<span className="float-right">6</span></p>
-                        <p className="ml-4">3.1. Equipment Cabinet Space Planning<span className="float-right">6</span></p>
-                        <p className="ml-4">3.2. Transport Platforms<span className="float-right">7</span></p>
-                        <p className="ml-4">3.3. 50V DC Power Distribution<span className="float-right">7</span></p>
-                        <p className="ml-4">3.4. Eskom equipment room photos<span className="float-right">7</span></p>
-                        <p className="ml-4">3.5. New cabinet location photos<span className="float-right">8</span></p>
-                        <p className="ml-4">3.6. DC Power Distribution photos<span className="float-right">8</span></p>
-                        <p className="ml-4">3.7. Transport Equipment photos (Close-Ups)<span className="float-right">9</span></p>
-                        <p className="ml-4">3.8. Optical Distribution Frame photos (Close-Ups), if applicable.<span className="float-right">9</span></p>
-                        <p className="ml-4">3.9. Access Equipment photos (Close-Ups)<span className="float-right">10</span></p>
-                        <p className="ml-4">3.10. Cable routing (overhead/underfloor/Both)<span className="float-right">10</span></p>
-                        <p className="ml-4">3.11. Equipment Room ceiling & HVAC photos<span className="float-right">11</span></p>
-                      </div>
-                      
-                      <div>
-                        <p className="font-semibold">4. INSTALLATION REQUIREMENTS<span className="float-right">12</span></p>
-                      </div>
-                      
-                      <div>
-                        <p className="font-semibold">5. GENERAL REMARKS<span className="float-right">12</span></p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center mt-8">
-                  <div className="flex items-center space-x-4">
-                    <div>
-                      <p className="text-sm font-semibold">Approved by:</p>
-                      <p className="text-sm">{eskomRepresentative.name || "_______________"}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">Authorized Date:</p>
-                      <p className="text-sm">{date || "DD/MM/YYYY"}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">Page 4 of 4</p>
-                  </div>
-                </div>
-                
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} variant="outline" className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Navigation and action buttons */}
-        <div className="mt-8 flex justify-between">
-          <div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleSaveForLater}
-              className="flex items-center gap-2"
-            >
-              <Save className="h-4 w-4" />
-              Save and Continue Later
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="submit"
-              className="bg-akhanya hover:bg-akhanya/80"
-            >
-              Submit Survey
-            </Button>
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-export default EskomSiteSurveyForm;
+                              <div className="flex items-center justify-center
