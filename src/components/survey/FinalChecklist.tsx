@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import BCXLogo from "@/components/ui/logo";
-import { FileText, Image, Printer } from "lucide-react";
+import { FileText, Image, Printer, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import html2pdf from "html2pdf.js";
+import { toast } from "sonner";
 
 interface FinalChecklistProps {
   formData: any;
@@ -74,6 +76,31 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
     return drawingFields.some(field => 
       formData[field] && formData[field].trim() !== ''
     ) || (formData.additionalDrawings && formData.additionalDrawings.some((url: string) => url && url.trim() !== ''));
+  };
+
+  const generatePDF = () => {
+    const element = document.getElementById('survey-preview-content');
+    if (!element) {
+      toast.error("Could not generate PDF - document content not found");
+      return;
+    }
+
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: `${formData.siteName || 'Eskom'}_Survey_Report.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    toast.info("Generating PDF, please wait...");
+    
+    html2pdf().from(element).set(opt).save().then(() => {
+      toast.success("PDF generated successfully!");
+    }).catch(error => {
+      console.error("PDF generation error:", error);
+      toast.error("Failed to generate PDF");
+    });
   };
 
   return (
@@ -289,11 +316,28 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
         
         <TabsContent value="preview" className="mt-0">
           <Card className="mb-6">
-            <CardHeader className="bg-gray-50">
+            <CardHeader className="bg-gray-50 flex flex-row items-center justify-between">
               <CardTitle className="text-base">Document Preview</CardTitle>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={generatePDF} 
+                  className="flex items-center gap-2 bg-akhanya hover:bg-akhanya-dark"
+                >
+                  <Download className="h-4 w-4" />
+                  Export PDF
+                </Button>
+                <Button 
+                  onClick={() => window.print()} 
+                  className="flex items-center gap-2"
+                  variant="outline"
+                >
+                  <Printer className="h-4 w-4" />
+                  Print
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="bg-white border rounded-lg p-6 shadow-sm max-h-[700px] overflow-y-auto">
+              <div id="survey-preview-content" className="bg-white border rounded-lg p-6 shadow-sm max-h-[700px] overflow-y-auto">
                 <div className="text-center mb-8">
                   <BCXLogo className="mx-auto h-20 w-auto mb-4" />
                   <h1 className="text-2xl font-bold mb-2">Eskom OT IP/MPLS Network Site Survey</h1>
@@ -349,7 +393,7 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   
                   {/* Site Contacts Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">Site Contacts</h3>
+                    <h3 className="text-lg font-semibold mb-3">2. Site Contacts</h3>
                     {formData.siteContacts.some((contact: any) => contact.name || contact.cellphone || contact.email) ? (
                       <div className="grid grid-cols-1 gap-2">
                         {formData.siteContacts.map((contact: any, index: number) => 
@@ -369,7 +413,7 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   
                   {/* Equipment Room General Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">2. Equipment Room Information</h3>
+                    <h3 className="text-lg font-semibold mb-3">3. Equipment Room Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <p><strong>Cable Access:</strong> {formData.cableAccess || 'Not specified'}</p>
@@ -387,27 +431,27 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   
                   {/* Cabinet Space Planning Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">3. Cabinet Space Planning</h3>
+                    <h3 className="text-lg font-semibold mb-3">4. Cabinet Space Planning</h3>
                     <p><strong>Number of Routers:</strong> {formData.numberOfRouters || 'Not specified'}</p>
                     
                     {formData.roomLayoutDrawing && (
                       <div className="mt-2">
                         <p className="font-medium mb-1">Room Layout Drawing:</p>
-                        <img src={formData.roomLayoutDrawing} alt="Room Layout" className="max-h-40 border rounded" />
+                        <img src={formData.roomLayoutDrawing} alt="Room Layout" className="max-h-60 border rounded" />
                       </div>
                     )}
                     
                     {formData.roomLayoutMarkup && (
                       <div className="mt-2">
                         <p className="font-medium mb-1">Room Layout Markup:</p>
-                        <img src={formData.roomLayoutMarkup} alt="Room Layout Markup" className="max-h-40 border rounded" />
+                        <img src={formData.roomLayoutMarkup} alt="Room Layout Markup" className="max-h-60 border rounded" />
                       </div>
                     )}
                   </div>
                   
                   {/* Transport Platforms Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">4. Transport Platforms</h3>
+                    <h3 className="text-lg font-semibold mb-3">5. Transport Platforms</h3>
                     {formData.transportLinks.some((link: any) => link.linkType || link.direction || link.capacity) ? (
                       <div className="space-y-3">
                         {formData.transportLinks.map((link: any, index: number) => 
@@ -428,7 +472,7 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   
                   {/* DC Power Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">5. DC Power Distribution</h3>
+                    <h3 className="text-lg font-semibold mb-3">6. DC Power Distribution</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <p><strong>Charger A:</strong> {formData.chargerA || 'Not specified'}</p>
@@ -487,29 +531,95 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                     </div>
                   </div>
                   
-                  {/* Show equipment photo thumbnails */}
-                  {hasPhotos() && (
-                    <div className="border-b pb-4">
-                      <h3 className="text-lg font-semibold mb-3">6. Equipment Photos</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-2">
-                        {['equipmentRoomPhotos', 'cabinetLocationPhotos', 'powerDistributionPhotos',
-                          'transportEquipmentPhotos', 'opticalFramePhotos', 'accessEquipmentPhotos',
-                          'cableRoutingPhotos', 'ceilingHVACPhotos'].map(field => 
-                          Array.isArray(formData[field]) && formData[field].map((photo: string, photoIdx: number) => 
-                            photo && (
-                              <div key={`${field}-${photoIdx}`} className="border rounded overflow-hidden">
-                                <img src={photo} alt={`${field} ${photoIdx + 1}`} className="w-full h-24 object-cover" />
-                              </div>
-                            )
-                          )
-                        )}
-                      </div>
+                  {/* Equipment Photos Section */}
+                  <div className="border-b pb-4">
+                    <h3 className="text-lg font-semibold mb-3">7. Equipment Photos</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-2">
+                      {/* Equipment Room Photos */}
+                      {Array.isArray(formData.equipmentRoomPhotos) && formData.equipmentRoomPhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`room-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Equipment Room {idx + 1}</p>
+                            <img src={photo} alt={`Equipment Room ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
+                      
+                      {/* Cabinet Location Photos */}
+                      {Array.isArray(formData.cabinetLocationPhotos) && formData.cabinetLocationPhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`cabinet-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Cabinet Location {idx + 1}</p>
+                            <img src={photo} alt={`Cabinet Location ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
+                      
+                      {/* Power Distribution Photos */}
+                      {Array.isArray(formData.powerDistributionPhotos) && formData.powerDistributionPhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`power-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Power Distribution {idx + 1}</p>
+                            <img src={photo} alt={`Power Distribution ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
+                      
+                      {/* Transport Equipment Photos */}
+                      {Array.isArray(formData.transportEquipmentPhotos) && formData.transportEquipmentPhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`transport-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Transport Equipment {idx + 1}</p>
+                            <img src={photo} alt={`Transport Equipment ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
+                      
+                      {/* Optical Frame Photos */}
+                      {Array.isArray(formData.opticalFramePhotos) && formData.opticalFramePhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`optical-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Optical Frame {idx + 1}</p>
+                            <img src={photo} alt={`Optical Frame ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
+                      
+                      {/* Access Equipment Photos */}
+                      {Array.isArray(formData.accessEquipmentPhotos) && formData.accessEquipmentPhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`access-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Access Equipment {idx + 1}</p>
+                            <img src={photo} alt={`Access Equipment ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
+                      
+                      {/* Cable Routing Photos */}
+                      {Array.isArray(formData.cableRoutingPhotos) && formData.cableRoutingPhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`cable-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Cable Routing {idx + 1}</p>
+                            <img src={photo} alt={`Cable Routing ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
+                      
+                      {/* Ceiling HVAC Photos */}
+                      {Array.isArray(formData.ceilingHVACPhotos) && formData.ceilingHVACPhotos.map((photo: string, idx: number) => 
+                        photo && (
+                          <div key={`hvac-${idx}`} className="border rounded overflow-hidden">
+                            <p className="text-xs p-1 bg-gray-100">Ceiling/HVAC {idx + 1}</p>
+                            <img src={photo} alt={`Ceiling/HVAC ${idx + 1}`} className="w-full h-24 object-cover" />
+                          </div>
+                        )
+                      )}
                     </div>
-                  )}
+                  </div>
                   
                   {/* Optical Distribution Frame Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">7. Optical Distribution Frame</h3>
+                    <h3 className="text-lg font-semibold mb-3">8. Optical Distribution Frame</h3>
                     {formData.odfCabinets.some((cabinet: any) => cabinet.direction || cabinet.connectionType || cabinet.cores) ? (
                       <div className="space-y-3">
                         {formData.odfCabinets.map((cabinet: any, index: number) => 
@@ -530,7 +640,7 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   
                   {/* Requirements & Remarks Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">8. Requirements & Remarks</h3>
+                    <h3 className="text-lg font-semibold mb-3">9. Requirements & Remarks</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <p><strong>Access & Security:</strong> {formData.accessSecurity || 'Not specified'}</p>
@@ -555,7 +665,7 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   
                   {/* Attendee Information Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">9. Attendee Information</h3>
+                    <h3 className="text-lg font-semibold mb-3">10. Attendee Information</h3>
                     {formData.attendees.some((a: any) => a.name || a.company || a.department || a.cellphone) ? (
                       <div className="grid grid-cols-1 gap-2">
                         {formData.attendees.map((attendee: any, index: number) => 
@@ -577,7 +687,7 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   
                   {/* Survey Outcome Section */}
                   <div className="border-b pb-4">
-                    <h3 className="text-lg font-semibold mb-3">10. Survey Outcome & Approval</h3>
+                    <h3 className="text-lg font-semibold mb-3">11. Survey Outcome & Approval</h3>
                     <div className="grid grid-cols-1 gap-3 text-sm">
                       <div>
                         <p>
@@ -633,58 +743,49 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
                   </div>
                   
                   {/* Room Layout Drawings Section */}
-                  {hasDrawings() && (
-                    <div className="border-b pb-4">
-                      <h3 className="text-lg font-semibold mb-3">11. Room Layout Drawings</h3>
-                      <div className="grid grid-cols-1 gap-4 mt-2">
-                        {formData.roomLayoutDrawing && (
-                          <div>
-                            <p className="font-medium mb-1">Room Layout Drawing:</p>
-                            <img src={formData.roomLayoutDrawing} alt="Room Layout" className="max-h-40 border rounded" />
+                  <div className="border-b pb-4">
+                    <h3 className="text-lg font-semibold mb-3">12. Room Layout Drawings</h3>
+                    <div className="grid grid-cols-1 gap-4 mt-2">
+                      {formData.roomLayoutDrawing && (
+                        <div>
+                          <p className="font-medium mb-1">Room Layout Drawing:</p>
+                          <img src={formData.roomLayoutDrawing} alt="Room Layout" className="max-h-60 border rounded" />
+                        </div>
+                      )}
+                      
+                      {formData.cabinetLayoutDrawing && (
+                        <div>
+                          <p className="font-medium mb-1">Cabinet Layout Drawing:</p>
+                          <img src={formData.cabinetLayoutDrawing} alt="Cabinet Layout" className="max-h-60 border rounded" />
+                        </div>
+                      )}
+                      
+                      {formData.scannedRoomLayout && (
+                        <div>
+                          <p className="font-medium mb-1">Scanned Room Layout:</p>
+                          <img src={formData.scannedRoomLayout} alt="Scanned Room Layout" className="max-h-60 border rounded" />
+                        </div>
+                      )}
+                      
+                      {formData.additionalDrawings?.map((drawing: string, idx: number) => 
+                        drawing && (
+                          <div key={idx}>
+                            <p className="font-medium mb-1">Additional Drawing {idx + 1}:</p>
+                            <img src={drawing} alt={`Additional Drawing ${idx + 1}`} className="max-h-60 border rounded" />
                           </div>
-                        )}
-                        
-                        {formData.cabinetLayoutDrawing && (
-                          <div>
-                            <p className="font-medium mb-1">Cabinet Layout Drawing:</p>
-                            <img src={formData.cabinetLayoutDrawing} alt="Cabinet Layout" className="max-h-40 border rounded" />
-                          </div>
-                        )}
-                        
-                        {formData.scannedRoomLayout && (
-                          <div>
-                            <p className="font-medium mb-1">Scanned Room Layout:</p>
-                            <img src={formData.scannedRoomLayout} alt="Scanned Room Layout" className="max-h-40 border rounded" />
-                          </div>
-                        )}
-                        
-                        {formData.additionalDrawings?.map((drawing: string, idx: number) => 
-                          drawing && (
-                            <div key={idx}>
-                              <p className="font-medium mb-1">Additional Drawing {idx + 1}:</p>
-                              <img src={drawing} alt={`Additional Drawing ${idx + 1}`} className="max-h-40 border rounded" />
-                            </div>
-                          )
-                        )}
-                      </div>
+                        )
+                      )}
                     </div>
-                  )}
+                  </div>
                   
                   {/* Final Notes Section */}
                   {formData.finalNotes && (
                     <div>
-                      <h3 className="text-lg font-semibold mb-3">Final Notes & Recommendations</h3>
+                      <h3 className="text-lg font-semibold mb-3">13. Final Notes & Recommendations</h3>
                       <p className="text-sm whitespace-pre-line">{formData.finalNotes}</p>
                     </div>
                   )}
                 </div>
-              </div>
-              
-              <div className="flex justify-center mt-6">
-                <Button className="flex items-center gap-2 bg-akhanya hover:bg-akhanya-dark">
-                  <Printer className="h-4 w-4" />
-                  Print Preview
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -710,3 +811,4 @@ const FinalChecklist: React.FC<FinalChecklistProps> = ({
 };
 
 export default FinalChecklist;
+
