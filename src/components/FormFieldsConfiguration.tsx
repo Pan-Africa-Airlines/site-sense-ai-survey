@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +37,17 @@ export interface FormConfig {
     sections: string[];
     fields: FormField[];
   };
+}
+
+// Interface for equipment room general
+interface EquipmentRoomGeneral {
+  cableAccess: string;
+  roomLighting: string;
+  fireProtection: string;
+  coolingMethod: string;
+  coolingRating: string;
+  roomTemperature: string;
+  equipmentRoomCondition: string;
 }
 
 // Initial configuration with some example fields and our new Eskom survey fields
@@ -862,6 +872,7 @@ const FormFieldsConfiguration = () => {
   const [newFieldRequired, setNewFieldRequired] = useState(true);
   const [newSectionName, setNewSectionName] = useState("");
   const [editingField, setEditingField] = useState<FormField | null>(null);
+  const [currentTab, setCurrentTab] = useState<"cover" | "attendees" | "contents" | "site-info" | "equipment-details" | "equipment-room">("cover");
 
   // Set active section when tab changes
   useEffect(() => {
@@ -1092,6 +1103,34 @@ const FormFieldsConfiguration = () => {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+  };
+
+  const nextTab = () => {
+    if (currentTab === "cover") {
+      setCurrentTab("attendees");
+    } else if (currentTab === "attendees") {
+      setCurrentTab("contents");
+    } else if (currentTab === "contents") {
+      setCurrentTab("site-info");
+    } else if (currentTab === "site-info") {
+      setCurrentTab("equipment-details");
+    } else if (currentTab === "equipment-details") {
+      setCurrentTab("equipment-room");
+    }
+  };
+
+  const prevTab = () => {
+    if (currentTab === "equipment-room") {
+      setCurrentTab("equipment-details");
+    } else if (currentTab === "equipment-details") {
+      setCurrentTab("site-info");
+    } else if (currentTab === "site-info") {
+      setCurrentTab("contents");
+    } else if (currentTab === "contents") {
+      setCurrentTab("attendees");
+    } else if (currentTab === "attendees") {
+      setCurrentTab("cover");
+    }
   };
 
   return (
