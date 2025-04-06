@@ -199,7 +199,6 @@ const EskomSurvey = () => {
     finalNotes: "",
   });
   
-  // Fetch survey data if editing an existing survey
   const { isLoading, error, data: surveyData } = useQuery({
     queryKey: ['survey', id],
     queryFn: async () => {
@@ -217,65 +216,53 @@ const EskomSurvey = () => {
     enabled: !!id && !isNewSurvey,
   });
   
-  // Update form data when survey data is fetched
   useEffect(() => {
     if (surveyData) {
-      // Populate form with data from database
-      setFormData(prevData => ({
-        ...prevData,
-        siteName: surveyData.site_name || "",
-        siteId: surveyData.site_id || "",
-        siteType: surveyData.site_type || "",
-        region: surveyData.region || "",
-        date: surveyData.date || new Date().toISOString().split('T')[0],
-        address: surveyData.address || "",
-        gpsCoordinates: surveyData.gps_coordinates || "",
-        buildingPhoto: surveyData.building_photo || "",
-        ...(surveyData.survey_data || {}),
-      }));
+      setFormData(prevData => {
+        return {
+          ...prevData,
+          siteName: surveyData.site_name || "",
+          siteId: surveyData.site_id || "",
+          siteType: surveyData.site_type || "",
+          region: surveyData.region || "",
+          date: surveyData.date || new Date().toISOString().split('T')[0],
+          address: surveyData.address || "",
+          gpsCoordinates: surveyData.gps_coordinates || "",
+          buildingPhoto: surveyData.building_photo || "",
+          ...(surveyData.survey_data || {})
+        }
+      });
     }
   }, [surveyData]);
   
   const saveSurveyMutation = useMutation({
     mutationFn: async () => {
       const userId = localStorage.getItem("userId");
+      const surveyDataToSave = {
+        site_name: formData.siteName,
+        site_id: formData.siteId,
+        site_type: formData.siteType,
+        region: formData.region,
+        date: formData.date,
+        address: formData.address,
+        gps_coordinates: formData.gpsCoordinates,
+        building_photo: formData.buildingPhoto,
+        user_id: userId || null,
+        survey_data: formData,
+      };
       
       if (id && !isNewSurvey) {
-        // Update existing survey
         const { data: updatedData, error } = await supabase
           .from('site_surveys')
-          .update({
-            site_name: formData.siteName,
-            site_id: formData.siteId,
-            site_type: formData.siteType,
-            region: formData.region,
-            date: formData.date,
-            address: formData.address,
-            gps_coordinates: formData.gpsCoordinates,
-            building_photo: formData.buildingPhoto,
-            user_id: userId || null,
-            survey_data: formData,
-          })
+          .update(surveyDataToSave)
           .eq('id', id);
           
         if (error) throw error;
         return updatedData;
       } else {
-        // Create new survey
         const { data: newData, error } = await supabase
           .from('site_surveys')
-          .insert({
-            site_name: formData.siteName,
-            site_id: formData.siteId,
-            site_type: formData.siteType,
-            region: formData.region,
-            date: formData.date,
-            address: formData.address,
-            gps_coordinates: formData.gpsCoordinates,
-            building_photo: formData.buildingPhoto,
-            user_id: userId || null,
-            survey_data: formData,
-          })
+          .insert(surveyDataToSave)
           .select();
           
         if (error) throw error;
@@ -285,7 +272,6 @@ const EskomSurvey = () => {
     onSuccess: (data) => {
       toast.success(`Survey ${id ? 'updated' : 'created'} successfully!`);
       if (!id) {
-        // If it was a new survey, navigate to the edit page
         navigate(`/eskom-survey/${data[0].id}`);
       }
     },
@@ -295,10 +281,8 @@ const EskomSurvey = () => {
     },
   });
   
-  // Fixed the spread type error by ensuring we're passing an object
   const handleInputChange = (field: string, value: any) => {
     setFormData(prevData => {
-      // Handle nested fields with dot notation (e.g., "oemContractor.name")
       if (field.includes('.')) {
         const [parentField, childField] = field.split('.');
         const parentData = prevData[parentField as keyof typeof prevData];
@@ -314,7 +298,6 @@ const EskomSurvey = () => {
         return prevData;
       }
       
-      // Handle array indexing with square brackets (e.g., "additionalDrawings[0]")
       if (field.includes('[') && field.includes(']')) {
         const match = field.match(/(.+?)\[(\d+)\]/);
         if (match) {
@@ -329,7 +312,6 @@ const EskomSurvey = () => {
         }
       }
       
-      // Handle regular fields
       return {
         ...prevData,
         [field]: value
@@ -340,7 +322,6 @@ const EskomSurvey = () => {
   const handleSave = async (status = 'draft') => {
     setIsSaving(true);
     try {
-      // Save to database
       await saveSurveyMutation.mutateAsync();
     } catch (error) {
       console.error("Error in handleSave:", error);
@@ -350,7 +331,6 @@ const EskomSurvey = () => {
   };
 
   const handleSubmit = async () => {
-    // Similar to handleSave but sets status to submitted
     await handleSave('submitted');
   };
 
