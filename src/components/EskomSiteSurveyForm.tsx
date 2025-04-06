@@ -378,11 +378,23 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
 
       <form onSubmit={handleSubmit}>
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="cover">Cover Page</TabsTrigger>
-            <TabsTrigger value="attendees">Attendees & Approval</TabsTrigger>
-            <TabsTrigger value="site-info">Site Information</TabsTrigger>
-            <TabsTrigger value="contents">Table of Contents</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="cover" className="flex items-center justify-center gap-2 relative">
+              <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">1</div>
+              <span>Cover Page</span>
+            </TabsTrigger>
+            <TabsTrigger value="attendees" className="flex items-center justify-center gap-2">
+              <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">2</div>
+              <span>Attendees & Approval</span>
+            </TabsTrigger>
+            <TabsTrigger value="contents" className="flex items-center justify-center gap-2">
+              <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">3</div>
+              <span>Table of Contents</span>
+            </TabsTrigger>
+            <TabsTrigger value="site-info" className="flex items-center justify-center gap-2">
+              <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">4</div>
+              <span>Site Information</span>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="cover" className="mt-4">
