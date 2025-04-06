@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,9 @@ import EquipmentPhotos from "./survey/EquipmentPhotos";
 import RequirementsRemarks from "./survey/RequirementsRemarks";
 import AttendeeInformation from "./survey/AttendeeInformation";
 import OpticalFrame from "./survey/OpticalFrame";
+import SurveyOutcome from "./survey/SurveyOutcome";
+import RoomLayoutDrawing from "./survey/RoomLayoutDrawing";
+import FinalChecklist from "./survey/FinalChecklist";
 import html2pdf from 'html2pdf.js';
 import { toast } from "sonner";
 
@@ -162,6 +164,9 @@ interface FormData {
   
   // Room Layout Scanned Drawing
   scannedRoomLayout: string;
+  
+  // Final Notes
+  finalNotes?: string;
 }
 
 interface EskomSurveyTabsProps {
@@ -186,7 +191,10 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     { id: "power", label: "6. Power Distribution" },
     { id: "photos", label: "7. Equipment Photos" },
     { id: "odf", label: "8. Optical Frame" },
-    { id: "requirements", label: "9. Requirements" }
+    { id: "requirements", label: "9. Requirements" },
+    { id: "survey-outcome", label: "10. Survey Outcome" },
+    { id: "room-layout", label: "11. Room Layout" },
+    { id: "final-checklist", label: "12. Final Checklist" }
   ];
   
   const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
@@ -234,7 +242,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     <div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-between items-center mb-4">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-9 mb-2">
+          <TabsList className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 mb-2">
             {tabs.map(tab => (
               <TabsTrigger key={tab.id} value={tab.id} className="text-xs md:text-sm">
                 {tab.label}
@@ -319,6 +327,30 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
           
           <TabsContent value="requirements">
             <RequirementsRemarks 
+              formData={formData}
+              onInputChange={onInputChange}
+              showAIRecommendations={showAIRecommendations}
+            />
+          </TabsContent>
+          
+          <TabsContent value="survey-outcome">
+            <SurveyOutcome 
+              formData={formData}
+              onInputChange={onInputChange}
+              showAIRecommendations={showAIRecommendations}
+            />
+          </TabsContent>
+          
+          <TabsContent value="room-layout">
+            <RoomLayoutDrawing 
+              formData={formData}
+              onInputChange={onInputChange}
+              showAIRecommendations={showAIRecommendations}
+            />
+          </TabsContent>
+          
+          <TabsContent value="final-checklist">
+            <FinalChecklist 
               formData={formData}
               onInputChange={onInputChange}
               showAIRecommendations={showAIRecommendations}

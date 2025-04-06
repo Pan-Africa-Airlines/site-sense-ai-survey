@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import NetworkingBanner from "@/components/NetworkingBanner";
@@ -183,7 +182,10 @@ const EskomSurvey = () => {
     },
     
     // Room Layout Scanned Drawing
-    scannedRoomLayout: ""
+    scannedRoomLayout: "",
+    
+    // Final Notes
+    finalNotes: "",
   });
   
   const handleInputChange = (field: string, value: any) => {
@@ -198,6 +200,21 @@ const EskomSurvey = () => {
             [childField]: value
           }
         };
+      }
+      
+      // Handle array indexing with square brackets (e.g., "additionalDrawings[0]")
+      if (field.includes('[') && field.includes(']')) {
+        const match = field.match(/(.+?)\[(\d+)\]/);
+        if (match) {
+          const [, arrayName, indexStr] = match;
+          const index = parseInt(indexStr);
+          const array = [...(prev[arrayName as keyof typeof prev] as any[])];
+          array[index] = value;
+          return {
+            ...prev,
+            [arrayName]: array
+          };
+        }
       }
       
       // Handle regular fields
@@ -256,7 +273,7 @@ const EskomSurvey = () => {
                   <Button
                     variant="outline"
                     className="flex items-center gap-2"
-                    onClick={() => window.open("/public/lovable-uploads/3d43a04f-8853-44d0-aa58-fe39e729336d.png", "_blank")}
+                    onClick={() => window.open("/lovable-uploads/3d43a04f-8853-44d0-aa58-fe39e729336d.png", "_blank")}
                   >
                     <FileText className="h-4 w-4" />
                     View Template

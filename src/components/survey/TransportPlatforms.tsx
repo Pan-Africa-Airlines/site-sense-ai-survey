@@ -42,7 +42,7 @@ const TransportPlatforms: React.FC<TransportPlatformsProps> = ({
     <div className="space-y-6">
       <div className="flex justify-center mb-6">
         <img 
-          src="public/lovable-uploads/f3b0d24a-bde2-40c2-84a6-ed83f7605bce.png" 
+          src="/lovable-uploads/f3b0d24a-bde2-40c2-84a6-ed83f7605bce.png" 
           alt="BCX Logo" 
           className="h-20 object-contain" 
         />
