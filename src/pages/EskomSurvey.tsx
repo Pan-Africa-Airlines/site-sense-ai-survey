@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
@@ -219,6 +220,9 @@ const EskomSurvey = () => {
   useEffect(() => {
     if (surveyData) {
       setFormData(prevData => {
+        // Fixed: Create a proper object to spread
+        const surveyDataObj = surveyData.survey_data || {};
+        
         return {
           ...prevData,
           siteName: surveyData.site_name || "",
@@ -229,7 +233,7 @@ const EskomSurvey = () => {
           address: surveyData.address || "",
           gpsCoordinates: surveyData.gps_coordinates || "",
           buildingPhoto: surveyData.building_photo || "",
-          ...(surveyData.survey_data || {})
+          ...surveyDataObj  // Now we're spreading a valid object
         }
       });
     }
@@ -252,21 +256,21 @@ const EskomSurvey = () => {
       };
       
       if (id && !isNewSurvey) {
-        const { data: updatedData, error } = await supabase
+        const { data, error } = await supabase
           .from('site_surveys')
           .update(surveyDataToSave)
           .eq('id', id);
           
         if (error) throw error;
-        return updatedData;
+        return data;
       } else {
-        const { data: newData, error } = await supabase
+        const { data, error } = await supabase
           .from('site_surveys')
           .insert(surveyDataToSave)
           .select();
           
         if (error) throw error;
-        return newData;
+        return data;
       }
     },
     onSuccess: (data) => {
