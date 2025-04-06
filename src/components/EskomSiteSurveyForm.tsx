@@ -53,7 +53,6 @@ const TableInputRow: React.FC<TableInputRowProps> = ({ label, name, value, onCha
   );
 };
 
-// Interface for site attendee
 interface SiteAttendee {
   date: string;
   name: string;
@@ -62,7 +61,6 @@ interface SiteAttendee {
   cellphone: string;
 }
 
-// Interface for approval section
 interface ApprovalSection {
   name: string;
   signature: string;
@@ -72,7 +70,6 @@ interface ApprovalSection {
   comments: string;
 }
 
-// Interface for equipment location
 interface EquipmentLocation {
   buildingName: string;
   buildingType: string;
@@ -80,14 +77,12 @@ interface EquipmentLocation {
   roomNumber: string;
 }
 
-// Interface for access procedure
 interface AccessProcedure {
   requirements: string;
   securityRequirements: string;
   vehicleType: string;
 }
 
-// Interface for site owner contact
 interface SiteOwnerContact {
   name: string;
   cellphone: string;
@@ -102,14 +97,12 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const [date, setDate] = useState("");
   const [buildingPhoto, setBuildingPhoto] = useState("");
   
-  // Site Information fields
   const [siteId, setSiteId] = useState("");
   const [siteType, setSiteType] = useState("");
   const [address, setAddress] = useState("");
   const [gpsCoordinates, setGpsCoordinates] = useState("");
   const [engineerId, setEngineerId] = useState("");
   
-  // Site visit attendees
   const [attendees, setAttendees] = useState<SiteAttendee[]>([
     { date: "", name: "", company: "", department: "", cellphone: "" },
     { date: "", name: "", company: "", department: "", cellphone: "" },
@@ -119,7 +112,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     { date: "", name: "", company: "", department: "", cellphone: "" },
   ]);
   
-  // Equipment location information
   const [equipmentLocation, setEquipmentLocation] = useState<EquipmentLocation>({
     buildingName: "",
     buildingType: "",
@@ -127,21 +119,18 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     roomNumber: ""
   });
 
-  // Access procedure information
   const [accessProcedure, setAccessProcedure] = useState<AccessProcedure>({
     requirements: "",
     securityRequirements: "",
     vehicleType: ""
   });
 
-  // Site owner contacts
   const [siteOwnerContacts, setSiteOwnerContacts] = useState<SiteOwnerContact[]>([
     { name: "", cellphone: "", email: "" },
     { name: "", cellphone: "", email: "" },
     { name: "", cellphone: "", email: "" }
   ]);
   
-  // Approval sections
   const [oemContractor, setOemContractor] = useState<ApprovalSection>({
     name: "",
     signature: "",
@@ -169,13 +158,11 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     comments: ""
   });
   
-  // Use the geolocation hook
   const { latitude, longitude, loading, error, retry, address: geoAddress } = useGeolocation();
   
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Get the current user ID as engineer ID
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -187,19 +174,16 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     getUser();
   }, []);
 
-  // Set coordinates when geolocation data is available
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
       setGpsCoordinates(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
       
-      // Optionally set the address if it's available and the user hasn't manually entered one
       if (geoAddress && !address) {
         setAddress(geoAddress);
       }
     }
   }, [latitude, longitude, geoAddress]);
 
-  // Initialize the date field with today's date if it's empty
   useEffect(() => {
     if (!date) {
       const today = new Date().toISOString().split('T')[0];
@@ -207,7 +191,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     }
   }, [date]);
 
-  // Update form progress when fields change
   useEffect(() => {
     const filledFields = [siteName, region, date, buildingPhoto, siteId, siteType, address, gpsCoordinates].filter(Boolean).length;
     const totalFields = 8;
@@ -243,7 +226,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     }
   };
 
-  // Handle equipment location changes
   const handleEquipmentLocationChange = (field: keyof EquipmentLocation, value: string) => {
     setEquipmentLocation({
       ...equipmentLocation,
@@ -251,7 +233,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     });
   };
 
-  // Handle access procedure changes
   const handleAccessProcedureChange = (field: keyof AccessProcedure, value: string) => {
     setAccessProcedure({
       ...accessProcedure,
@@ -259,7 +240,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     });
   };
 
-  // Handle site owner contact changes
   const handleSiteOwnerContactChange = (index: number, field: keyof SiteOwnerContact, value: string) => {
     const updatedContacts = [...siteOwnerContacts];
     updatedContacts[index] = {
@@ -269,7 +249,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     setSiteOwnerContacts(updatedContacts);
   };
 
-  // Handle attendee changes
   const handleAttendeeChange = (index: number, field: keyof SiteAttendee, value: string) => {
     const updatedAttendees = [...attendees];
     updatedAttendees[index] = {
@@ -279,7 +258,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     setAttendees(updatedAttendees);
   };
 
-  // Handle approval section changes
   const handleApprovalChange = (
     section: "oemContractor" | "oemEngineer" | "eskomRepresentative",
     field: keyof ApprovalSection,
@@ -310,9 +288,9 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
       const surveyData = {
         engineerId,
         lastUpdated: new Date().toISOString(),
-        approved: false,  // Initial approval status
-        approvedBy: null, // Will be filled by admin later
-        approvalDate: null, // Will be filled by admin later
+        approved: false,
+        approvedBy: null,
+        approvalDate: null,
         attendees,
         equipmentLocation,
         accessProcedure,
@@ -648,7 +626,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                   <div className="mt-8">
                     <h3 className="text-xl font-semibold text-center mb-4">Site survey outcome</h3>
                     
-                    {/* OEM Contractor Section */}
                     <div className="mb-6">
                       <table className="w-full border-collapse border border-gray-300">
                         <tbody>
@@ -734,7 +711,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                       </table>
                     </div>
                     
-                    {/* OEM Engineer Section */}
                     <div className="mb-6">
                       <table className="w-full border-collapse border border-gray-300">
                         <tbody>
@@ -820,7 +796,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                       </table>
                     </div>
                     
-                    {/* Eskom Representative Section */}
                     <div className="mb-6">
                       <table className="w-full border-collapse border border-gray-300">
                         <tbody>
@@ -861,4 +836,407 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                           </tr>
                           <tr>
                             <td className="border border-gray-300 p-2 text-center">
-                              <div className="flex items-center justify-center space-x
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="eskom-representative-accepted"
+                                    checked={eskomRepresentative.accepted}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("eskomRepresentative", "accepted", checked === true);
+                                      if (checked === true) handleApprovalChange("eskomRepresentative", "rejected", false);
+                                    }}
+                                  />
+                                  <label htmlFor="eskom-representative-accepted">Accepted</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="eskom-representative-rejected"
+                                    checked={eskomRepresentative.rejected}
+                                    onCheckedChange={(checked) => {
+                                      handleApprovalChange("eskomRepresentative", "rejected", checked === true);
+                                      if (checked === true) handleApprovalChange("eskomRepresentative", "accepted", false);
+                                    }}
+                                  />
+                                  <label htmlFor="eskom-representative-rejected">Rejected</label>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-2 font-medium text-center">Comments</td>
+                          </tr>
+                          <tr>
+                            <td colSpan={3} className="border border-gray-300 p-1">
+                              <Textarea 
+                                value={eskomRepresentative.comments}
+                                onChange={(e) => handleApprovalChange("eskomRepresentative", "comments", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full min-h-[80px]"
+                                placeholder="Enter comments here"
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-right mt-4">
+                  <p className="text-sm text-gray-500">Page 2 of 5</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="contents" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold text-center mb-4">Table of Contents</h3>
+                  
+                  <table className="w-full border-collapse border border-gray-300 mb-6">
+                    <tbody>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium w-1/12 text-center">1</td>
+                        <td className="border border-gray-300 p-2">Cover Page</td>
+                      </tr>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium text-center">2</td>
+                        <td className="border border-gray-300 p-2">Site Visit Attendees and Approval</td>
+                      </tr>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium text-center">3</td>
+                        <td className="border border-gray-300 p-2">Table of Contents</td>
+                      </tr>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium text-center">4</td>
+                        <td className="border border-gray-300 p-2">Site Information</td>
+                      </tr>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium text-center">5</td>
+                        <td className="border border-gray-300 p-2">Equipment Details</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="text-right mt-4">
+                  <p className="text-sm text-gray-500">Page 3 of 5</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="site-info" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold text-center mb-4">Site Information</h3>
+                  
+                  <div className="space-y-6">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <tbody>
+                        <TableInputRow 
+                          label="Site ID" 
+                          name="siteId"
+                          value={siteId}
+                          onChange={handleInputChange}
+                        />
+                        <TableInputRow 
+                          label="Site Type" 
+                          name="siteType"
+                          value={siteType}
+                          onChange={handleInputChange}
+                        />
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">Address</td>
+                          <td className="border border-gray-300 p-1">
+                            <div className="flex">
+                              <Input 
+                                type="text" 
+                                name="address"
+                                value={address}
+                                onChange={handleInputChange}
+                                className="border-0 focus-visible:ring-0 h-full w-full mr-2"
+                              />
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm"
+                                onClick={retry}
+                                className="flex items-center gap-1"
+                                disabled={loading}
+                              >
+                                <MapPin className="h-4 w-4" />
+                                {loading ? "Loading..." : "Get Location"}
+                              </Button>
+                            </div>
+                            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+                          </td>
+                        </tr>
+                        <TableInputRow 
+                          label="GPS Coordinates" 
+                          name="gpsCoordinates"
+                          value={gpsCoordinates}
+                          onChange={handleInputChange}
+                        />
+                      </tbody>
+                    </table>
+                    
+                    <div className="border border-gray-300 p-4 rounded-md">
+                      <h4 className="font-semibold mb-2">Site Photos</h4>
+                      <p className="text-sm text-gray-500 mb-4">Upload additional photos of the site or surrounding areas if needed.</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <ImageCapture 
+                          onCapture={() => {}} 
+                          label="Equipment Room"
+                          description="Photo of the room where equipment will be installed"
+                        />
+                        <ImageCapture 
+                          onCapture={() => {}} 
+                          label="Network Cabinet"
+                          description="Photo of existing network cabinet/rack (if applicable)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-right mt-4">
+                  <p className="text-sm text-gray-500">Page 4 of 5</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="equipment-details" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold text-center mb-4">Equipment Details</h3>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Equipment Location</h4>
+                      <table className="w-full border-collapse border border-gray-300">
+                        <tbody>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">Building Name</td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={equipmentLocation.buildingName}
+                                onChange={(e) => handleEquipmentLocationChange("buildingName", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">Building Type</td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={equipmentLocation.buildingType}
+                                onChange={(e) => handleEquipmentLocationChange("buildingType", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">Floor Level</td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={equipmentLocation.floorLevel}
+                                onChange={(e) => handleEquipmentLocationChange("floorLevel", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">Room Number</td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={equipmentLocation.roomNumber}
+                                onChange={(e) => handleEquipmentLocationChange("roomNumber", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Access Procedure</h4>
+                      <table className="w-full border-collapse border border-gray-300">
+                        <tbody>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">Access Requirements</td>
+                            <td className="border border-gray-300 p-1">
+                              <Textarea 
+                                value={accessProcedure.requirements}
+                                onChange={(e) => handleAccessProcedureChange("requirements", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full min-h-[80px]"
+                                placeholder="Describe access requirements, keys, etc."
+                              />
+                            </td>
+                          </tr>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">Security Requirements</td>
+                            <td className="border border-gray-300 p-1">
+                              <Textarea 
+                                value={accessProcedure.securityRequirements}
+                                onChange={(e) => handleAccessProcedureChange("securityRequirements", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full min-h-[80px]"
+                                placeholder="Describe any security clearance requirements"
+                              />
+                            </td>
+                          </tr>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">Vehicle Type Restrictions</td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text"
+                                value={accessProcedure.vehicleType}
+                                onChange={(e) => handleAccessProcedureChange("vehicleType", e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                                placeholder="e.g. 4x4 required, no heavy vehicles, etc."
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Site Owner Contacts</h4>
+                      <table className="w-full border-collapse border border-gray-300">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="border border-gray-300 p-2 text-left">Name</th>
+                            <th className="border border-gray-300 p-2 text-left">Cellphone</th>
+                            <th className="border border-gray-300 p-2 text-left">Email</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {siteOwnerContacts.map((contact, index) => (
+                            <tr key={index} className="border border-gray-300">
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="text"
+                                  value={contact.name}
+                                  onChange={(e) => handleSiteOwnerContactChange(index, "name", e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="text"
+                                  value={contact.cellphone}
+                                  onChange={(e) => handleSiteOwnerContactChange(index, "cellphone", e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <Input 
+                                  type="email"
+                                  value={contact.email}
+                                  onChange={(e) => handleSiteOwnerContactChange(index, "email", e.target.value)}
+                                  className="border-0 focus-visible:ring-0 h-full w-full"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-right mt-4">
+                  <p className="text-sm text-gray-500">Page 5 of 5</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              
+              <div className="space-x-2">
+                <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
+                  <Save className="mr-2 h-4 w-4" /> Save Draft
+                </Button>
+                <Button type="submit" className="flex items-center">
+                  Submit Survey
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </form>
+    </div>
+  );
+};
+
+export default EskomSiteSurveyForm;
