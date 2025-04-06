@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Loader, Clock, Navigation } from 'lucide-react';
 
 // Define the interface for the MapView component props
@@ -27,6 +27,9 @@ interface MapViewProps {
   center: { lat: number; lng: number };
 }
 
+// Mapbox API Key - this is a frontend-only key with URL restrictions
+const MAPBOX_API_KEY = "pk.eyJ1IjoibG92YWJsZXNob3ciLCJhIjoiY2x3eGJha3I5MHJodzJxcXF2Ym1weWh6ZCJ9.TrsYcvQ2rlZDWQRo0uZhsQ";
+
 const MapView: React.FC<MapViewProps> = ({ 
   engineers, 
   sites, 
@@ -47,6 +50,16 @@ const MapView: React.FC<MapViewProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
+  // Generate Mapbox static map URL for South Africa
+  const getMapboxStaticUrl = () => {
+    const width = 1200;
+    const height = 900;
+    const centerCoords = `${center.lng},${center.lat}`;
+    const zoom = 5;
+    
+    return `https://api.mapbox.com/styles/v1/mapbox/light-v10/static/${centerCoords},${zoom},0/${width}x${height}?access_token=${MAPBOX_API_KEY}`;
+  };
+
   if (!mapLoaded) {
     return (
       <div className="h-full flex items-center justify-center bg-gray-50">
@@ -62,7 +75,9 @@ const MapView: React.FC<MapViewProps> = ({
   return (
     <div className="relative h-full bg-gray-100 overflow-hidden">
       {/* Map of South Africa */}
-      <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/25.0339,-29.0000,5,0/1200x900?access_token=pk.eyJ1IjoibG92YWJsZXNob3ciLCJhIjoiY2x3eGJha3I5MHJodzJxcXF2Ym1weWh6ZCJ9.TrsYcvQ2rlZDWQRo0uZhsQ')] bg-cover bg-center"></div>
+      <div className="absolute inset-0 bg-cover bg-center" style={{
+        backgroundImage: `url('${getMapboxStaticUrl()}')`
+      }}></div>
       
       {/* Engineer markers */}
       {engineers.map(engineer => {
