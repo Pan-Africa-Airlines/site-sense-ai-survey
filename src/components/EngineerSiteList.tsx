@@ -1,15 +1,18 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Clipboard, 
   Car, 
   MapPin, 
   Clock, 
   CalendarCheck, 
-  Navigation 
+  Navigation,
+  Compass
 } from "lucide-react";
 import NavigationPopup from "./NavigationPopup";
 
@@ -33,6 +36,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
   onVehicleCheck
 }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
@@ -41,8 +45,22 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
   };
 
   const handleStartRoute = (site: Site) => {
+    if (!site.address) {
+      toast({
+        title: "Navigation Error",
+        description: "Cannot navigate: The site has no address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSelectedSite(site);
     setNavigationOpen(true);
+    
+    toast({
+      title: "Starting Navigation",
+      description: "Preparing directions to " + site.name
+    });
   };
 
   const getPriorityBadge = (priority: string) => {
@@ -91,7 +109,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
             {sites.map((site) => (
               <Card key={site.id} className="border-l-4 border-l-akhanya">
                 <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div>
                       <h3 className="font-medium text-lg">{site.name}</h3>
                       <div className="flex flex-wrap gap-2 mt-1 mb-2">
@@ -127,7 +145,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                         variant="outline"
                         className="text-akhanya border-akhanya hover:bg-akhanya/10"
                       >
-                        <Navigation className="mr-2 h-4 w-4" />
+                        <Compass className="mr-2 h-4 w-4" />
                         Start Route
                       </Button>
                       <Button

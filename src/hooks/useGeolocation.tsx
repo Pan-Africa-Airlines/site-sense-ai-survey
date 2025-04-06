@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface GeolocationState {
   latitude: number | null;
@@ -16,13 +16,21 @@ export const useGeolocation = () => {
     latitude: null,
     longitude: null,
     accuracy: null,
-    loading: true,
+    loading: false, // Start as false and only set to true when explicitly requested
     error: null,
     timestamp: null,
     address: null,
   });
 
-  useEffect(() => {
+  // Memoize location fetching function to prevent recreating it on every render
+  const fetchLocation = useCallback(() => {
+    // Only set loading if we're actually going to fetch
+    setState(prev => ({
+      ...prev,
+      loading: true,
+      error: null, // Clear any previous errors
+    }));
+
     if (!navigator.geolocation) {
       setState(prev => ({
         ...prev,
@@ -43,7 +51,7 @@ export const useGeolocation = () => {
         error: null, // Clear any previous errors
       }));
 
-      // Reverse geocoding to get address
+      // Reverse geocoding to get address - do this in the background after setting location
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
         .then(response => response.json())
         .then(data => {
@@ -79,10 +87,13 @@ export const useGeolocation = () => {
 
     const options = {
       enableHighAccuracy: true,
-      timeout: 10000, // Increase timeout to 10 seconds
-      maximumAge: 0
+      timeout: 8000, // Reduce timeout for faster fallback
+      maximumAge: 60000 // Accept positions up to 1 minute old for faster response
     };
 
+    // Use getCurrentPosition instead of watchPosition for a one-time fast location grab
+    navigator.geolocation.getCurrentPosition(geoSuccess, geoError, options);
+    
     // Add a backup timeout in case geolocation API hangs
     const timeoutId = setTimeout(() => {
       setState(prev => {
@@ -96,24 +107,17 @@ export const useGeolocation = () => {
         }
         return prev;
       });
-    }, 12000); // Slightly longer than the geolocation timeout
-
-    const watchId = navigator.geolocation.watchPosition(geoSuccess, geoError, options);
+    }, 10000); // Slightly longer than the geolocation timeout
 
     return () => {
-      navigator.geolocation.clearWatch(watchId);
       clearTimeout(timeoutId);
     };
   }, []);
 
-  // Add a retry function to allow users to try again
-  const retry = () => {
-    setState(prev => ({
-      ...prev,
-      loading: true,
-      error: null
-    }));
+  // Don't automatically fetch location on mount - let the component request it explicitly
+  
+  return { 
+    ...state, 
+    retry: fetchLocation // Expose the fetch function as retry
   };
-
-  return { ...state, retry };
 };

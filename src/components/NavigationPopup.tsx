@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { Navigation, MapPin, Route, AlertCircle, Maximize2, Minimize2, RefreshCw } from "lucide-react";
+import { Navigation, MapPin, Route, AlertCircle, Maximize2, Minimize2, RefreshCw, Compass } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface NavigationPopupProps {
   open: boolean;
@@ -26,7 +27,16 @@ const NavigationPopup = ({
 }: NavigationPopupProps) => {
   const { latitude, longitude, loading, error, retry } = useGeolocation();
   const [expanded, setExpanded] = React.useState(false);
+  const [navigationStarted, setNavigationStarted] = React.useState(false);
+  const { toast } = useToast();
 
+  // Pre-fetch location when the popup opens
+  useEffect(() => {
+    if (open && !latitude && !longitude && !loading && !error) {
+      retry();
+    }
+  }, [open, latitude, longitude, loading, error, retry]);
+  
   // Generate Google Maps embed URL with directions
   const getMapsEmbedUrl = () => {
     if (!latitude || !longitude) return '';
@@ -43,6 +53,33 @@ const NavigationPopup = ({
 
   const toggleExpand = () => {
     setExpanded(!expanded);
+  };
+  
+  const handleStartNavigation = () => {
+    setNavigationStarted(true);
+    setExpanded(true);
+    
+    // Try to open in native maps app on mobile
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /iphone|ipad|ipod|android/.test(userAgent);
+    
+    if (isMobile && latitude && longitude) {
+      // Create URL for native maps app
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${encodeURIComponent(siteAddress)}&travelmode=driving`;
+      
+      // Open in new tab which should trigger native app
+      window.open(mapsUrl, '_blank');
+      
+      toast({
+        title: "Navigation Started",
+        description: "Opening navigation in maps app"
+      });
+    } else {
+      toast({
+        title: "Navigation Started",
+        description: "Use the map below to navigate to the site"
+      });
+    }
   };
 
   // Check if we have a placeholder API key
@@ -216,7 +253,7 @@ const NavigationPopup = ({
                 Cancel
               </Button>
               <div className="flex gap-2">
-                {!error && !loading && hasValidApiKey && (
+                {!error && !loading && (
                   <>
                     <Button
                       onClick={toggleExpand}
@@ -227,10 +264,10 @@ const NavigationPopup = ({
                       Full Screen
                     </Button>
                     <Button
-                      onClick={toggleExpand}
+                      onClick={handleStartNavigation}
                       className="bg-akhanya hover:bg-akhanya/80"
                     >
-                      <Navigation className="mr-2 h-4 w-4" />
+                      <Compass className="mr-2 h-4 w-4" />
                       Start Navigation
                     </Button>
                   </>
