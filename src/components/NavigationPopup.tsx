@@ -15,7 +15,7 @@ interface NavigationPopupProps {
 
 // Google Maps API Key configured for this application
 // This is a frontend-only key with HTTP referrer restrictions
-const MAPS_API_KEY = "AIzaSyDJyAygUov1TrGDPi-fKbQGmGYQ-RMOf0w";
+const MAPS_API_KEY = "AIzaSyC_UK1gf3b1wXqFvYVQoRiBSxv8L_J9Wmo";
 
 const NavigationPopup = ({ 
   open, 
