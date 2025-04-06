@@ -97,6 +97,14 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     }
   }, [latitude, longitude, geoAddress]);
 
+  // Initialize the date field with today's date if it's empty
+  useEffect(() => {
+    if (!date) {
+      const today = new Date().toISOString().split('T')[0];
+      setDate(today);
+    }
+  }, [date]);
+
   // Update form progress when fields change
   useEffect(() => {
     const filledFields = [siteName, region, date, buildingPhoto, siteId, siteType, address, gpsCoordinates].filter(Boolean).length;
@@ -152,10 +160,13 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
         gps_coordinates: gpsCoordinates,
         building_photo: buildingPhoto,
         user_id: user?.id,
-        status: "Draft",
+        status: "submitted",
         survey_data: {
           engineerId,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
+          approved: false,  // Initial approval status
+          approvedBy: null, // Will be filled by admin later
+          approvalDate: null // Will be filled by admin later
         } as Json
       };
       
@@ -172,7 +183,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
       } else {
         toast({
           title: "Survey submitted successfully",
-          description: "Your survey has been saved.",
+          description: "Your survey has been saved and sent for approval.",
         });
         navigate("/eskom-surveys");
       }
@@ -199,12 +210,15 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
         gps_coordinates: gpsCoordinates,
         building_photo: buildingPhoto,
         user_id: user?.id,
-        status: "Draft",
+        status: "draft",
         survey_data: {
           engineerId,
           lastUpdated: new Date().toISOString(),
           currentTab,
-          formProgress
+          formProgress,
+          approved: false,
+          approvedBy: null,
+          approvalDate: null
         } as Json
       };
       
@@ -331,15 +345,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                         capturedImage={buildingPhoto}
                       />
                     </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between mt-8 text-sm text-gray-500">
-                  <div>
-                    <p>Approved by: ________________</p>
-                  </div>
-                  <div>
-                    <p>Authorized Date: {date || 'DD/MM/YYYY'}</p>
                   </div>
                 </div>
                 
@@ -517,13 +522,8 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
         </div>
       </form>
       
-      <div className="flex items-center justify-between mt-8 text-sm text-gray-500">
-        <div>
-          <p>Approved by: ________________</p>
-        </div>
-        <div>
-          <p>Authorized Date: {date || 'DD/MM/YYYY'}</p>
-        </div>
+      <div className="text-sm text-gray-500 text-center mt-8">
+        <p>Authorized Date: {date || 'DD/MM/YYYY'}</p>
       </div>
     </div>
   );

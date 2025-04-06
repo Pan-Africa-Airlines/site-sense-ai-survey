@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Plus, Edit, Download, Eye, ClipboardList, Loader, Filter } from "lucide-react";
+import { Plus, Edit, Download, Eye, ClipboardList, Loader, Filter, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +19,11 @@ interface SiteSurvey {
   date: string;
   site_id: string | null;
   status: string;
+  survey_data: {
+    approved?: boolean;
+    approvedBy?: string | null;
+    approvalDate?: string | null;
+  } | null;
 }
 
 const EskomSurveys = () => {
@@ -61,7 +65,6 @@ const EskomSurveys = () => {
       if (data) {
         setSurveys(data as SiteSurvey[]);
         
-        // Extract unique regions for the filter
         const uniqueRegions = [...new Set(data.map(item => item.region))];
         setRegions(uniqueRegions);
       }
@@ -72,15 +75,26 @@ const EskomSurveys = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, approved?: boolean) => {
+    if (approved) {
+      return "bg-green-100 text-green-800 border-green-300";
+    }
+    
     switch (status) {
       case 'draft':
         return "bg-yellow-100 text-yellow-800 border-yellow-300";
       case 'submitted':
-        return "bg-green-100 text-green-800 border-green-300";
+        return "bg-blue-100 text-blue-800 border-blue-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
     }
+  };
+
+  const getStatusDisplay = (status: string, approved?: boolean) => {
+    if (approved) {
+      return "Approved";
+    }
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   const formatDate = (dateString: string) => {
@@ -178,8 +192,8 @@ const EskomSurveys = () => {
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="text-lg font-semibold truncate">{survey.site_name}</h3>
-                      <Badge className={getStatusColor(survey.status)}>
-                        {survey.status === 'draft' ? 'Draft' : 'Submitted'}
+                      <Badge className={getStatusColor(survey.status, survey.survey_data?.approved)}>
+                        {getStatusDisplay(survey.status, survey.survey_data?.approved)}
                       </Badge>
                     </div>
                     <div className="space-y-1 text-sm text-gray-600">
@@ -187,6 +201,12 @@ const EskomSurveys = () => {
                       <p><span className="font-medium">Site ID:</span> {survey.site_id || 'N/A'}</p>
                       <p><span className="font-medium">Date:</span> {survey.date}</p>
                       <p><span className="font-medium">Last Updated:</span> {formatDate(survey.updated_at)}</p>
+                      {survey.survey_data?.approved && (
+                        <p className="flex items-center text-green-600">
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Approved on {survey.survey_data?.approvalDate ? formatDate(survey.survey_data.approvalDate) : 'N/A'}
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                   <CardFooter className="bg-gray-50 p-4 flex justify-between">
