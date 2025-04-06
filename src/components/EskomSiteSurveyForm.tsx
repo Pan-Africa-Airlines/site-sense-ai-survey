@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { useGeolocation } from "@/hooks/useGeolocation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import DrawingCanvas from "./DrawingCanvas";
 
 interface FormTabProps {
   children: React.ReactNode;
@@ -108,16 +110,15 @@ interface EquipmentRoomGeneral {
 // Interface for cabinet space planning
 interface CabinetSpacePlanning {
   roomLayoutDrawing: string;
+  roomLayoutImage: string;
   numberOfRouters: number;
-  roomLayoutMarkup: string;
 }
 
-// Add this interface to match the ImageCapture component props
-interface ImageCaptureComponentProps {
-  onPhotoTaken: (photoUrl: string) => void;
+interface EskomSiteSurveyFormProps {
+  showAIRecommendations?: boolean;
 }
 
-const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
+const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecommendations = false }) => {
   const [currentTab, setCurrentTab] = useState("cover");
   const [formProgress, setFormProgress] = useState(0);
   const [siteName, setSiteName] = useState("");
@@ -178,8 +179,8 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   // Cabinet space planning
   const [cabinetSpacePlanning, setCabinetSpacePlanning] = useState<CabinetSpacePlanning>({
     roomLayoutDrawing: "",
-    numberOfRouters: 0,
-    roomLayoutMarkup: ""
+    roomLayoutImage: "",
+    numberOfRouters: 0
   });
   
   // Approval sections
@@ -313,6 +314,18 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     setCabinetSpacePlanning({
       ...cabinetSpacePlanning,
       [field]: value
+    });
+  };
+
+  // Handle room layout drawing image save
+  const handleRoomLayoutImageSave = (dataUrl: string) => {
+    setCabinetSpacePlanning({
+      ...cabinetSpacePlanning,
+      roomLayoutImage: dataUrl
+    });
+    toast({
+      title: "Drawing saved",
+      description: "Your room layout drawing has been saved.",
     });
   };
 
@@ -612,7 +625,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                       Building Photo
                     </Label>
                     <ImageCapture 
-                      onPhotoTaken={handleBuildingPhotoUpload} 
+                      onImageCaptured={handleBuildingPhotoUpload} 
                     />
                     {buildingPhoto && (
                       <div className="mt-2">
@@ -950,7 +963,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                     />
                   </div>
                   
-                  <h3 className="text-2xl font-semibold text-center mb-6">3.1. EQUIPMENT ROOM (GENERAL)</h3>
+                  <h3 className="text-2xl font-semibold text-center mb-6">2. EQUIPMENT ROOM (GENERAL)</h3>
                   
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse border border-gray-300">
@@ -962,13 +975,13 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                       </thead>
                       <tbody>
                         <TableInputRow
-                          label="Cable Access"
+                          label="Cable access to the cabinet (Underfloor, Overhead)"
                           name="cableAccess"
                           value={equipmentRoomGeneral.cableAccess}
                           onChange={(e) => handleEquipmentRoomGeneralChange('cableAccess', e.target.value)}
                         />
                         <TableInputRow
-                          label="Room Lighting"
+                          label="Room lighting (Indicate if any lights are faulty)"
                           name="roomLighting"
                           value={equipmentRoomGeneral.roomLighting}
                           onChange={(e) => handleEquipmentRoomGeneralChange('roomLighting', e.target.value)}
@@ -980,25 +993,25 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                           onChange={(e) => handleEquipmentRoomGeneralChange('fireProtection', e.target.value)}
                         />
                         <TableInputRow
-                          label="Cooling Method"
+                          label="Cooling Method (Air-conditioning, Fans etc)"
                           name="coolingMethod"
                           value={equipmentRoomGeneral.coolingMethod}
                           onChange={(e) => handleEquipmentRoomGeneralChange('coolingMethod', e.target.value)}
                         />
                         <TableInputRow
-                          label="Cooling Rating"
+                          label="Cooling Rating (BTU or Central Controlled)"
                           name="coolingRating"
                           value={equipmentRoomGeneral.coolingRating}
                           onChange={(e) => handleEquipmentRoomGeneralChange('coolingRating', e.target.value)}
                         />
                         <TableInputRow
-                          label="Room Temperature"
+                          label="Measured room temperature (Deg C)"
                           name="roomTemperature"
                           value={equipmentRoomGeneral.roomTemperature}
                           onChange={(e) => handleEquipmentRoomGeneralChange('roomTemperature', e.target.value)}
                         />
                         <TableInputRow
-                          label="Equipment Room Condition"
+                          label="General condition of equipment room"
                           name="equipmentRoomCondition"
                           value={equipmentRoomGeneral.equipmentRoomCondition}
                           onChange={(e) => handleEquipmentRoomGeneralChange('equipmentRoomCondition', e.target.value)}
@@ -1007,22 +1020,75 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                     </table>
                   </div>
                   
-                  <h3 className="text-2xl font-semibold text-center my-6">3.2. CABINET SPACE PLANNING</h3>
+                  <h3 className="text-2xl font-semibold text-center my-6">3. DETAILED SITE RECORDS</h3>
+                  <h4 className="text-xl font-semibold mt-4 mb-3">3.1. Equipment Cabinet Space Planning</h4>
                   
                   <div className="mb-4">
-                    <Label htmlFor="roomLayoutDrawing" className="block text-sm font-medium text-gray-700 mb-2">
-                      Room Layout Drawing (Prior to site visit, Eskom will supply PDF version, as available). OEM to printout copies and bring to site). Red-lined scanned version to be attached to the site survey report.
-                    </Label>
-                    <p className="text-sm text-gray-500 mb-2">
-                      Where no Room Layout drawing available, a free hand drawing (not to scale) to be provided by the OEM
-                    </p>
-                    <Textarea
-                      id="roomLayoutDrawing"
-                      value={cabinetSpacePlanning.roomLayoutDrawing}
-                      onChange={(e) => handleCabinetSpacePlanningChange('roomLayoutDrawing', e.target.value)}
-                      className="min-h-[300px] resize-y"
-                      placeholder="Please add your room layout drawing notes here..."
-                    />
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-300 mb-6">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
+                            <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2">
+                              <p className="font-medium">Room Layout Drawing (Prior to site visit, Eskom will supply PDF version, as available). OEM to printout copies and bring to site). Red-lined scanned version to be attached to the site survey report.</p>
+                              <p className="mt-2 text-sm text-gray-600">Where no Room Layout drawing available, a free hand drawing (not to scale) to be provided by the OEM.</p>
+                            </td>
+                            <td className="border border-gray-300 p-2">
+                              <DrawingCanvas onSave={handleRoomLayoutImageSave} initialValue={cabinetSpacePlanning.roomLayoutImage} />
+                              {cabinetSpacePlanning.roomLayoutImage && (
+                                <div className="border-t border-gray-300 pt-4 mt-4">
+                                  <p className="font-medium mb-2">Current Drawing:</p>
+                                  <img 
+                                    src={cabinetSpacePlanning.roomLayoutImage} 
+                                    alt="Room Layout" 
+                                    className="border border-gray-300 rounded max-w-full"
+                                  />
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">
+                              Please indicated number of new routers required?
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="number" 
+                                name="numberOfRouters"
+                                value={cabinetSpacePlanning.numberOfRouters.toString()}
+                                onChange={(e) => handleCabinetSpacePlanningChange('numberOfRouters', parseInt(e.target.value) || 0)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                          <tr className="border border-gray-300">
+                            <td className="border border-gray-300 p-2">
+                              <p className="font-medium">Please red-line Room Layout Drawing to indicate:</p>
+                              <ul className="list-disc pl-6 mt-2 space-y-1">
+                                <li>Location of new IP/MPLS Cabinet(s).</li>
+                                <li>Location of existing ODFs needed for project.</li>
+                                <li>Location of existing Ericsson ADM.</li>
+                                <li>Location of the OTN Box.</li>
+                                <li>Location of existing BME (Transmission sites).</li>
+                                <li>Location of existing FOX.</li>
+                                <li>Location of existing OT Router (ASR Network).</li>
+                                <li>Location of existing DC Chargers.</li>
+                                <li>Location of existing EOA DB board.</li>
+                                <li>Location of air-conditioners.</li>
+                              </ul>
+                            </td>
+                            <td className="border border-gray-300 p-2">
+                              <p className="text-sm text-gray-600">Use the drawing tool above to mark these items on your room layout</p>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                   
                   <div className="text-right mt-4">
