@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, AlertTriangle, Navigation, Car, CheckSquare } from "lucide-react";
+import { Calendar, Clock, MapPin, AlertTriangle, Navigation } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import GoogleMapsNavigationPopup from "./GoogleMapsNavigationPopup";
 
@@ -123,15 +123,15 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                         <h4 className="font-medium mb-1">Equipment Needed:</h4>
                         <ul className="text-sm text-gray-500 space-y-1">
                           <li className="flex items-center">
-                            <CheckSquare className="h-3 w-3 mr-1 text-green-500" />
+                            <div className="h-3 w-3 mr-1 text-green-500">✓</div>
                             Voltage tester
                           </li>
                           <li className="flex items-center">
-                            <CheckSquare className="h-3 w-3 mr-1 text-green-500" />
+                            <div className="h-3 w-3 mr-1 text-green-500">✓</div>
                             Signal analyzer
                           </li>
                           <li className="flex items-center">
-                            <CheckSquare className="h-3 w-3 mr-1 text-green-500" />
+                            <div className="h-3 w-3 mr-1 text-green-500">✓</div>
                             Protective equipment
                           </li>
                         </ul>
@@ -141,27 +141,15 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                 </Popover>
                 
                 <div className="space-x-2">
-                  {!vehicleCheckCompleted ? (
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={onVehicleCheck}
-                      className="bg-amber-500 hover:bg-amber-600"
-                    >
-                      <Car className="h-4 w-4 mr-1" />
-                      Vehicle Check Required
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={() => handleNavigate(site)}
-                      className="bg-akhanya hover:bg-akhanya-dark"
-                    >
-                      <Navigation className="h-4 w-4 mr-1" />
-                      Navigate
-                    </Button>
-                  )}
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => handleNavigate(site)}
+                    className="bg-akhanya hover:bg-akhanya-dark"
+                  >
+                    <Navigation className="h-4 w-4 mr-1" />
+                    Navigate
+                  </Button>
                 </div>
               </div>
             </CardContent>

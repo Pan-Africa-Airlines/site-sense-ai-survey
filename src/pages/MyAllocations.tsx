@@ -1,18 +1,10 @@
 
-import React, { useState } from "react";
+import React from "react";
 import NavigationBar from "@/components/NavigationBar";
 import EngineerSiteList from "@/components/EngineerSiteList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import VehicleCheckWizard from "@/components/VehicleCheckWizard";
-import { useToast } from "@/hooks/use-toast";
 
 const MyAllocations = () => {
-  const { toast } = useToast();
-  const [vehicleCheckOpen, setVehicleCheckOpen] = useState(false);
-  const [vehicleCheckProcessing, setVehicleCheckProcessing] = useState(false);
-  const [vehicleCheckCompleted, setVehicleCheckCompleted] = useState(() => {
-    return localStorage.getItem("vehicleCheckCompleted") === "true";
-  });
   
   // Mock data for site allocations
   const sitesData = [
@@ -64,29 +56,6 @@ const MyAllocations = () => {
     }
   ];
   
-  const handleVehicleCheck = () => {
-    setVehicleCheckOpen(true);
-  };
-  
-  const handleVehicleCheckConfirm = () => {
-    setVehicleCheckProcessing(true);
-    
-    // Simulate processing
-    setTimeout(() => {
-      setVehicleCheckProcessing(false);
-      setVehicleCheckOpen(false);
-      setVehicleCheckCompleted(true);
-      
-      // Store completion in localStorage
-      localStorage.setItem("vehicleCheckCompleted", "true");
-      
-      toast({
-        title: "Vehicle Check Completed",
-        description: "Your vehicle has been verified as safe for travel. You can now proceed to site assessments."
-      });
-    }, 1500);
-  };
-  
   return (
     <div className="min-h-screen bg-gray-50">
       <NavigationBar />
@@ -103,29 +72,20 @@ const MyAllocations = () => {
           <TabsContent value="pending">
             <EngineerSiteList 
               sites={sitesData} 
-              onVehicleCheck={handleVehicleCheck}
-              vehicleCheckCompleted={vehicleCheckCompleted}
+              onVehicleCheck={() => {}}
+              vehicleCheckCompleted={true}
             />
           </TabsContent>
           
           <TabsContent value="completed">
             <EngineerSiteList 
               sites={completedSites}
-              onVehicleCheck={handleVehicleCheck}
+              onVehicleCheck={() => {}}
               vehicleCheckCompleted={true}
             />
           </TabsContent>
         </Tabs>
       </div>
-      
-      {/* Vehicle check dialog */}
-      <VehicleCheckWizard
-        open={vehicleCheckOpen}
-        onClose={() => setVehicleCheckOpen(false)}
-        onConfirm={handleVehicleCheckConfirm}
-        vehicle="Toyota Land Cruiser (ABC-123)"
-        isProcessing={vehicleCheckProcessing}
-      />
     </div>
   );
 };
