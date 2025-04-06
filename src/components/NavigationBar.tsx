@@ -64,16 +64,24 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
     }
   };
 
+  // Fixed heights to prevent twitching
+  const headerHeight = isCompact ? 'h-16' : 'h-20';
+  const logoHeight = isCompact ? 'h-12' : 'h-16';
+  const eskLogo = isCompact ? 'h-10' : 'h-12';
+  const textSize = isCompact ? 'text-xl' : 'text-2xl';
+  const iconSize = isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4';
+  const avatarSize = isCompact ? 'h-8 w-8' : 'h-10 w-10';
+
   return (
-    <header className={`bg-white border-b border-gray-200 transition-all duration-300 z-10 ${isCompact ? 'py-1' : 'py-3'}`}>
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center">
+    <header className={`bg-white border-b border-gray-200 ${headerHeight} transition-all duration-300 z-10`}>
+      <div className="container mx-auto px-4 h-full">
+        <div className="flex justify-between items-center h-full">
           <div className="flex items-center">
             <div className="flex items-center gap-3">
               <img 
                 src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
                 alt="Akhanya IT" 
-                className={`transition-all duration-300 ${isCompact ? 'h-12' : 'h-16'}`}
+                className={`transition-all duration-300 ${logoHeight}`}
                 onError={(e) => {
                   e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
                 }}
@@ -82,14 +90,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               <img 
                 src="/eskom-logo.png" 
                 alt="Eskom" 
-                className={`transition-all duration-300 ${isCompact ? 'h-10' : 'h-12'}`}
+                className={`transition-all duration-300 ${eskLogo}`}
                 onError={(e) => {
                   e.currentTarget.src = "https://via.placeholder.com/120x45?text=Eskom";
                 }}
               />
             </div>
             <div className="h-8 w-px bg-gray-300 mx-4"></div>
-            <div className={`text-akhanya-secondary font-bold mr-0 transition-all duration-300 ${isCompact ? 'text-xl' : 'text-2xl'}`}>
+            <div className={`text-akhanya-secondary font-bold mr-0 transition-all duration-300 ${textSize}`}>
               Eskom<span>Site</span><span className="text-red-600">IQ</span>
             </div>
             <div className={`text-sm bg-akhanya text-white px-2 py-1 rounded ml-2 transition-all duration-300 ${isCompact ? 'text-xs' : 'text-sm'}`}>AI</div>
@@ -102,7 +110,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               onClick={() => navigate("/")}
               className={`transition-all duration-300 ${isActive("/") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
             >
-              <Home className={`mr-1 transition-all duration-300 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Dashboard
+              <Home className={`mr-1 transition-all duration-300 ${iconSize}`} /> Dashboard
             </Button>
             <Button
               variant={isActive("/car-check") ? "default" : "ghost"}
@@ -110,7 +118,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               onClick={() => navigate("/car-check")}
               className={`transition-all duration-300 ${isActive("/car-check") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
             >
-              <Car className={`mr-1 transition-all duration-300 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Vehicle Check
+              <Car className={`mr-1 transition-all duration-300 ${iconSize}`} /> Vehicle Check
             </Button>
             <Button
               variant={isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "default" : "ghost"}
@@ -118,7 +126,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               onClick={() => navigate("/eskom-site-survey")}
               className={`transition-all duration-300 ${isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
             >
-              <FileSpreadsheet className={`mr-1 transition-all duration-300 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Eskom Site Survey
+              <FileSpreadsheet className={`mr-1 transition-all duration-300 ${iconSize}`} /> Eskom Site Survey
             </Button>
             <Button
               variant={isActive("/installation") ? "default" : "ghost"}
@@ -126,7 +134,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               onClick={() => navigate("/installation")}
               className={`transition-all duration-300 ${isActive("/installation") ? "bg-akhanya hover:bg-akhanya-dark" : ""}`}
             >
-              <HardHat className={`mr-1 transition-all duration-300 ${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> Installation
+              <HardHat className={`mr-1 transition-all duration-300 ${iconSize}`} /> Installation
             </Button>
           </div>
           
@@ -143,8 +151,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className={`relative rounded-full transition-all duration-300 ${isCompact ? 'h-8 w-8' : 'h-10 w-10'}`}>
-                  <Avatar className={`transition-all duration-300 ${isCompact ? 'h-8 w-8' : 'h-10 w-10'}`}>
+                <Button variant="ghost" className={`relative rounded-full transition-all duration-300 ${avatarSize}`}>
+                  <Avatar className={`transition-all duration-300 ${avatarSize}`}>
                     <AvatarImage src="/engineer-profile.jpg" alt="Profile" />
                     <AvatarFallback className="bg-akhanya text-white">
                       {getInitials(userEmail)}

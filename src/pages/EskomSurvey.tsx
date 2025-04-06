@@ -296,6 +296,7 @@ const EskomSurvey = () => {
     },
   });
   
+  // Fixed the spread type error by ensuring we're passing an object
   const handleInputChange = (field: string, value: any) => {
     setFormData(prevData => {
       // Handle nested fields with dot notation (e.g., "oemContractor.name")

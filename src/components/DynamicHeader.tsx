@@ -40,9 +40,12 @@ const DynamicHeader: React.FC = () => {
     }
   };
 
+  // Fixed height to prevent twitching
+  const headerHeight = "h-14";
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
+    <header className={`sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${headerHeight}`}>
+      <div className={`container flex items-center ${headerHeight}`}>
         <div className="mr-4 hidden md:flex">
           <NavLink 
             to="/" 
@@ -173,6 +176,7 @@ const DynamicHeader: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={toggleTheme}
+            className="min-w-[70px]"
           >
             {theme === "dark" ? "Light" : "Dark"}
           </Button>
