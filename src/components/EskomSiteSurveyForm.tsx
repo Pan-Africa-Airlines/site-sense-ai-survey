@@ -869,4 +869,638 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
                       name="region"
                       value={region}
                       onChange={handleInputChange}
-                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block
+                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      placeholder="Enter region"
+                    />
+                  </div>
+                  
+                  <div className="mb-6">
+                    <Label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                      Date
+                    </Label>
+                    <Input
+                      type="date"
+                      id="date"
+                      name="date"
+                      value={date}
+                      onChange={handleInputChange}
+                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                    />
+                  </div>
+                  
+                  <div className="mb-6">
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">
+                      Building Photo
+                    </Label>
+                    {buildingPhoto ? (
+                      <div className="relative mb-4">
+                        <img src={buildingPhoto} alt="Building" className="rounded-md max-h-64 mx-auto" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => setBuildingPhoto("")}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <ImageCapture onCapture={handleBuildingPhotoUpload} />
+                    )}
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold mb-3">Site Details</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="siteId" className="block text-sm font-medium text-gray-700 mb-1">
+                        Site ID
+                      </Label>
+                      <Input
+                        type="text"
+                        id="siteId"
+                        name="siteId"
+                        value={siteId}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                        placeholder="Enter site ID"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="siteType" className="block text-sm font-medium text-gray-700 mb-1">
+                        Site Type
+                      </Label>
+                      <Select value={siteType} onValueChange={(value) => setSiteType(value)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select site type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="substation">Substation</SelectItem>
+                          <SelectItem value="power-station">Power Station</SelectItem>
+                          <SelectItem value="distribution-station">Distribution Station</SelectItem>
+                          <SelectItem value="control-center">Control Center</SelectItem>
+                          <SelectItem value="office">Office</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <Label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </Label>
+                  <Textarea
+                    id="address"
+                    name="address"
+                    value={address}
+                    onChange={handleInputChange}
+                    className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md min-h-20"
+                    placeholder="Enter site address"
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <Label htmlFor="gpsCoordinates" className="block text-sm font-medium text-gray-700 mb-1">
+                    GPS Coordinates
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      id="gpsCoordinates"
+                      name="gpsCoordinates"
+                      value={gpsCoordinates}
+                      onChange={handleInputChange}
+                      className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      placeholder="Latitude, Longitude"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={retry}
+                      className="flex items-center gap-1"
+                      disabled={loading}
+                    >
+                      <MapPin className="h-4 w-4" />
+                      {loading ? "Detecting..." : "Auto-detect"}
+                    </Button>
+                  </div>
+                  {error && (
+                    <p className="text-sm text-red-600 mt-1">
+                      Error detecting location. Please enter coordinates manually.
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <div></div>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="attendees" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Attendees</h3>
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th className="border border-gray-300 p-2 font-medium">Date</th>
+                        <th className="border border-gray-300 p-2 font-medium">Name</th>
+                        <th className="border border-gray-300 p-2 font-medium">Company</th>
+                        <th className="border border-gray-300 p-2 font-medium">Department</th>
+                        <th className="border border-gray-300 p-2 font-medium">Cellphone</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendees.map((attendee, index) => (
+                        <TableInputRow
+                          key={index}
+                          label="Date"
+                          name={`attendees[${index}].date`}
+                          value={attendee.date}
+                          onChange={(e) => handleAttendeeChange(index, "date", e.target.value)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={prevTab}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contents" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Contents</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="oemContractor.name" className="block text-sm font-medium text-gray-700 mb-1">
+                        OEM Contractor Name
+                      </Label>
+                      <Input
+                        type="text"
+                        id="oemContractor.name"
+                        name="oemContractor.name"
+                        value={oemContractor.name}
+                        onChange={(e) => handleApprovalChange("oemContractor", "name", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="oemContractor.signature" className="block text-sm font-medium text-gray-700 mb-1">
+                        OEM Contractor Signature
+                      </Label>
+                      <Input
+                        type="text"
+                        id="oemContractor.signature"
+                        name="oemContractor.signature"
+                        value={oemContractor.signature}
+                        onChange={(e) => handleApprovalChange("oemContractor", "signature", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={prevTab}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="site-info" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Site Info</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="siteOwnerContacts[0].name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Site Owner Contact Name
+                      </Label>
+                      <Input
+                        type="text"
+                        id="siteOwnerContacts[0].name"
+                        name="siteOwnerContacts[0].name"
+                        value={siteOwnerContacts[0].name}
+                        onChange={(e) => handleSiteOwnerContactChange(0, "name", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="siteOwnerContacts[0].cellphone" className="block text-sm font-medium text-gray-700 mb-1">
+                        Site Owner Contact Cellphone
+                      </Label>
+                      <Input
+                        type="text"
+                        id="siteOwnerContacts[0].cellphone"
+                        name="siteOwnerContacts[0].cellphone"
+                        value={siteOwnerContacts[0].cellphone}
+                        onChange={(e) => handleSiteOwnerContactChange(0, "cellphone", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={prevTab}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="equipment-details" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Equipment</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="equipmentLocation.buildingName" className="block text-sm font-medium text-gray-700 mb-1">
+                        Building Name
+                      </Label>
+                      <Input
+                        type="text"
+                        id="equipmentLocation.buildingName"
+                        name="equipmentLocation.buildingName"
+                        value={equipmentLocation.buildingName}
+                        onChange={(e) => handleEquipmentLocationChange("buildingName", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="equipmentLocation.buildingType" className="block text-sm font-medium text-gray-700 mb-1">
+                        Building Type
+                      </Label>
+                      <Input
+                        type="text"
+                        id="equipmentLocation.buildingType"
+                        name="equipmentLocation.buildingType"
+                        value={equipmentLocation.buildingType}
+                        onChange={(e) => handleEquipmentLocationChange("buildingType", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={prevTab}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="equipment-room" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Room Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="equipmentRoomGeneral.cableAccess" className="block text-sm font-medium text-gray-700 mb-1">
+                        Cable Access
+                      </Label>
+                      <Input
+                        type="text"
+                        id="equipmentRoomGeneral.cableAccess"
+                        name="equipmentRoomGeneral.cableAccess"
+                        value={equipmentRoomGeneral.cableAccess}
+                        onChange={(e) => handleEquipmentRoomGeneralChange("cableAccess", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="equipmentRoomGeneral.roomLighting" className="block text-sm font-medium text-gray-700 mb-1">
+                        Room Lighting
+                      </Label>
+                      <Input
+                        type="text"
+                        id="equipmentRoomGeneral.roomLighting"
+                        name="equipmentRoomGeneral.roomLighting"
+                        value={equipmentRoomGeneral.roomLighting}
+                        onChange={(e) => handleEquipmentRoomGeneralChange("roomLighting", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={prevTab}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="additional-photos" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Equipment Room Photos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                    {equipmentRoomPhotos.photos.filter(Boolean).map((photo, index) => (
+                      <div key={index} className="relative rounded-md overflow-hidden border border-gray-200">
+                        <img src={photo} alt={`Equipment Room ${index + 1}`} className="w-full h-48 object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => removeEquipmentRoomPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-center border border-dashed border-gray-300 rounded-md h-48">
+                      <ImageCapture onCapture={handleEquipmentRoomPhotoUpload}>
+                        <div className="flex flex-col items-center p-4">
+                          <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">Add Equipment Room Photo</p>
+                        </div>
+                      </ImageCapture>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Cabinet Location Photos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                    {cabinetLocationPhotos.photos.filter(Boolean).map((photo, index) => (
+                      <div key={index} className="relative rounded-md overflow-hidden border border-gray-200">
+                        <img src={photo} alt={`Cabinet Location ${index + 1}`} className="w-full h-48 object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => removeCabinetLocationPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-center border border-dashed border-gray-300 rounded-md h-48">
+                      <ImageCapture onCapture={handleCabinetLocationPhotoUpload}>
+                        <div className="flex flex-col items-center p-4">
+                          <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">Add Cabinet Location Photo</p>
+                        </div>
+                      </ImageCapture>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">DC Power Distribution Photos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                    {dcPowerDistributionPhotos.photos.filter(Boolean).map((photo, index) => (
+                      <div key={index} className="relative rounded-md overflow-hidden border border-gray-200">
+                        <img src={photo} alt={`DC Power Distribution ${index + 1}`} className="w-full h-48 object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => removeDcPowerDistributionPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-center border border-dashed border-gray-300 rounded-md h-48">
+                      <ImageCapture onCapture={handleDcPowerDistributionPhotoUpload}>
+                        <div className="flex flex-col items-center p-4">
+                          <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">Add DC Power Distribution Photo</p>
+                        </div>
+                      </ImageCapture>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Electrical DC Distribution Photos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                    {electricalDCDistributionPhotos.photos.filter(Boolean).map((photo, index) => (
+                      <div key={index} className="relative rounded-md overflow-hidden border border-gray-200">
+                        <img src={photo} alt={`Electrical DC Distribution ${index + 1}`} className="w-full h-48 object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => removeElectricalDCDistributionPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-center border border-dashed border-gray-300 rounded-md h-48">
+                      <ImageCapture onCapture={handleElectricalDCDistributionPhotoUpload}>
+                        <div className="flex flex-col items-center p-4">
+                          <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">Add Electrical DC Distribution Photo</p>
+                        </div>
+                      </ImageCapture>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Transport Equipment Photos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                    {transportEquipmentPhotos.photos.filter(Boolean).map((photo, index) => (
+                      <div key={index} className="relative rounded-md overflow-hidden border border-gray-200">
+                        <img src={photo} alt={`Transport Equipment ${index + 1}`} className="w-full h-48 object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => removeTransportEquipmentPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-center border border-dashed border-gray-300 rounded-md h-48">
+                      <ImageCapture onCapture={handleTransportEquipmentPhotoUpload}>
+                        <div className="flex flex-col items-center p-4">
+                          <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">Add Transport Equipment Photo</p>
+                        </div>
+                      </ImageCapture>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={prevTab}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="technical-details" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Technical</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="accessProcedure.requirements" className="block text-sm font-medium text-gray-700 mb-1">
+                        Access Procedure Requirements
+                      </Label>
+                      <Input
+                        type="text"
+                        id="accessProcedure.requirements"
+                        name="accessProcedure.requirements"
+                        value={accessProcedure.requirements}
+                        onChange={(e) => handleAccessProcedureChange("requirements", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="accessProcedure.securityRequirements" className="block text-sm font-medium text-gray-700 mb-1">
+                        Access Procedure Security Requirements
+                      </Label>
+                      <Input
+                        type="text"
+                        id="accessProcedure.securityRequirements"
+                        name="accessProcedure.securityRequirements"
+                        value={accessProcedure.securityRequirements}
+                        onChange={(e) => handleAccessProcedureChange("securityRequirements", e.target.value)}
+                        className="shadow-sm focus:ring-akhanya focus:border-akhanya block w-full sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={prevTab}>
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save for Later
+                </Button>
+                <Button type="button" onClick={nextTab} className="bg-akhanya hover:bg-akhanya-dark">
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </form>
+    </div>
+  );
+};
+
+export default EskomSiteSurveyForm;
