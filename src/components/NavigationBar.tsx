@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +42,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
     name.charAt(0).toUpperCase() + name.slice(1)
   ).join(' ');
   
-  // Get initials from email for the avatar fallback
   const getInitials = (email: string) => {
     if (email === "User") return "U";
     const nameParts = email.split('@')[0].split('.');
@@ -53,7 +51,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
     return email.substring(0, 2).toUpperCase();
   };
 
-  // Function to get page title based on current path
   const getPageTitle = () => {
     switch(location.pathname) {
       case "/": return "Dashboard";
@@ -77,7 +74,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
                 alt="Akhanya IT" 
                 className={`transition-all duration-300 ${isCompact ? 'h-12' : 'h-16'}`}
                 onError={(e) => {
-                  // Fallback if image not found
                   e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
                 }}
               />
@@ -87,7 +83,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
                 alt="Eskom" 
                 className={`transition-all duration-300 ${isCompact ? 'h-10' : 'h-12'}`}
                 onError={(e) => {
-                  // Fallback if image not found
                   e.currentTarget.src = "https://via.placeholder.com/120x45?text=Eskom";
                 }}
               />
@@ -135,7 +130,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
           </div>
           
           <div className="flex items-center gap-3">
-            {/* Engineer name and role section */}
             <div className="hidden md:flex items-center gap-2 mr-2">
               <div className="text-right">
                 <div className="font-medium text-akhanya">{userName}</div>
@@ -146,7 +140,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               </div>
             </div>
             
-            {/* Profile dropdown menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className={`relative rounded-full transition-all duration-300 ${isCompact ? 'h-8 w-8' : 'h-10 w-10'}`}>
@@ -190,7 +183,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
         </div>
       </div>
       
-      {/* Breadcrumb navigation - only shown on non-dashboard pages */}
       {location.pathname !== "/" && (
         <div className="bg-gray-50 border-t border-b border-gray-200">
           <div className="container mx-auto px-4 py-2">

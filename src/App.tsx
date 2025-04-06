@@ -103,12 +103,28 @@ const App = () => {
                   } 
                 />
 
+                {/* Eskom Survey Routes */}
                 <Route 
                   path="/eskom-survey" 
                   element={
                     <ProtectedRoute>
+                      <EskomSurvey />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                {/* Add redirect from "/eskom-site-survey" to "/eskom-survey" */}
+                <Route 
+                  path="/eskom-site-survey" 
+                  element={<Navigate to="/eskom-survey" replace />} 
+                />
+                
+                <Route 
+                  path="/eskom-surveys" 
+                  element={
+                    <ProtectedRoute>
                       <div className="flex flex-col min-h-screen">
-                        <EskomSurvey />
+                        <EskomSurveys />
                         <Footer />
                       </div>
                     </ProtectedRoute>
