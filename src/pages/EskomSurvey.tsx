@@ -7,20 +7,20 @@ import { Button } from "@/components/ui/button";
 import { useAI } from "@/contexts/AIContext";
 import { Sparkles, FileText } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import BCXLogo from "@/components/ui/logo";
+import Footer from "@/components/Footer";
 
 const EskomSurvey = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const { isProcessing } = useAI();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <NavigationBar />
       <NetworkingBanner
         title="Eskom OT IP/MPLS Network"
         subtitle="Site Survey Report - Site Information"
       />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-akhanya">Eskom OT IP/MPLS Network Site Survey</h2>
@@ -73,6 +73,7 @@ const EskomSurvey = () => {
           <EskomSiteSurveyForm showAIRecommendations={showAIRecommendations} />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
