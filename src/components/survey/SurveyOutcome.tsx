@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import DrawingCanvas from "@/components/DrawingCanvas";
 
 interface SurveyOutcomeProps {
   formData: any;
@@ -17,8 +18,30 @@ const SurveyOutcome: React.FC<SurveyOutcomeProps> = ({
   onInputChange,
   showAIRecommendations = false
 }) => {
+  const [showDrawingCanvas, setShowDrawingCanvas] = useState<{
+    oemContractor: boolean;
+    oemEngineer: boolean;
+    eskomRepresentative: boolean;
+  }>({
+    oemContractor: false,
+    oemEngineer: false,
+    eskomRepresentative: false
+  });
+
   const handleSignatureChange = (role: 'oemContractor' | 'oemEngineer' | 'eskomRepresentative', field: string, value: any) => {
     onInputChange(`${role}.${field}`, value);
+  };
+
+  const toggleDrawingCanvas = (role: keyof typeof showDrawingCanvas) => {
+    setShowDrawingCanvas({
+      ...showDrawingCanvas,
+      [role]: !showDrawingCanvas[role]
+    });
+  };
+
+  const handleSignatureSave = (role: 'oemContractor' | 'oemEngineer' | 'eskomRepresentative', signature: string) => {
+    handleSignatureChange(role, 'signature', signature);
+    toggleDrawingCanvas(role);
   };
 
   return (
@@ -81,17 +104,29 @@ const SurveyOutcome: React.FC<SurveyOutcomeProps> = ({
               
               <div className="border-t pt-4 mt-4">
                 <Label>Signature</Label>
-                <div className="border-2 border-dashed rounded-md p-4 mt-2 min-h-[100px]">
-                  {formData.oemContractor.signature ? (
-                    <img 
-                      src={formData.oemContractor.signature} 
-                      alt="Signature" 
-                      className="max-h-[100px] mx-auto"
+                {showDrawingCanvas.oemContractor ? (
+                  <div className="mt-2">
+                    <DrawingCanvas 
+                      onSave={(dataUrl) => handleSignatureSave('oemContractor', dataUrl)} 
+                      initialValue={formData.oemContractor.signature}
                     />
-                  ) : (
-                    <p className="text-center text-gray-400">No signature provided</p>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div 
+                    className="border-2 border-dashed rounded-md p-4 mt-2 min-h-[100px] cursor-pointer"
+                    onClick={() => toggleDrawingCanvas('oemContractor')}
+                  >
+                    {formData.oemContractor.signature ? (
+                      <img 
+                        src={formData.oemContractor.signature} 
+                        alt="Signature" 
+                        className="max-h-[100px] mx-auto"
+                      />
+                    ) : (
+                      <p className="text-center text-gray-400">Click here to add signature</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -144,17 +179,29 @@ const SurveyOutcome: React.FC<SurveyOutcomeProps> = ({
               
               <div className="border-t pt-4 mt-4">
                 <Label>Signature</Label>
-                <div className="border-2 border-dashed rounded-md p-4 mt-2 min-h-[100px]">
-                  {formData.oemEngineer.signature ? (
-                    <img 
-                      src={formData.oemEngineer.signature} 
-                      alt="Signature" 
-                      className="max-h-[100px] mx-auto"
+                {showDrawingCanvas.oemEngineer ? (
+                  <div className="mt-2">
+                    <DrawingCanvas 
+                      onSave={(dataUrl) => handleSignatureSave('oemEngineer', dataUrl)} 
+                      initialValue={formData.oemEngineer.signature}
                     />
-                  ) : (
-                    <p className="text-center text-gray-400">No signature provided</p>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div 
+                    className="border-2 border-dashed rounded-md p-4 mt-2 min-h-[100px] cursor-pointer"
+                    onClick={() => toggleDrawingCanvas('oemEngineer')}
+                  >
+                    {formData.oemEngineer.signature ? (
+                      <img 
+                        src={formData.oemEngineer.signature} 
+                        alt="Signature" 
+                        className="max-h-[100px] mx-auto"
+                      />
+                    ) : (
+                      <p className="text-center text-gray-400">Click here to add signature</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -207,17 +254,29 @@ const SurveyOutcome: React.FC<SurveyOutcomeProps> = ({
               
               <div className="border-t pt-4 mt-4">
                 <Label>Signature</Label>
-                <div className="border-2 border-dashed rounded-md p-4 mt-2 min-h-[100px]">
-                  {formData.eskomRepresentative.signature ? (
-                    <img 
-                      src={formData.eskomRepresentative.signature} 
-                      alt="Signature" 
-                      className="max-h-[100px] mx-auto"
+                {showDrawingCanvas.eskomRepresentative ? (
+                  <div className="mt-2">
+                    <DrawingCanvas 
+                      onSave={(dataUrl) => handleSignatureSave('eskomRepresentative', dataUrl)} 
+                      initialValue={formData.eskomRepresentative.signature}
                     />
-                  ) : (
-                    <p className="text-center text-gray-400">No signature provided</p>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div 
+                    className="border-2 border-dashed rounded-md p-4 mt-2 min-h-[100px] cursor-pointer"
+                    onClick={() => toggleDrawingCanvas('eskomRepresentative')}
+                  >
+                    {formData.eskomRepresentative.signature ? (
+                      <img 
+                        src={formData.eskomRepresentative.signature} 
+                        alt="Signature" 
+                        className="max-h-[100px] mx-auto"
+                      />
+                    ) : (
+                      <p className="text-center text-gray-400">Click here to add signature</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -231,7 +290,7 @@ const SurveyOutcome: React.FC<SurveyOutcomeProps> = ({
           </CardHeader>
           <CardContent>
             <div className="text-sm text-blue-700 space-y-2">
-              <p>🖋️ <strong>Digital Signatures:</strong> Consider implementing a digital signature capture for easier sign-off.</p>
+              <p>🖋️ <strong>Digital Signatures:</strong> Use the drawing canvas to create clear signatures that look professional in the final report.</p>
               <p>📅 <strong>Schedule Follow-up:</strong> If survey is not accepted, schedule a follow-up meeting to address concerns.</p>
               <p>📝 <strong>Detailed Comments:</strong> Request specific details in comments section if any aspects need improvement.</p>
             </div>
