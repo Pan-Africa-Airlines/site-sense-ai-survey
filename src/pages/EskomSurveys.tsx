@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
@@ -30,8 +31,8 @@ const EskomSurveys = () => {
   const navigate = useNavigate();
   const [surveys, setSurveys] = useState<SiteSurvey[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [regionFilter, setRegionFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [regionFilter, setRegionFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [regions, setRegions] = useState<string[]>([]);
 
@@ -46,11 +47,11 @@ const EskomSurveys = () => {
         .from('site_surveys')
         .select('*');
       
-      if (statusFilter) {
+      if (statusFilter && statusFilter !== "all") {
         query = query.eq('status', statusFilter);
       }
       
-      if (regionFilter) {
+      if (regionFilter && regionFilter !== "all") {
         query = query.eq('region', regionFilter);
       }
       
@@ -110,8 +111,8 @@ const EskomSurveys = () => {
   };
 
   const clearFilters = () => {
-    setStatusFilter("");
-    setRegionFilter("");
+    setStatusFilter("all");
+    setRegionFilter("all");
     setSearchQuery("");
   };
 
@@ -153,7 +154,7 @@ const EskomSurveys = () => {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="submitted">Submitted</SelectItem>
                 </SelectContent>
@@ -166,7 +167,7 @@ const EskomSurveys = () => {
                   <SelectValue placeholder="All regions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All regions</SelectItem>
+                  <SelectItem value="all">All regions</SelectItem>
                   {regions.map(region => (
                     <SelectItem key={region} value={region}>{region}</SelectItem>
                   ))}
