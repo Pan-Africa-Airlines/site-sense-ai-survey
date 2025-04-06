@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
@@ -238,7 +237,7 @@ const EskomSurvey = () => {
   }, [surveyData]);
   
   const saveSurveyMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async () => {
       const userId = localStorage.getItem("userId");
       
       if (id && !isNewSurvey) {
@@ -342,7 +341,7 @@ const EskomSurvey = () => {
     setIsSaving(true);
     try {
       // Save to database
-      await saveSurveyMutation.mutateAsync({ ...formData, status });
+      await saveSurveyMutation.mutateAsync();
     } catch (error) {
       console.error("Error in handleSave:", error);
     } finally {
