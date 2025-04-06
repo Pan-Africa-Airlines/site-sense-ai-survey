@@ -187,7 +187,7 @@ const CarCheckup = () => {
                     <ImageCapture
                       label="Engine Compartment"
                       description="Capture a clear image of the engine compartment"
-                      onImageCaptured={handleEngineImageCapture}
+                      onCapture={handleEngineImageCapture}
                       capturedImage={engineImage}
                     />
                     {engineAnalysis && (
@@ -221,7 +221,7 @@ const CarCheckup = () => {
                     <ImageCapture
                       label="Tire Condition"
                       description="Capture a clear image of the tire tread"
-                      onImageCaptured={handleTireImageCapture}
+                      onCapture={handleTireImageCapture}
                       capturedImage={tireImage}
                     />
                     {tireAnalysis && (
@@ -255,7 +255,7 @@ const CarCheckup = () => {
                     <ImageCapture
                       label="Brake Components"
                       description="Capture a clear image of the brake components"
-                      onImageCaptured={handleBrakeImageCapture}
+                      onCapture={handleBrakeImageCapture}
                       capturedImage={brakeImage}
                     />
                     {brakeAnalysis && (

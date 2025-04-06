@@ -116,18 +116,6 @@ const App = () => {
                 />
                 
                 <Route 
-                  path="/eskom-surveys" 
-                  element={
-                    <ProtectedRoute>
-                      <div className="flex flex-col min-h-screen">
-                        <EskomSurveys />
-                        <Footer />
-                      </div>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
                   path="/assessment" 
                   element={
                     <ProtectedRoute>
