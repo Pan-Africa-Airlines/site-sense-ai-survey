@@ -11,8 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import ImageCapture from "./ImageCapture";
 import { Json } from "@/integrations/supabase/types";
-import { Save, MapPin } from "lucide-react";
+import { Save, MapPin, ChevronRight, ChevronLeft } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface FormTabProps {
   children: React.ReactNode;
@@ -52,7 +53,7 @@ const TableInputRow: React.FC<TableInputRowProps> = ({ label, name, value, onCha
 };
 
 const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState("cover");
   const [formProgress, setFormProgress] = useState(0);
   const [siteName, setSiteName] = useState("");
   const [region, setRegion] = useState("");
@@ -233,136 +234,264 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     }
   };
 
+  const nextTab = () => {
+    if (currentTab === "cover") {
+      setCurrentTab("site-info");
+    }
+  };
+
+  const prevTab = () => {
+    if (currentTab === "site-info") {
+      setCurrentTab("cover");
+    }
+  };
+
   return (
     <div className="mt-6">
       <Progress value={formProgress} className="mb-6" />
 
       <form onSubmit={handleSubmit}>
-        <FormTab active={true}>
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold mb-4">1. SITE INFORMATION & LOCATION</h3>
-            
-            <div>
-              <h4 className="text-md font-semibold mb-2">1.1. Site Identification</h4>
-              <table className="w-full border-collapse border border-gray-300">
-                <tbody>
-                  <TableInputRow 
-                    label="Site Name" 
-                    name="siteName" 
-                    value={siteName} 
-                    onChange={handleInputChange}
-                  />
-                  <TableInputRow 
-                    label="Site ID (WorkPlace ID)" 
-                    name="siteId" 
-                    value={siteId} 
-                    onChange={handleInputChange}
-                  />
-                  <TableInputRow 
-                    label="Site Type (Sub-TX, RS, PS-Coal)" 
-                    name="siteType" 
-                    value={siteType} 
-                    onChange={handleInputChange}
-                  />
-                  <tr className="border border-gray-300">
-                    <td className="border border-gray-300 p-2 font-medium">Region:</td>
-                    <td className="border border-gray-300 p-1">
-                      <Select value={region} onValueChange={(value) => setRegion(value)}>
-                        <SelectTrigger className="border-0 focus:ring-0 h-full w-full">
-                          <SelectValue placeholder="Select a region" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Gauteng">Gauteng</SelectItem>
-                          <SelectItem value="Western Cape">Western Cape</SelectItem>
-                          <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
-                          <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
-                          <SelectItem value="Free State">Free State</SelectItem>
-                          <SelectItem value="North West">North West</SelectItem>
-                          <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
-                          <SelectItem value="Limpopo">Limpopo</SelectItem>
-                          <SelectItem value="Northern Cape">Northern Cape</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </td>
-                  </tr>
-                  <tr className="border border-gray-300">
-                    <td className="border border-gray-300 p-2 font-medium">Date:</td>
-                    <td className="border border-gray-300 p-1">
-                      <Input 
-                        type="date"
-                        name="date"
-                        value={date}
-                        onChange={handleInputChange}
-                        className="border-0 focus-visible:ring-0 h-full w-full"
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="cover">Cover Page</TabsTrigger>
+            <TabsTrigger value="site-info">Site Information</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="cover" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center mb-8 relative">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/890a7ff6-5612-4deb-b38a-5d8492c4f971.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  <h1 className="text-3xl font-bold mb-6">ESKOM OT IP/MPLS NETWORK</h1>
+                  <h2 className="text-2xl font-bold mb-8">SITE SURVEY REPORT</h2>
+                  
+                  <table className="w-full border-collapse border border-gray-300 mb-6">
+                    <tbody>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium w-1/3">Site Name:</td>
+                        <td className="border border-gray-300 p-2">
+                          <Input 
+                            type="text" 
+                            name="siteName" 
+                            value={siteName} 
+                            onChange={handleInputChange}
+                            className="border-0 focus-visible:ring-0 h-full w-full"
+                          />
+                        </td>
+                      </tr>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium">Region:</td>
+                        <td className="border border-gray-300 p-2">
+                          <Select value={region} onValueChange={(value) => setRegion(value)}>
+                            <SelectTrigger className="border-0 focus:ring-0 h-full w-full">
+                              <SelectValue placeholder="Select a region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Gauteng">Gauteng</SelectItem>
+                              <SelectItem value="Western Cape">Western Cape</SelectItem>
+                              <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
+                              <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
+                              <SelectItem value="Free State">Free State</SelectItem>
+                              <SelectItem value="North West">North West</SelectItem>
+                              <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
+                              <SelectItem value="Limpopo">Limpopo</SelectItem>
+                              <SelectItem value="Northern Cape">Northern Cape</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </td>
+                      </tr>
+                      <tr className="border border-gray-300">
+                        <td className="border border-gray-300 p-2 font-medium">Date:</td>
+                        <td className="border border-gray-300 p-2">
+                          <Input 
+                            type="date"
+                            name="date"
+                            value={date}
+                            onChange={handleInputChange}
+                            className="border-0 focus-visible:ring-0 h-full w-full"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  
+                  <div className="border border-gray-300 p-2 mb-6">
+                    <p className="font-medium mb-2">Full front view photo of building where IP/MPLS equipment will be situated.</p>
+                    <div className="min-h-[300px]">
+                      <ImageCapture 
+                        onCapture={handleBuildingPhotoUpload} 
+                        label="Building Photo"
+                        description=""
+                        capturedImage={buildingPhoto}
                       />
-                    </td>
-                  </tr>
-                  <TableInputRow 
-                    label="Address/Location Description" 
-                    name="address" 
-                    value={address} 
-                    onChange={handleInputChange}
-                  />
-                  <tr className="border border-gray-300">
-                    <td className="border border-gray-300 p-2 font-medium">GPS coordinates WGS84 (Lat/Long)</td>
-                    <td className="border border-gray-300 p-1">
-                      <div className="flex items-center space-x-2">
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between mt-8 text-sm text-gray-500">
+                  <div>
+                    <p>Approved by: ________________</p>
+                  </div>
+                  <div>
+                    <p>Authorized Date: {date || 'DD/MM/YYYY'}</p>
+                  </div>
+                </div>
+                
+                <div className="text-right mt-4">
+                  <p className="text-sm text-gray-500">Page 1 of 2</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-end mt-4">
+              <Button type="button" onClick={nextTab} className="flex items-center">
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="site-info" className="mt-4">
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold mb-4">1. SITE INFORMATION & LOCATION</h3>
+              
+              <div>
+                <h4 className="text-md font-semibold mb-2">1.1. Site Identification</h4>
+                <table className="w-full border-collapse border border-gray-300">
+                  <tbody>
+                    <TableInputRow 
+                      label="Site Name" 
+                      name="siteName" 
+                      value={siteName} 
+                      onChange={handleInputChange}
+                    />
+                    <TableInputRow 
+                      label="Site ID (WorkPlace ID)" 
+                      name="siteId" 
+                      value={siteId} 
+                      onChange={handleInputChange}
+                    />
+                    <TableInputRow 
+                      label="Site Type (Sub-TX, RS, PS-Coal)" 
+                      name="siteType" 
+                      value={siteType} 
+                      onChange={handleInputChange}
+                    />
+                    <tr className="border border-gray-300">
+                      <td className="border border-gray-300 p-2 font-medium">Region:</td>
+                      <td className="border border-gray-300 p-1">
+                        <Select value={region} onValueChange={(value) => setRegion(value)}>
+                          <SelectTrigger className="border-0 focus:ring-0 h-full w-full">
+                            <SelectValue placeholder="Select a region" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Gauteng">Gauteng</SelectItem>
+                            <SelectItem value="Western Cape">Western Cape</SelectItem>
+                            <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
+                            <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
+                            <SelectItem value="Free State">Free State</SelectItem>
+                            <SelectItem value="North West">North West</SelectItem>
+                            <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
+                            <SelectItem value="Limpopo">Limpopo</SelectItem>
+                            <SelectItem value="Northern Cape">Northern Cape</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    </tr>
+                    <tr className="border border-gray-300">
+                      <td className="border border-gray-300 p-2 font-medium">Date:</td>
+                      <td className="border border-gray-300 p-1">
                         <Input 
-                          type="text" 
-                          name="gpsCoordinates" 
-                          value={gpsCoordinates} 
+                          type="date"
+                          name="date"
+                          value={date}
                           onChange={handleInputChange}
                           className="border-0 focus-visible:ring-0 h-full w-full"
-                          placeholder="e.g., -26.195246, 28.034088"
                         />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-shrink-0 h-8"
-                          onClick={retry}
-                          disabled={loading}
-                        >
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {loading ? "Getting..." : "Get Location"}
-                        </Button>
-                      </div>
-                      {error && (
-                        <p className="text-xs text-red-500 mt-1">{error}</p>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                      </td>
+                    </tr>
+                    <TableInputRow 
+                      label="Address/Location Description" 
+                      name="address" 
+                      value={address} 
+                      onChange={handleInputChange}
+                    />
+                    <tr className="border border-gray-300">
+                      <td className="border border-gray-300 p-2 font-medium">GPS coordinates WGS84 (Lat/Long)</td>
+                      <td className="border border-gray-300 p-1">
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            type="text" 
+                            name="gpsCoordinates" 
+                            value={gpsCoordinates} 
+                            onChange={handleInputChange}
+                            className="border-0 focus-visible:ring-0 h-full w-full"
+                            placeholder="e.g., -26.195246, 28.034088"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-shrink-0 h-8"
+                            onClick={retry}
+                            disabled={loading}
+                          >
+                            <MapPin className="h-4 w-4 mr-1" />
+                            {loading ? "Getting..." : "Get Location"}
+                          </Button>
+                        </div>
+                        {error && (
+                          <p className="text-xs text-red-500 mt-1">{error}</p>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-            <div className="mt-8">
-              <p className="font-medium mb-2">Full front view photo of building where IP/MPLS equipment will be situated.</p>
-              <div className="min-h-[300px]">
-                <ImageCapture 
-                  onCapture={handleBuildingPhotoUpload} 
-                  label="Building Photo"
-                  description="Take a photo of the front view of the building."
-                  capturedImage={buildingPhoto}
-                />
+              <div className="mt-8">
+                <p className="font-medium mb-2">Full front view photo of building where IP/MPLS equipment will be situated.</p>
+                <div className="min-h-[300px]">
+                  <ImageCapture 
+                    onCapture={handleBuildingPhotoUpload} 
+                    label="Building Photo"
+                    description="Take a photo of the front view of the building."
+                    capturedImage={buildingPhoto}
+                  />
+                </div>
+              </div>
+              
+              {showAIRecommendations && (
+                <Card className="bg-akhanya-light/20 border-akhanya/30 mt-4">
+                  <CardContent className="pt-4">
+                    <h4 className="font-semibold text-akhanya mb-2">AI Recommendations</h4>
+                    <ul className="list-disc pl-5 space-y-1 text-sm">
+                      <li>Make sure the entire building facade is clearly visible in your photo.</li>
+                      <li>Use the "Get Location" button to automatically fill in your current GPS coordinates.</li>
+                      <li>For Site Type, use standard Eskom abbreviations (Sub-TX for Substation Transmission, RS for Repeater Station, etc.).</li>
+                      <li>Include nearby landmarks in the Address field to help locate the site.</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+              
+              <div className="text-right mt-4">
+                <p className="text-sm text-gray-500">Page 2 of 2</p>
               </div>
             </div>
             
-            {showAIRecommendations && (
-              <Card className="bg-akhanya-light/20 border-akhanya/30 mt-4">
-                <CardContent className="pt-4">
-                  <h4 className="font-semibold text-akhanya mb-2">AI Recommendations</h4>
-                  <ul className="list-disc pl-5 space-y-1 text-sm">
-                    <li>Make sure the entire building facade is clearly visible in your photo.</li>
-                    <li>Use the "Get Location" button to automatically fill in your current GPS coordinates.</li>
-                    <li>For Site Type, use standard Eskom abbreviations (Sub-TX for Substation Transmission, RS for Repeater Station, etc.).</li>
-                    <li>Include nearby landmarks in the Address field to help locate the site.</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </FormTab>
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} variant="outline" className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Navigation and action buttons */}
         <div className="mt-8 flex justify-between">
