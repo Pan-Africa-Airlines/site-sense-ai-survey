@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
@@ -187,6 +188,7 @@ const CarCheckup = () => {
                     <ImageCapture
                       label="Engine Compartment"
                       description="Capture a clear image of the engine compartment"
+                      onImageCaptured={handleEngineImageCapture}
                       onCapture={handleEngineImageCapture}
                       capturedImage={engineImage}
                     />
@@ -221,6 +223,7 @@ const CarCheckup = () => {
                     <ImageCapture
                       label="Tire Condition"
                       description="Capture a clear image of the tire tread"
+                      onImageCaptured={handleTireImageCapture}
                       onCapture={handleTireImageCapture}
                       capturedImage={tireImage}
                     />
@@ -255,6 +258,7 @@ const CarCheckup = () => {
                     <ImageCapture
                       label="Brake Components"
                       description="Capture a clear image of the brake components"
+                      onImageCaptured={handleBrakeImageCapture}
                       onCapture={handleBrakeImageCapture}
                       capturedImage={brakeImage}
                     />
