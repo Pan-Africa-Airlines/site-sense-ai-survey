@@ -4,16 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAI } from "@/contexts/AIContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import ImageCapture from "./ImageCapture";
 import { Json } from "@/integrations/supabase/types";
-import { Calendar, ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { Save } from "lucide-react";
 
 interface FormTabProps {
   children: React.ReactNode;
@@ -24,38 +22,6 @@ const FormTab: React.FC<FormTabProps> = ({ children, active }) => {
   return (
     <div className={`${active ? "block" : "hidden"}`}>
       {children}
-    </div>
-  );
-};
-
-interface TabIndicatorProps {
-  currentTab: number;
-  totalTabs: number;
-  goToTab: (tab: number) => void;
-}
-
-const TabIndicator: React.FC<TabIndicatorProps> = ({ currentTab, totalTabs, goToTab }) => {
-  return (
-    <div className="flex justify-center items-center space-x-2 mb-8">
-      {Array.from({ length: totalTabs }, (_, i) => (
-        <div 
-          key={i} 
-          className={`
-            flex items-center justify-center 
-            w-8 h-8 rounded-full cursor-pointer
-            border-2 transition-all
-            ${currentTab === i 
-              ? "bg-akhanya text-white border-akhanya" 
-              : i < currentTab 
-                ? "bg-gray-200 border-gray-300 text-gray-700" 
-                : "bg-white border-gray-300 text-gray-500"
-            }
-          `}
-          onClick={() => goToTab(i)}
-        >
-          {i + 1}
-        </div>
-      ))}
     </div>
   );
 };
@@ -86,14 +52,13 @@ const TableInputRow: React.FC<TableInputRowProps> = ({ label, name, value, onCha
 
 const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const [currentTab, setCurrentTab] = useState(0);
-  const totalTabs = 1; // Reduced to just one tab for site information
   const [formProgress, setFormProgress] = useState(0);
   const [siteName, setSiteName] = useState("");
   const [region, setRegion] = useState("");
   const [date, setDate] = useState("");
   const [buildingPhoto, setBuildingPhoto] = useState("");
   
-  // Additional form fields
+  // Site Information fields
   const [siteId, setSiteId] = useState("");
   const [siteType, setSiteType] = useState("");
   const [address, setAddress] = useState("");
@@ -121,12 +86,6 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     const totalFields = 8;
     setFormProgress(Math.floor((filledFields / totalFields) * 100));
   }, [siteName, region, date, buildingPhoto, siteId, siteType, address, gpsCoordinates]);
-
-  const goToTab = (tabIndex: number) => {
-    if (tabIndex >= 0 && tabIndex < totalTabs) {
-      setCurrentTab(tabIndex);
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -260,17 +219,10 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
 
   return (
     <div className="mt-6">
-      <TabIndicator 
-        currentTab={currentTab}
-        totalTabs={totalTabs}
-        goToTab={goToTab}
-      />
-
       <Progress value={formProgress} className="mb-6" />
 
       <form onSubmit={handleSubmit}>
-        {/* Tab 1: Site Information & Basic Details */}
-        <FormTab active={currentTab === 0}>
+        <FormTab active={true}>
           <div className="space-y-6">
             <h3 className="text-lg font-semibold mb-4">1. SITE INFORMATION & LOCATION</h3>
             
@@ -320,16 +272,13 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                   <tr className="border border-gray-300">
                     <td className="border border-gray-300 p-2 font-medium">Date:</td>
                     <td className="border border-gray-300 p-1">
-                      <div className="flex items-center">
-                        <Input
-                          type="date"
-                          name="date"
-                          value={date}
-                          onChange={handleInputChange}
-                          className="border-0 focus-visible:ring-0 h-full w-full"
-                        />
-                        <Calendar className="h-4 w-4 text-gray-500 mr-2" />
-                      </div>
+                      <Input 
+                        type="date"
+                        name="date"
+                        value={date}
+                        onChange={handleInputChange}
+                        className="border-0 focus-visible:ring-0 h-full w-full"
+                      />
                     </td>
                   </tr>
                   <TableInputRow 
