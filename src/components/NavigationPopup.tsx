@@ -13,6 +13,10 @@ interface NavigationPopupProps {
   siteDistance?: number;
 }
 
+// You need to replace this with your own valid Google Maps API key
+// Make sure it has the Google Maps Embed API enabled
+const MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
+
 const NavigationPopup = ({ 
   open, 
   onOpenChange, 
@@ -27,7 +31,11 @@ const NavigationPopup = ({
   const getMapsEmbedUrl = () => {
     if (!latitude || !longitude) return '';
     
-    return `https://www.google.com/maps/embed/v1/directions?key=AIzaSyDHRjm9zwRmlw_I7jNXZL0a1wHGUwzU1aY
+    if (MAPS_API_KEY === "YOUR_GOOGLE_MAPS_API_KEY") {
+      return '';
+    }
+    
+    return `https://www.google.com/maps/embed/v1/directions?key=${MAPS_API_KEY}
       &origin=${latitude},${longitude}
       &destination=${encodeURIComponent(siteAddress)}
       &mode=driving`;
@@ -36,6 +44,9 @@ const NavigationPopup = ({
   const toggleExpand = () => {
     setExpanded(!expanded);
   };
+
+  // Check if we have a placeholder API key
+  const hasValidApiKey = MAPS_API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,6 +82,21 @@ const NavigationPopup = ({
                           <RefreshCw className="mr-2 h-4 w-4" />
                           Retry Location
                         </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : !hasValidApiKey ? (
+                <div className="p-4 h-full flex items-center justify-center">
+                  <div className="bg-yellow-50 p-6 rounded-lg max-w-md">
+                    <div className="flex items-start">
+                      <AlertCircle className="text-yellow-500 mr-3 h-6 w-6 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-yellow-800 font-semibold text-lg mb-2">Maps API Key Required</p>
+                        <p className="text-yellow-700 mb-4">
+                          To use the navigation feature, a valid Google Maps API key must be configured.
+                          Please update the MAPS_API_KEY constant in the NavigationPopup component.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -152,18 +178,32 @@ const NavigationPopup = ({
                     </div>
                   </div>
                   
-                  <div className="mt-4 h-[200px] rounded-md overflow-hidden border">
-                    <iframe
-                      src={getMapsEmbedUrl()}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Google Maps Preview"
-                    ></iframe>
-                  </div>
+                  {hasValidApiKey ? (
+                    <div className="mt-4 h-[200px] rounded-md overflow-hidden border">
+                      <iframe
+                        src={getMapsEmbedUrl()}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Google Maps Preview"
+                      ></iframe>
+                    </div>
+                  ) : (
+                    <div className="mt-4 bg-yellow-50 p-4 rounded-md">
+                      <div className="flex items-start">
+                        <AlertCircle className="text-yellow-500 mr-3 h-5 w-5 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-yellow-800 font-medium mb-1">Maps API Key Required</p>
+                          <p className="text-yellow-700">
+                            To use the navigation feature, a valid Google Maps API key must be configured.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -176,7 +216,7 @@ const NavigationPopup = ({
                 Cancel
               </Button>
               <div className="flex gap-2">
-                {!error && !loading && (
+                {!error && !loading && hasValidApiKey && (
                   <>
                     <Button
                       onClick={toggleExpand}
