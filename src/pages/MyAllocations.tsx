@@ -1,7 +1,7 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import DynamicHeader from "@/components/DynamicHeader";
+import NavigationBar from "@/components/NavigationBar";
 import EngineerSiteList from "@/components/EngineerSiteList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
@@ -46,7 +46,7 @@ const MyAllocations = () => {
 
   return (
     <>
-      <DynamicHeader />
+      <NavigationBar isCompact={false} />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-2 mb-6">
           <MapPin className="h-5 w-5 text-akhanya" />
