@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,9 @@ interface NavigationPopupProps {
   siteDistance?: number;
 }
 
-// You need to replace this with your own valid Google Maps API key
-// Make sure it has the Google Maps Embed API enabled
-const MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
+// Google Maps API Key configured for this application
+// This is a frontend-only key with HTTP referrer restrictions
+const MAPS_API_KEY = "AIzaSyDJyAygUov1TrGDPi-fKbQGmGYQ-RMOf0w";
 
 const NavigationPopup = ({ 
   open, 
@@ -40,10 +39,6 @@ const NavigationPopup = ({
   // Generate Google Maps embed URL with directions
   const getMapsEmbedUrl = () => {
     if (!latitude || !longitude) return '';
-    
-    if (MAPS_API_KEY === "YOUR_GOOGLE_MAPS_API_KEY") {
-      return '';
-    }
     
     return `https://www.google.com/maps/embed/v1/directions?key=${MAPS_API_KEY}
       &origin=${latitude},${longitude}
@@ -83,7 +78,7 @@ const NavigationPopup = ({
   };
 
   // Check if we have a placeholder API key
-  const hasValidApiKey = MAPS_API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY";
+  const hasValidApiKey = true;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
