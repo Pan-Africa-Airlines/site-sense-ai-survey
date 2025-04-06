@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -186,6 +185,9 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
   // Current drawing canvas index
   const [currentDrawingIndex, setCurrentDrawingIndex] = useState(0);
   
+  // Add a new state for the redline drawing
+  const [redlineDrawing, setRedlineDrawing] = useState("");
+  
   // Approval sections
   const [oemContractor, setOemContractor] = useState<ApprovalSection>({
     name: "",
@@ -335,6 +337,16 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
       description: `Room layout drawing #${currentDrawingIndex + 1} has been saved.`,
     });
   };
+  
+  // Handle redline drawing save
+  const handleRedlineDrawingSave = (dataUrl: string) => {
+    setRedlineDrawing(dataUrl);
+    
+    toast({
+      title: "Red-line drawing saved",
+      description: "Your red-line layout drawing has been saved.",
+    });
+  };
 
   // Add a new drawing canvas
   const addNewDrawing = () => {
@@ -450,6 +462,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         siteOwnerContacts,
         equipmentRoomGeneral,
         cabinetSpacePlanning,
+        redlineDrawing,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -515,6 +528,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         siteOwnerContacts,
         equipmentRoomGeneral,
         cabinetSpacePlanning,
+        redlineDrawing,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -1183,7 +1197,17 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
                               </ul>
                             </td>
                             <td className="border border-gray-300 p-2">
-                              <p className="text-sm text-gray-600">Use the drawing tool above to mark these items on your room layout</p>
+                              <div className="mb-2">
+                                <h5 className="font-semibold mb-4">Red-line Drawing</h5>
+                                <DrawingCanvas 
+                                  onSave={handleRedlineDrawingSave} 
+                                  initialValue={redlineDrawing}
+                                />
+                                <p className="text-sm text-gray-600 mt-2">
+                                  Use the drawing tool above to mark the location of all equipment items. 
+                                  We recommend using red color for visibility.
+                                </p>
+                              </div>
                             </td>
                           </tr>
                         </tbody>
