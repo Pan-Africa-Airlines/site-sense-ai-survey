@@ -1,8 +1,5 @@
-
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Brain, TrendingUp, AlertTriangle, Check, MapPin } from "lucide-react";
@@ -15,7 +12,6 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [allocatedSites, setAllocatedSites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,16 +54,11 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) 
     }
   };
 
-  // Fetch engineer specific data
   useEffect(() => {
     const fetchEngineerData = async () => {
       try {
         setIsLoading(true);
         
-        // For a real implementation, we would fetch actual data from Supabase here
-        // Since we don't have real data yet, we'll simulate engineer-specific data
-        
-        // Mock data for individual engineer
         const mockEngineerAssessments = [
           { month: 'Jan', completed: 4, pending: 1 },
           { month: 'Feb', completed: 5, pending: 0 },
@@ -93,7 +84,6 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) 
           { action: "Completed installation", time: "2 days ago", location: "Midrand" },
         ];
         
-        // Set the data
         setEngineerData({
           assessments: mockEngineerAssessments,
           installations: mockEngineerInstallations,
@@ -104,7 +94,6 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) 
           recentActivities: mockRecentActivities
         });
 
-        // Also fetch allocated sites as before
         const { data, error } = await supabase
           .from('engineer_allocations')
           .select('*');
@@ -160,22 +149,6 @@ const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) 
         <div>
           <h1 className="text-3xl font-bold text-akhanya">Dashboard</h1>
           <p className="text-gray-600">Welcome to the SiteSense monitoring platform</p>
-        </div>
-        
-        <div className="flex gap-4">
-          <Button 
-            onClick={() => navigate("/car-check")}
-            className="bg-akhanya hover:bg-akhanya-dark"
-          >
-            New Vehicle Checkup
-          </Button>
-          <Button 
-            onClick={() => navigate("/assessment")}
-            className="bg-akhanya hover:bg-akhanya-dark"
-            disabled={!vehicleCheckCompleted}
-          >
-            New Assessment
-          </Button>
         </div>
       </div>
 
