@@ -1,10 +1,8 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ImageCapture from "@/components/ImageCapture";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
-import BCXLogo from "@/components/ui/logo";
 
 interface EquipmentPhotosProps {
   formData: any;
@@ -81,10 +79,7 @@ const EquipmentPhotos: React.FC<EquipmentPhotosProps> = ({
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center mb-6">
-        <BCXLogo className="mb-4 h-16" />
-        <h2 className="text-xl font-bold border-b pb-2 mb-4">3. DETAILED SITE RECORDS - Equipment Photos</h2>
-      </div>
+      <h2 className="text-xl font-bold border-b pb-2 mb-4">3. DETAILED SITE RECORDS - Equipment Photos</h2>
       
       {renderPhotoSection(
         "3.4. Eskom equipment room photos",

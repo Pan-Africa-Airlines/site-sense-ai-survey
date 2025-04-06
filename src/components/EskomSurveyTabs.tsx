@@ -14,6 +14,7 @@ import OpticalFrame from "./survey/OpticalFrame";
 import SurveyOutcome from "./survey/SurveyOutcome";
 import RoomLayoutDrawing from "./survey/RoomLayoutDrawing";
 import FinalChecklist from "./survey/FinalChecklist";
+import SurveyCover from "./survey/SurveyCover";
 import BCXLogo from "./ui/logo";
 import html2pdf from 'html2pdf.js';
 import { toast } from "sonner";
@@ -181,10 +182,11 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
   onInputChange,
   showAIRecommendations = false
 }) => {
-  const [activeTab, setActiveTab] = useState("site-info");
+  const [activeTab, setActiveTab] = useState("cover");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   const tabs = [
+    { id: "cover", label: "Cover Page" },
     { id: "site-info", label: "1. Site Information" },
     { id: "attendees", label: "2. Attendees" },
     { id: "equipment-room", label: "3. Equipment Room" },
@@ -655,6 +657,14 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
         </div>
         
         <div id="survey-content" className="mt-6 bg-white rounded-lg p-6 shadow-md">
+          <TabsContent value="cover" className="mt-0">
+            <SurveyCover 
+              formData={formData}
+              onInputChange={onInputChange}
+              showAIRecommendations={showAIRecommendations}
+            />
+          </TabsContent>
+          
           <TabsContent value="site-info" className="mt-0">
             <SiteInformation 
               formData={formData}
