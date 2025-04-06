@@ -15,7 +15,6 @@ import SurveyOutcome from "./survey/SurveyOutcome";
 import RoomLayoutDrawing from "./survey/RoomLayoutDrawing";
 import FinalChecklist from "./survey/FinalChecklist";
 import SurveyCover from "./survey/SurveyCover";
-import BCXLogo from "./ui/logo";
 import html2pdf from 'html2pdf.js';
 import { toast } from "sonner";
 
@@ -235,6 +234,8 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     `;
     container.appendChild(header);
     
+    addDataSummarySection(container);
+    
     tabs.forEach(tab => {
       const tabContent = document.querySelector(`[data-state="inactive"][data-orientation="horizontal"][data-value="${tab.id}"]`);
       
@@ -275,6 +276,201 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     addSignatureSection(container);
     
     return container;
+  };
+  
+  const addDataSummarySection = (container: HTMLElement) => {
+    const section = document.createElement('div');
+    section.className = 'pdf-section data-summary';
+    section.style.marginBottom = '30px';
+    section.style.pageBreakAfter = 'always';
+    
+    const title = document.createElement('h2');
+    title.textContent = 'Survey Data Summary';
+    title.style.borderBottom = '2px solid #eee';
+    title.style.paddingBottom = '10px';
+    title.style.marginBottom = '20px';
+    title.style.color = '#444';
+    
+    section.appendChild(title);
+    
+    const siteInfoDiv = document.createElement('div');
+    siteInfoDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Site Information</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">Site Name:</span> ${formData.siteName || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Site ID:</span> ${formData.siteId || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Site Type:</span> ${formData.siteType || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Region:</span> ${formData.region || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Date:</span> ${formData.date || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Address:</span> ${formData.address || 'N/A'}</div>
+        <div><span style="font-weight: 500;">GPS Coordinates:</span> ${formData.gpsCoordinates || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(siteInfoDiv);
+    
+    const buildingInfoDiv = document.createElement('div');
+    buildingInfoDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Building Information</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">Building Name:</span> ${formData.buildingName || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Building Type:</span> ${formData.buildingType || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Floor Level:</span> ${formData.floorLevel || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Equipment Room:</span> ${formData.equipmentRoomName || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(buildingInfoDiv);
+    
+    const accessInfoDiv = document.createElement('div');
+    accessInfoDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Access Information</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">Access Requirements:</span> ${formData.accessRequirements || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Security Requirements:</span> ${formData.securityRequirements || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Vehicle Type:</span> ${formData.vehicleType || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(accessInfoDiv);
+    
+    if (formData.siteContacts && formData.siteContacts.length > 0) {
+      const contactsDiv = document.createElement('div');
+      contactsDiv.innerHTML = `
+        <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Site Contacts</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Name</th>
+              <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Cellphone</th>
+              <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${formData.siteContacts.map(contact => `
+              <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${contact.name || 'N/A'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${contact.cellphone || 'N/A'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${contact.email || 'N/A'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      section.appendChild(contactsDiv);
+    }
+    
+    const equipmentRoomDiv = document.createElement('div');
+    equipmentRoomDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Equipment Room Details</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">Cable Access:</span> ${formData.cableAccess || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Room Lighting:</span> ${formData.roomLighting || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Fire Protection:</span> ${formData.fireProtection || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Cooling Method:</span> ${formData.coolingMethod || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Cooling Rating:</span> ${formData.coolingRating || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Room Temperature:</span> ${formData.roomTemperature || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Room Condition:</span> ${formData.equipmentRoomCondition || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(equipmentRoomDiv);
+    
+    const cabinetPlanningDiv = document.createElement('div');
+    cabinetPlanningDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Cabinet Space Planning</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">Number of Routers:</span> ${formData.numberOfRouters || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(cabinetPlanningDiv);
+    
+    if (formData.transportLinks && formData.transportLinks.length > 0) {
+      const transportDiv = document.createElement('div');
+      transportDiv.innerHTML = `
+        <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Transport Platforms</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Link No.</th>
+              <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Link Type</th>
+              <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Direction</th>
+              <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Capacity</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${formData.transportLinks.map(link => `
+              <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${link.linkNumber || 'N/A'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${link.linkType || 'N/A'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${link.direction || 'N/A'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${link.capacity || 'N/A'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      section.appendChild(transportDiv);
+    }
+    
+    const powerDiv = document.createElement('div');
+    powerDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">DC Power</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">Charger A:</span> ${formData.chargerA || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Charger B:</span> ${formData.chargerB || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Power Supply Method:</span> ${formData.powerSupplyMethod || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Cable Length:</span> ${formData.cableLength || 'N/A'}</div>
+        <div><span style="font-weight: 500;">End of Aisle Layout:</span> ${formData.endOfAisleLayout || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(powerDiv);
+    
+    const requirementsDiv = document.createElement('div');
+    requirementsDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Requirements & Remarks</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">Access Security:</span> ${formData.accessSecurity || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Cooling/Ventilation:</span> ${formData.coolingVentilation || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Flooring Type:</span> ${formData.flooringType || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Fire Protection:</span> ${formData.fireProt || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Lighting:</span> ${formData.lighting || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Roof Type:</span> ${formData.roofType || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Power Cables:</span> ${formData.powerCables || 'N/A'}</div>
+      </div>
+      <div style="margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">General Remarks:</span> ${formData.remarks || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(requirementsDiv);
+    
+    const outcomeDiv = document.createElement('div');
+    outcomeDiv.innerHTML = `
+      <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Survey Outcome</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><span style="font-weight: 500;">OEM Contractor:</span> ${formData.oemContractor.name || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Status:</span> ${formData.oemContractor.accepted ? 'Accepted' : 'Not Accepted'}</div>
+        <div><span style="font-weight: 500;">Comments:</span> ${formData.oemContractor.comments || 'N/A'}</div>
+        
+        <div><span style="font-weight: 500;">OEM Engineer:</span> ${formData.oemEngineer.name || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Status:</span> ${formData.oemEngineer.accepted ? 'Accepted' : 'Not Accepted'}</div>
+        <div><span style="font-weight: 500;">Comments:</span> ${formData.oemEngineer.comments || 'N/A'}</div>
+        
+        <div><span style="font-weight: 500;">Eskom Representative:</span> ${formData.eskomRepresentative.name || 'N/A'}</div>
+        <div><span style="font-weight: 500;">Status:</span> ${formData.eskomRepresentative.accepted ? 'Accepted' : 'Not Accepted'}</div>
+        <div><span style="font-weight: 500;">Comments:</span> ${formData.eskomRepresentative.comments || 'N/A'}</div>
+      </div>
+    `;
+    section.appendChild(outcomeDiv);
+    
+    if (formData.finalNotes) {
+      const finalNotesDiv = document.createElement('div');
+      finalNotesDiv.innerHTML = `
+        <h3 style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px;">Final Notes</h3>
+        <div style="margin-bottom: 15px;">
+          <p>${formData.finalNotes}</p>
+        </div>
+      `;
+      section.appendChild(finalNotesDiv);
+    }
+    
+    container.appendChild(section);
   };
   
   const hasAnyImages = () => {

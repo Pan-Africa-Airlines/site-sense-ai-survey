@@ -5,13 +5,14 @@ import NavigationBar from "@/components/NavigationBar";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { Button } from "@/components/ui/button";
 import { useAI } from "@/contexts/AIContext";
-import { Sparkles, FileText, Save, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Sparkles, FileText, Save, ArrowLeft, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import EskomSurveyTabs from "@/components/EskomSurveyTabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const EskomSurvey = () => {
   const { id } = useParams();
@@ -22,6 +23,7 @@ const EskomSurvey = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const { isProcessing } = useAI();
   const [isSaving, setIsSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   
   const [formData, setFormData] = useState({
     // Site Information
@@ -230,7 +232,7 @@ const EskomSurvey = () => {
         address: surveyData.address || "",
         gpsCoordinates: surveyData.gps_coordinates || "",
         buildingPhoto: surveyData.building_photo || "",
-        ...surveyData.survey_data,
+        ...(surveyData.survey_data || {}),
       }));
     }
   }, [surveyData]);
@@ -353,7 +355,11 @@ const EskomSurvey = () => {
   };
 
   const goBack = () => {
-    navigate('/eskom-survey');
+    navigate('/eskom-surveys');
+  };
+
+  const togglePreview = () => {
+    setShowPreview(!showPreview);
   };
 
   if (isLoading) {
@@ -458,6 +464,15 @@ const EskomSurvey = () => {
             </TooltipProvider>
             
             <Button 
+              onClick={togglePreview}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Eye className="h-4 w-4" />
+              Review Data
+            </Button>
+            
+            <Button 
               onClick={() => handleSave()}
               className="flex items-center gap-2"
               variant="outline"
@@ -486,6 +501,88 @@ const EskomSurvey = () => {
           />
         </div>
       </div>
+      
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Survey Data Preview</DialogTitle>
+            <DialogDescription>
+              Review all data before exporting to PDF
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4 text-sm">
+            <h3 className="font-semibold text-lg mb-2">Site Information</h3>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div><span className="font-medium">Site Name:</span> {formData.siteName}</div>
+              <div><span className="font-medium">Site ID:</span> {formData.siteId}</div>
+              <div><span className="font-medium">Site Type:</span> {formData.siteType}</div>
+              <div><span className="font-medium">Region:</span> {formData.region}</div>
+              <div><span className="font-medium">Date:</span> {formData.date}</div>
+              <div><span className="font-medium">Address:</span> {formData.address}</div>
+              <div><span className="font-medium">GPS Coordinates:</span> {formData.gpsCoordinates}</div>
+            </div>
+            
+            <h3 className="font-semibold text-lg mb-2">Building Information</h3>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div><span className="font-medium">Building Name:</span> {formData.buildingName}</div>
+              <div><span className="font-medium">Building Type:</span> {formData.buildingType}</div>
+              <div><span className="font-medium">Floor Level:</span> {formData.floorLevel}</div>
+              <div><span className="font-medium">Equipment Room:</span> {formData.equipmentRoomName}</div>
+            </div>
+            
+            <h3 className="font-semibold text-lg mb-2">Access Information</h3>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div><span className="font-medium">Access Requirements:</span> {formData.accessRequirements}</div>
+              <div><span className="font-medium">Security Requirements:</span> {formData.securityRequirements}</div>
+              <div><span className="font-medium">Vehicle Type:</span> {formData.vehicleType}</div>
+            </div>
+            
+            <h3 className="font-semibold text-lg mb-2">Equipment Room Details</h3>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div><span className="font-medium">Cable Access:</span> {formData.cableAccess}</div>
+              <div><span className="font-medium">Room Lighting:</span> {formData.roomLighting}</div>
+              <div><span className="font-medium">Fire Protection:</span> {formData.fireProtection}</div>
+              <div><span className="font-medium">Cooling Method:</span> {formData.coolingMethod}</div>
+              <div><span className="font-medium">Cooling Rating:</span> {formData.coolingRating}</div>
+              <div><span className="font-medium">Room Temperature:</span> {formData.roomTemperature}</div>
+              <div><span className="font-medium">Room Condition:</span> {formData.equipmentRoomCondition}</div>
+            </div>
+            
+            <h3 className="font-semibold text-lg mb-2">Requirements & Remarks</h3>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div><span className="font-medium">Access Security:</span> {formData.accessSecurity}</div>
+              <div><span className="font-medium">Cooling/Ventilation:</span> {formData.coolingVentilation}</div>
+              <div><span className="font-medium">Flooring Type:</span> {formData.flooringType}</div>
+              <div><span className="font-medium">Fire Protection:</span> {formData.fireProt}</div>
+              <div><span className="font-medium">Lighting:</span> {formData.lighting}</div>
+              <div><span className="font-medium">Roof Type:</span> {formData.roofType}</div>
+              <div><span className="font-medium">Power Cables:</span> {formData.powerCables}</div>
+              <div><span className="font-medium">General Remarks:</span> {formData.remarks}</div>
+            </div>
+            
+            <h3 className="font-semibold text-lg mb-2">Survey Outcome</h3>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div><span className="font-medium">OEM Contractor:</span> {formData.oemContractor.name}</div>
+              <div><span className="font-medium">Status:</span> {formData.oemContractor.accepted ? 'Accepted' : 'Not Accepted'}</div>
+              <div><span className="font-medium">OEM Engineer:</span> {formData.oemEngineer.name}</div>
+              <div><span className="font-medium">Status:</span> {formData.oemEngineer.accepted ? 'Accepted' : 'Not Accepted'}</div>
+              <div><span className="font-medium">Eskom Representative:</span> {formData.eskomRepresentative.name}</div>
+              <div><span className="font-medium">Status:</span> {formData.eskomRepresentative.accepted ? 'Accepted' : 'Not Accepted'}</div>
+            </div>
+            
+            <h3 className="font-semibold text-lg mb-2">Final Notes</h3>
+            <div className="mb-4">
+              <p>{formData.finalNotes}</p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end mt-4">
+            <Button onClick={togglePreview} variant="outline" className="mr-2">Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       <Footer />
     </div>
   );
