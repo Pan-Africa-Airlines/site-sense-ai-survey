@@ -15,6 +15,7 @@ import {
   Compass
 } from "lucide-react";
 import NavigationPopup from "./NavigationPopup";
+import VehicleCheckWizard from "./VehicleCheckWizard";
 
 interface Site {
   id: number;
@@ -39,6 +40,8 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
   const { toast } = useToast();
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+  const [vehicleCheckOpen, setVehicleCheckOpen] = useState(false);
+  const [vehicleCheckProcessing, setVehicleCheckProcessing] = useState(false);
 
   const handleAssessment = (siteId: number) => {
     navigate(`/assessment?siteId=${siteId}`);
@@ -61,6 +64,28 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
       title: "Starting Navigation",
       description: "Preparing directions to " + site.name
     });
+  };
+
+  const handleVehicleCheckStart = () => {
+    setVehicleCheckOpen(true);
+  };
+
+  const handleVehicleCheckConfirm = () => {
+    setVehicleCheckProcessing(true);
+    
+    // Simulate processing
+    setTimeout(() => {
+      setVehicleCheckProcessing(false);
+      setVehicleCheckOpen(false);
+      
+      // Call the parent handler
+      onVehicleCheck();
+      
+      toast({
+        title: "Vehicle Check Completed",
+        description: "Your vehicle has been verified as safe for travel"
+      });
+    }, 1500);
   };
 
   const getPriorityBadge = (priority: string) => {
@@ -98,7 +123,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                 <p className="text-blue-600 text-sm">Complete a vehicle check before starting assessments</p>
               </div>
               <Button 
-                onClick={onVehicleCheck} 
+                onClick={handleVehicleCheckStart} 
                 className="ml-auto bg-blue-600 hover:bg-blue-700"
                 size="sm"
               >
@@ -106,6 +131,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
               </Button>
             </div>
 
+            {/* Site list */}
             {sites.map((site) => (
               <Card key={site.id} className="border-l-4 border-l-akhanya">
                 <CardContent className="p-4">
@@ -162,6 +188,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
           </div>
         )}
 
+        {/* Popups */}
         {selectedSite && (
           <NavigationPopup
             open={navigationOpen}
@@ -171,6 +198,14 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
             siteDistance={selectedSite.distance}
           />
         )}
+        
+        <VehicleCheckWizard
+          open={vehicleCheckOpen}
+          onClose={() => setVehicleCheckOpen(false)}
+          onConfirm={handleVehicleCheckConfirm}
+          vehicle="Toyota Land Cruiser (ABC-123)"
+          isProcessing={vehicleCheckProcessing}
+        />
       </CardContent>
     </Card>
   );

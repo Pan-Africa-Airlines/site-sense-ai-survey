@@ -3,15 +3,15 @@ import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { useAI } from "@/contexts/AIContext";
-import { Sparkles, FileText, AlertTriangle } from "lucide-react";
+import { Sparkles, FileText, AlertTriangle, Check, Car } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ImageCapture from "@/components/ImageCapture";
-import { Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import VehicleCheckWizard from "@/components/VehicleCheckWizard";
 
 const CarCheckup = () => {
   const [activeTab, setActiveTab] = useState("engine");
@@ -27,6 +27,8 @@ const CarCheckup = () => {
   const [brakeAnalysis, setBrakeAnalysis] = useState("");
   const [anomaliesReport, setAnomaliesReport] = useState("");
   const [maintenanceRecommendations, setMaintenanceRecommendations] = useState("");
+  const [vehicleCheckOpen, setVehicleCheckOpen] = useState(false);
+  const [vehicleCheckCompleted, setVehicleCheckCompleted] = useState(false);
 
   const handleEngineImageCapture = (imageData: string) => {
     setEngineImage(imageData);
@@ -82,6 +84,12 @@ const CarCheckup = () => {
     toast.success("Maintenance recommendations generated");
   };
 
+  const handleVehicleCheckComplete = () => {
+    setVehicleCheckCompleted(true);
+    setVehicleCheckOpen(false);
+    toast.success("Vehicle safety check completed successfully");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <NavigationBar />
@@ -90,14 +98,23 @@ const CarCheckup = () => {
         subtitle="Comprehensive evaluation of vehicle condition"
       />
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6 flex justify-between">
+        <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
             <h2 className="text-2xl font-bold text-akhanya">Vehicle Inspection</h2>
             <p className="text-gray-600">
               Capture images of key vehicle components for AI-assisted analysis
             </p>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 bg-blue-50 border-blue-100 text-blue-700 hover:bg-blue-100"
+              onClick={() => setVehicleCheckOpen(true)}
+            >
+              <Car className="h-4 w-4" />
+              {vehicleCheckCompleted ? "Review Safety Check" : "Complete Safety Check"}
+            </Button>
+            
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2" onClick={checkForAnomalies}>
@@ -141,6 +158,18 @@ const CarCheckup = () => {
             </Dialog>
           </div>
         </div>
+
+        {vehicleCheckCompleted && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-lg flex items-start">
+            <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-green-800">Safety Check Completed</h3>
+              <p className="text-green-700 text-sm">
+                Your vehicle has passed all the required safety checks and is ready for operation.
+              </p>
+            </div>
+          </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-6">
@@ -261,6 +290,14 @@ const CarCheckup = () => {
           </Button>
         </div>
       </div>
+      
+      <VehicleCheckWizard
+        open={vehicleCheckOpen}
+        onClose={() => setVehicleCheckOpen(false)}
+        onConfirm={handleVehicleCheckComplete}
+        vehicle="Toyota Land Cruiser (ABC-123)"
+        isProcessing={false}
+      />
     </div>
   );
 };
