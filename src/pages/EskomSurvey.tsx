@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import NetworkingBanner from "@/components/NetworkingBanner";
@@ -193,12 +194,14 @@ const EskomSurvey = () => {
       // Handle nested fields with dot notation (e.g., "oemContractor.name")
       if (field.includes('.')) {
         const [parentField, childField] = field.split('.');
+        const updatedParent = {
+          ...prev[parentField as keyof typeof prev],
+          [childField]: value
+        };
+        
         return {
           ...prev,
-          [parentField]: {
-            ...prev[parentField as keyof typeof prev],
-            [childField]: value
-          }
+          [parentField]: updatedParent
         };
       }
       
@@ -232,21 +235,21 @@ const EskomSurvey = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavigationBar />
       <NetworkingBanner
         title="Eskom OT IP/MPLS Network"
         subtitle="Site Survey Report"
       />
       <div className="container mx-auto px-4 py-8 flex-grow">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h2 className="text-2xl font-bold text-akhanya">Eskom OT IP/MPLS Network Site Survey</h2>
             <p className="text-gray-600">
               Complete the form below to document the site information
             </p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap gap-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -295,7 +298,7 @@ const EskomSurvey = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="mb-8">
           <EskomSurveyTabs 
             formData={formData} 
             onInputChange={handleInputChange} 

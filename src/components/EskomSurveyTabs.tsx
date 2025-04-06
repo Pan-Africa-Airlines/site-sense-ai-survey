@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -202,12 +203,14 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
   const handleNextTab = () => {
     if (currentTabIndex < tabs.length - 1) {
       setActiveTab(tabs[currentTabIndex + 1].id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   
   const handlePrevTab = () => {
     if (currentTabIndex > 0) {
       setActiveTab(tabs[currentTabIndex - 1].id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   
@@ -239,20 +242,30 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
   };
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <TabsList className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 mb-2">
-            {tabs.map(tab => (
-              <TabsTrigger key={tab.id} value={tab.id} className="text-xs md:text-sm">
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div className="w-full overflow-x-auto pb-2 md:pb-0">
+            <TabsList className="h-auto p-1 bg-gray-100 rounded-lg">
+              {tabs.map(tab => (
+                <TabsTrigger 
+                  key={tab.id} 
+                  value={tab.id} 
+                  className={`
+                    text-xs sm:text-sm py-2 px-3 rounded-md transition-all
+                    data-[state=active]:bg-white data-[state=active]:text-akhanya data-[state=active]:shadow-sm
+                    data-[state=active]:font-medium
+                  `}
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
           
           <Button 
             onClick={generatePDF}
-            className="flex items-center gap-2 bg-akhanya hover:bg-akhanya-dark"
+            className="flex items-center gap-2 bg-akhanya hover:bg-akhanya-dark shrink-0"
             type="button"
           >
             <FileDown className="h-4 w-4" />
@@ -260,8 +273,8 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
           </Button>
         </div>
         
-        <div id="survey-content" className="mt-4">
-          <TabsContent value="site-info">
+        <div id="survey-content" className="mt-6 bg-white rounded-lg p-6 shadow-md">
+          <TabsContent value="site-info" className="mt-0">
             <SiteInformation 
               formData={formData}
               onInputChange={onInputChange}
@@ -269,7 +282,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="attendees">
+          <TabsContent value="attendees" className="mt-0">
             <AttendeeInformation 
               formData={formData}
               onInputChange={onInputChange}
@@ -277,7 +290,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="equipment-room">
+          <TabsContent value="equipment-room" className="mt-0">
             <EquipmentRoomGeneral 
               formData={formData}
               onInputChange={onInputChange}
@@ -285,7 +298,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="cabinet-planning">
+          <TabsContent value="cabinet-planning" className="mt-0">
             <CabinetSpacePlanning 
               formData={formData}
               onInputChange={onInputChange}
@@ -293,7 +306,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="transport">
+          <TabsContent value="transport" className="mt-0">
             <TransportPlatforms 
               formData={formData}
               onInputChange={onInputChange}
@@ -301,7 +314,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="power">
+          <TabsContent value="power" className="mt-0">
             <PowerDistribution 
               formData={formData}
               onInputChange={onInputChange}
@@ -309,7 +322,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="photos">
+          <TabsContent value="photos" className="mt-0">
             <EquipmentPhotos 
               formData={formData}
               onInputChange={onInputChange}
@@ -317,7 +330,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="odf">
+          <TabsContent value="odf" className="mt-0">
             <OpticalFrame 
               formData={formData}
               onInputChange={onInputChange}
@@ -325,7 +338,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="requirements">
+          <TabsContent value="requirements" className="mt-0">
             <RequirementsRemarks 
               formData={formData}
               onInputChange={onInputChange}
@@ -333,7 +346,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="survey-outcome">
+          <TabsContent value="survey-outcome" className="mt-0">
             <SurveyOutcome 
               formData={formData}
               onInputChange={onInputChange}
@@ -341,7 +354,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="room-layout">
+          <TabsContent value="room-layout" className="mt-0">
             <RoomLayoutDrawing 
               formData={formData}
               onInputChange={onInputChange}
@@ -349,7 +362,7 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="final-checklist">
+          <TabsContent value="final-checklist" className="mt-0">
             <FinalChecklist 
               formData={formData}
               onInputChange={onInputChange}

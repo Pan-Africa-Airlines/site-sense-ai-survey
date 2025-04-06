@@ -39,36 +39,36 @@ const TransportPlatforms: React.FC<TransportPlatformsProps> = ({
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex justify-center mb-6">
         <img 
           src="/lovable-uploads/f3b0d24a-bde2-40c2-84a6-ed83f7605bce.png" 
           alt="BCX Logo" 
-          className="h-20 object-contain" 
+          className="h-16 object-contain" 
         />
       </div>
       
-      <h2 className="text-xl font-bold border-b pb-2 mb-4">3.2. Transport Platforms</h2>
+      <h2 className="text-xl font-bold border-b pb-2 mb-6 text-akhanya">3.2. Transport Platforms</h2>
       
-      <Card className="mb-6">
+      <Card className="mb-6 shadow-md">
         <CardContent className="pt-6">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="border p-2 text-left">Subject</th>
-                  <th className="border p-2 text-left">Description</th>
-                  <th className="border p-2 text-left w-16">Actions</th>
+                  <th className="border p-3 text-left font-medium text-gray-700">Subject</th>
+                  <th className="border p-3 text-left font-medium text-gray-700">Description</th>
+                  <th className="border p-3 text-center font-medium text-gray-700 w-16">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {formData.transportLinks.map((link: any, index: number) => (
-                  <tr key={index}>
-                    <td className="border p-2">
+                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td className="border p-3">
                       Link {link.linkNumber} – Link Type, Direction, Capacity
                     </td>
-                    <td className="border p-2">
-                      <div className="grid grid-cols-3 gap-2">
+                    <td className="border p-3">
+                      <div className="grid grid-cols-3 gap-3">
                         <Input
                           placeholder="Link Type"
                           value={link.linkType}
@@ -77,6 +77,7 @@ const TransportPlatforms: React.FC<TransportPlatformsProps> = ({
                             newLinks[index] = { ...link, linkType: e.target.value };
                             onInputChange("transportLinks", newLinks);
                           }}
+                          className="bg-white"
                         />
                         <Input
                           placeholder="Direction"
@@ -86,6 +87,7 @@ const TransportPlatforms: React.FC<TransportPlatformsProps> = ({
                             newLinks[index] = { ...link, direction: e.target.value };
                             onInputChange("transportLinks", newLinks);
                           }}
+                          className="bg-white"
                         />
                         <Input
                           placeholder="Capacity"
@@ -95,15 +97,16 @@ const TransportPlatforms: React.FC<TransportPlatformsProps> = ({
                             newLinks[index] = { ...link, capacity: e.target.value };
                             onInputChange("transportLinks", newLinks);
                           }}
+                          className="bg-white"
                         />
                       </div>
                     </td>
-                    <td className="border p-2">
+                    <td className="border p-3 text-center">
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
                         onClick={() => removeTransportLink(index)}
                         disabled={formData.transportLinks.length <= 1}
                       >
@@ -119,7 +122,7 @@ const TransportPlatforms: React.FC<TransportPlatformsProps> = ({
               type="button"
               variant="outline"
               size="sm"
-              className="mt-4"
+              className="mt-4 bg-white"
               onClick={addTransportLink}
             >
               <PlusCircle className="h-4 w-4 mr-2" /> Add Transport Link
@@ -129,8 +132,8 @@ const TransportPlatforms: React.FC<TransportPlatformsProps> = ({
       </Card>
       
       {showAIRecommendations && (
-        <Card className="bg-blue-50 border-blue-200">
-          <CardHeader>
+        <Card className="bg-blue-50 border-blue-200 shadow-sm">
+          <CardHeader className="pb-2">
             <CardTitle className="text-blue-800 text-base">AI Recommendations</CardTitle>
           </CardHeader>
           <CardContent>
