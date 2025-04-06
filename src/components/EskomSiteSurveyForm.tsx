@@ -11,7 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import ImageCapture from "./ImageCapture";
 import { Json } from "@/integrations/supabase/types";
-import { Save } from "lucide-react";
+import { Save, MapPin } from "lucide-react";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 interface FormTabProps {
   children: React.ReactNode;
@@ -65,6 +66,9 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
   const [gpsCoordinates, setGpsCoordinates] = useState("");
   const [engineerId, setEngineerId] = useState("");
   
+  // Use the geolocation hook
+  const { latitude, longitude, loading, error, retry, address: geoAddress } = useGeolocation();
+  
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -79,6 +83,18 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
     
     getUser();
   }, []);
+
+  // Set coordinates when geolocation data is available
+  useEffect(() => {
+    if (latitude !== null && longitude !== null) {
+      setGpsCoordinates(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+      
+      // Optionally set the address if it's available and the user hasn't manually entered one
+      if (geoAddress && !address) {
+        setAddress(geoAddress);
+      }
+    }
+  }, [latitude, longitude, geoAddress]);
 
   // Update form progress when fields change
   useEffect(() => {
@@ -287,12 +303,35 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                     value={address} 
                     onChange={handleInputChange}
                   />
-                  <TableInputRow 
-                    label="GPS coordinates WGS84 (Lat/Long)" 
-                    name="gpsCoordinates" 
-                    value={gpsCoordinates} 
-                    onChange={handleInputChange}
-                  />
+                  <tr className="border border-gray-300">
+                    <td className="border border-gray-300 p-2 font-medium">GPS coordinates WGS84 (Lat/Long)</td>
+                    <td className="border border-gray-300 p-1">
+                      <div className="flex items-center space-x-2">
+                        <Input 
+                          type="text" 
+                          name="gpsCoordinates" 
+                          value={gpsCoordinates} 
+                          onChange={handleInputChange}
+                          className="border-0 focus-visible:ring-0 h-full w-full"
+                          placeholder="e.g., -26.195246, 28.034088"
+                        />
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-shrink-0 h-8"
+                          onClick={retry}
+                          disabled={loading}
+                        >
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {loading ? "Getting..." : "Get Location"}
+                        </Button>
+                      </div>
+                      {error && (
+                        <p className="text-xs text-red-500 mt-1">{error}</p>
+                      )}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -315,7 +354,7 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                   <h4 className="font-semibold text-akhanya mb-2">AI Recommendations</h4>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
                     <li>Make sure the entire building facade is clearly visible in your photo.</li>
-                    <li>Ensure GPS coordinates are in the correct WGS84 format (e.g., -26.195246, 28.034088).</li>
+                    <li>Use the "Get Location" button to automatically fill in your current GPS coordinates.</li>
                     <li>For Site Type, use standard Eskom abbreviations (Sub-TX for Substation Transmission, RS for Repeater Station, etc.).</li>
                     <li>Include nearby landmarks in the Address field to help locate the site.</li>
                   </ul>
