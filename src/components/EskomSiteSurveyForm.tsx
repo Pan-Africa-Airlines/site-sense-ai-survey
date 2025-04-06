@@ -861,4 +861,4 @@ const EskomSiteSurveyForm = ({ showAIRecommendations = false }) => {
                           </tr>
                           <tr>
                             <td className="border border-gray-300 p-2 text-center">
-                              <div className="flex items-center justify-center
+                              <div className="flex items-center justify-center space-x
