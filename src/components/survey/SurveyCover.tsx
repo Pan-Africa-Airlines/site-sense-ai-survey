@@ -3,6 +3,11 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import BCXLogo from "@/components/ui/logo";
 import ImageCapture from "@/components/ImageCapture";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 interface SurveyCoverProps {
   formData: any;
@@ -15,6 +20,26 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
   onInputChange,
   showAIRecommendations = false
 }) => {
+  // Handle signature capture
+  const handleSignatureCapture = (role: string, url: string) => {
+    onInputChange(`${role}.signature`, url);
+  };
+  
+  // Handle checkbox changes for acceptance status
+  const handleAcceptanceChange = (role: string, checked: boolean) => {
+    onInputChange(`${role}.accepted`, checked);
+  };
+  
+  // Handle input changes for attendees
+  const handleAttendeeChange = (index: number, field: string, value: string) => {
+    const newAttendees = [...formData.attendees];
+    newAttendees[index] = {
+      ...newAttendees[index],
+      [field]: value
+    };
+    onInputChange("attendees", newAttendees);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-center mb-6">
@@ -28,28 +53,37 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
       
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <table className="w-full border-collapse">
-            <tbody>
-              <tr>
-                <td className="border border-gray-300 p-2 font-semibold w-1/3">Site Name:</td>
-                <td className="border border-gray-300 p-2">
-                  {formData.siteName}
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2 font-semibold">Region:</td>
-                <td className="border border-gray-300 p-2">
-                  {formData.region}
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2 font-semibold">Date:</td>
-                <td className="border border-gray-300 p-2">
-                  {formData.date}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="siteName">Site Name:</Label>
+              <Input
+                id="siteName"
+                value={formData.siteName || ""}
+                onChange={(e) => onInputChange("siteName", e.target.value)}
+                placeholder="Enter site name"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="region">Region:</Label>
+              <Input
+                id="region"
+                value={formData.region || ""}
+                onChange={(e) => onInputChange("region", e.target.value)}
+                placeholder="Enter region"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="date">Date:</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date || ""}
+                onChange={(e) => onInputChange("date", e.target.value)}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
       
@@ -57,167 +91,285 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
         <CardContent className="pt-6">
           <p className="text-sm font-medium mb-3">Full front view photo of building where IP/MPLS equipment will be situated.</p>
           <div className="border border-gray-300 p-2 min-h-[300px] flex items-center justify-center">
-            {formData.buildingPhoto ? (
-              <img 
-                src={formData.buildingPhoto} 
-                alt="Building Photo" 
-                className="max-h-[300px] max-w-full object-contain"
-              />
-            ) : (
-              <ImageCapture
-                onImageCaptured={(url) => onInputChange("buildingPhoto", url)}
-                onCapture={(url) => onInputChange("buildingPhoto", url)}
-                capturedImage={formData.buildingPhoto}
-                label="Building Photo"
-                description="Take a clear photo of the building front"
-              />
-            )}
+            <ImageCapture
+              onImageCaptured={(url) => onInputChange("buildingPhoto", url)}
+              onCapture={(url) => onInputChange("buildingPhoto", url)}
+              capturedImage={formData.buildingPhoto}
+              label="Building Photo"
+              description="Take a clear photo of the building front"
+            />
           </div>
         </CardContent>
       </Card>
       
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <h3 className="font-semibold text-center mb-2">Site visit attendee's information</h3>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="border border-gray-300 p-2 text-center w-1/6">Date</th>
-                <th className="border border-gray-300 p-2 text-center w-1/4">Name</th>
-                <th className="border border-gray-300 p-2 text-center w-1/4">Company</th>
-                <th className="border border-gray-300 p-2 text-center w-1/6">Department</th>
-                <th className="border border-gray-300 p-2 text-center w-1/6">Cellphone</th>
-              </tr>
-            </thead>
-            <tbody>
-              {formData.attendees.slice(0, 5).map((attendee: any, index: number) => (
-                <tr key={index}>
-                  <td className="border border-gray-300 p-2 text-center">{attendee.date}</td>
-                  <td className="border border-gray-300 p-2 text-center">{attendee.name}</td>
-                  <td className="border border-gray-300 p-2 text-center">{attendee.company}</td>
-                  <td className="border border-gray-300 p-2 text-center">{attendee.department}</td>
-                  <td className="border border-gray-300 p-2 text-center">{attendee.cellphone}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <h3 className="font-semibold text-center mb-4">Site visit attendee's information</h3>
+          <div className="space-y-6">
+            {formData.attendees.slice(0, 5).map((attendee: any, index: number) => (
+              <div key={index} className="border-b pb-4 mb-4 last:border-b-0 last:mb-0 last:pb-0">
+                <h4 className="font-medium mb-2">Attendee {index + 1}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`attendee-date-${index}`}>Date:</Label>
+                    <Input
+                      id={`attendee-date-${index}`}
+                      type="date"
+                      value={attendee.date || ""}
+                      onChange={(e) => handleAttendeeChange(index, "date", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`attendee-name-${index}`}>Name:</Label>
+                    <Input
+                      id={`attendee-name-${index}`}
+                      value={attendee.name || ""}
+                      onChange={(e) => handleAttendeeChange(index, "name", e.target.value)}
+                      placeholder="Enter name"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`attendee-company-${index}`}>Company:</Label>
+                    <Input
+                      id={`attendee-company-${index}`}
+                      value={attendee.company || ""}
+                      onChange={(e) => handleAttendeeChange(index, "company", e.target.value)}
+                      placeholder="Enter company"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`attendee-department-${index}`}>Department:</Label>
+                    <Input
+                      id={`attendee-department-${index}`}
+                      value={attendee.department || ""}
+                      onChange={(e) => handleAttendeeChange(index, "department", e.target.value)}
+                      placeholder="Enter department"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`attendee-cellphone-${index}`}>Cellphone:</Label>
+                    <Input
+                      id={`attendee-cellphone-${index}`}
+                      value={attendee.cellphone || ""}
+                      onChange={(e) => handleAttendeeChange(index, "cellphone", e.target.value)}
+                      placeholder="Enter cellphone number"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
       
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <h3 className="font-semibold text-center mb-2">Site survey outcome</h3>
-          <table className="w-full border-collapse">
-            <tbody>
-              {/* OEM Contractor */}
-              <tr>
-                <td rowSpan={2} className="border border-gray-300 p-2 text-center font-medium w-1/5">OEM Contractor</td>
-                <td className="border border-gray-300 p-2 text-center w-1/4">Name</td>
-                <td className="border border-gray-300 p-2 text-center w-1/3">Signature</td>
-                <td className="border border-gray-300 p-2 text-center w-1/5">Date</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2 text-center">{formData.oemContractor.name}</td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {formData.oemContractor.signature && (
-                    <img 
-                      src={formData.oemContractor.signature} 
-                      alt="Signature" 
-                      className="h-10 mx-auto"
-                    />
-                  )}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">{formData.oemContractor.date}</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2 w-10">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 border border-gray-500 ${formData.oemContractor.accepted ? 'bg-black' : 'bg-white'}`}></div>
-                    <span>Accepted</span>
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2 w-10">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 border border-gray-500 ${!formData.oemContractor.accepted ? 'bg-black' : 'bg-white'}`}></div>
-                    <span>Rejected</span>
-                  </div>
-                </td>
-                <td colSpan={2} className="border border-gray-300 p-2">Comments: {formData.oemContractor.comments}</td>
-              </tr>
+          <h3 className="font-semibold text-center mb-4">Site survey outcome</h3>
+          
+          {/* OEM Contractor Section */}
+          <div className="border-b pb-4 mb-4">
+            <h4 className="font-medium mb-2">OEM Contractor</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="oemContractorName">Name:</Label>
+                <Input
+                  id="oemContractorName"
+                  value={formData.oemContractor?.name || ""}
+                  onChange={(e) => onInputChange("oemContractor.name", e.target.value)}
+                  placeholder="Enter name"
+                />
+              </div>
               
-              {/* OEM Engineer */}
-              <tr>
-                <td rowSpan={2} className="border border-gray-300 p-2 text-center font-medium">OEM Engineer</td>
-                <td className="border border-gray-300 p-2 text-center">Name</td>
-                <td className="border border-gray-300 p-2 text-center">Signature</td>
-                <td className="border border-gray-300 p-2 text-center">Date</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2 text-center">{formData.oemEngineer.name}</td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {formData.oemEngineer.signature && (
-                    <img 
-                      src={formData.oemEngineer.signature} 
-                      alt="Signature" 
-                      className="h-10 mx-auto"
-                    />
-                  )}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">{formData.oemEngineer.date}</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 border border-gray-500 ${formData.oemEngineer.accepted ? 'bg-black' : 'bg-white'}`}></div>
-                    <span>Accepted</span>
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 border border-gray-500 ${!formData.oemEngineer.accepted ? 'bg-black' : 'bg-white'}`}></div>
-                    <span>Rejected</span>
-                  </div>
-                </td>
-                <td colSpan={2} className="border border-gray-300 p-2">Comments: {formData.oemEngineer.comments}</td>
-              </tr>
+              <div className="space-y-2">
+                <Label htmlFor="oemContractorDate">Date:</Label>
+                <Input
+                  id="oemContractorDate"
+                  type="date"
+                  value={formData.oemContractor?.date || ""}
+                  onChange={(e) => onInputChange("oemContractor.date", e.target.value)}
+                />
+              </div>
               
-              {/* Eskom Representative */}
-              <tr>
-                <td rowSpan={2} className="border border-gray-300 p-2 text-center font-medium">Eskom Representative</td>
-                <td className="border border-gray-300 p-2 text-center">Name</td>
-                <td className="border border-gray-300 p-2 text-center">Signature</td>
-                <td className="border border-gray-300 p-2 text-center">Date</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2 text-center">{formData.eskomRepresentative.name}</td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {formData.eskomRepresentative.signature && (
-                    <img 
-                      src={formData.eskomRepresentative.signature} 
-                      alt="Signature" 
-                      className="h-10 mx-auto"
-                    />
-                  )}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">{formData.eskomRepresentative.date}</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 p-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 border border-gray-500 ${formData.eskomRepresentative.accepted ? 'bg-black' : 'bg-white'}`}></div>
-                    <span>Accepted</span>
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 border border-gray-500 ${!formData.eskomRepresentative.accepted ? 'bg-black' : 'bg-white'}`}></div>
-                    <span>Rejected</span>
-                  </div>
-                </td>
-                <td colSpan={2} className="border border-gray-300 p-2">Comments: {formData.eskomRepresentative.comments}</td>
-              </tr>
-            </tbody>
-          </table>
+              <div className="space-y-2">
+                <Label>Signature:</Label>
+                <ImageCapture
+                  onImageCaptured={(url) => handleSignatureCapture("oemContractor", url)}
+                  onCapture={(url) => handleSignatureCapture("oemContractor", url)}
+                  capturedImage={formData.oemContractor?.signature}
+                  label="Signature"
+                  description="Sign here"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="oemContractorComments">Comments:</Label>
+                <Input
+                  id="oemContractorComments"
+                  value={formData.oemContractor?.comments || ""}
+                  onChange={(e) => onInputChange("oemContractor.comments", e.target.value)}
+                  placeholder="Enter comments"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-8 mt-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="oemContractorAccepted"
+                  checked={formData.oemContractor?.accepted || false}
+                  onCheckedChange={(checked) => handleAcceptanceChange("oemContractor", checked === true)}
+                />
+                <Label htmlFor="oemContractorAccepted">Accepted</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="oemContractorRejected"
+                  checked={!formData.oemContractor?.accepted}
+                  onCheckedChange={(checked) => handleAcceptanceChange("oemContractor", !checked)}
+                />
+                <Label htmlFor="oemContractorRejected">Rejected</Label>
+              </div>
+            </div>
+          </div>
+          
+          {/* OEM Engineer Section */}
+          <div className="border-b pb-4 mb-4">
+            <h4 className="font-medium mb-2">OEM Engineer</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="oemEngineerName">Name:</Label>
+                <Input
+                  id="oemEngineerName"
+                  value={formData.oemEngineer?.name || ""}
+                  onChange={(e) => onInputChange("oemEngineer.name", e.target.value)}
+                  placeholder="Enter name"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="oemEngineerDate">Date:</Label>
+                <Input
+                  id="oemEngineerDate"
+                  type="date"
+                  value={formData.oemEngineer?.date || ""}
+                  onChange={(e) => onInputChange("oemEngineer.date", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Signature:</Label>
+                <ImageCapture
+                  onImageCaptured={(url) => handleSignatureCapture("oemEngineer", url)}
+                  onCapture={(url) => handleSignatureCapture("oemEngineer", url)}
+                  capturedImage={formData.oemEngineer?.signature}
+                  label="Signature"
+                  description="Sign here"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="oemEngineerComments">Comments:</Label>
+                <Input
+                  id="oemEngineerComments"
+                  value={formData.oemEngineer?.comments || ""}
+                  onChange={(e) => onInputChange("oemEngineer.comments", e.target.value)}
+                  placeholder="Enter comments"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-8 mt-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="oemEngineerAccepted"
+                  checked={formData.oemEngineer?.accepted || false}
+                  onCheckedChange={(checked) => handleAcceptanceChange("oemEngineer", checked === true)}
+                />
+                <Label htmlFor="oemEngineerAccepted">Accepted</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="oemEngineerRejected"
+                  checked={!formData.oemEngineer?.accepted}
+                  onCheckedChange={(checked) => handleAcceptanceChange("oemEngineer", !checked)}
+                />
+                <Label htmlFor="oemEngineerRejected">Rejected</Label>
+              </div>
+            </div>
+          </div>
+          
+          {/* Eskom Representative Section */}
+          <div>
+            <h4 className="font-medium mb-2">Eskom Representative</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="eskomRepresentativeName">Name:</Label>
+                <Input
+                  id="eskomRepresentativeName"
+                  value={formData.eskomRepresentative?.name || ""}
+                  onChange={(e) => onInputChange("eskomRepresentative.name", e.target.value)}
+                  placeholder="Enter name"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="eskomRepresentativeDate">Date:</Label>
+                <Input
+                  id="eskomRepresentativeDate"
+                  type="date"
+                  value={formData.eskomRepresentative?.date || ""}
+                  onChange={(e) => onInputChange("eskomRepresentative.date", e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Signature:</Label>
+                <ImageCapture
+                  onImageCaptured={(url) => handleSignatureCapture("eskomRepresentative", url)}
+                  onCapture={(url) => handleSignatureCapture("eskomRepresentative", url)}
+                  capturedImage={formData.eskomRepresentative?.signature}
+                  label="Signature"
+                  description="Sign here"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="eskomRepresentativeComments">Comments:</Label>
+                <Input
+                  id="eskomRepresentativeComments"
+                  value={formData.eskomRepresentative?.comments || ""}
+                  onChange={(e) => onInputChange("eskomRepresentative.comments", e.target.value)}
+                  placeholder="Enter comments"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-8 mt-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="eskomRepresentativeAccepted"
+                  checked={formData.eskomRepresentative?.accepted || false}
+                  onCheckedChange={(checked) => handleAcceptanceChange("eskomRepresentative", checked === true)}
+                />
+                <Label htmlFor="eskomRepresentativeAccepted">Accepted</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="eskomRepresentativeRejected"
+                  checked={!formData.eskomRepresentative?.accepted}
+                  onCheckedChange={(checked) => handleAcceptanceChange("eskomRepresentative", !checked)}
+                />
+                <Label htmlFor="eskomRepresentativeRejected">Rejected</Label>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
       
@@ -249,8 +401,21 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
           </div>
         </CardContent>
       </Card>
+      
+      {showAIRecommendations && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="text-sm text-blue-700 space-y-2">
+              <p>📝 <strong>Documentation Completeness:</strong> Ensure all fields are accurately filled in. Missing information can cause delays in the project approval.</p>
+              <p>🖋️ <strong>Signatures:</strong> Make sure to obtain all required signatures during the site visit. Having all stakeholders sign off will prevent future disputes.</p>
+              <p>📊 <strong>Accurate Information:</strong> Double-check site details, as they will be used for equipment ordering and installation planning.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
 
 export default SurveyCover;
+
