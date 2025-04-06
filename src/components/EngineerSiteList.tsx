@@ -17,7 +17,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   Building2,
-  AlertCircle
+  AlertCircle,
+  ShieldOff
 } from "lucide-react";
 import NavigationPopup from "./NavigationPopup";
 import VehicleCheckWizard from "./VehicleCheckWizard";
@@ -36,11 +37,13 @@ interface Site {
 interface EngineerSiteListProps {
   sites: Site[];
   onVehicleCheck: () => void;
+  vehicleCheckCompleted?: boolean;
 }
 
 const EngineerSiteList: React.FC<EngineerSiteListProps> = ({ 
   sites,
-  onVehicleCheck
+  onVehicleCheck,
+  vehicleCheckCompleted = false
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -50,10 +53,27 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
   const [vehicleCheckProcessing, setVehicleCheckProcessing] = useState(false);
 
   const handleAssessment = (siteId: number) => {
+    if (!vehicleCheckCompleted) {
+      toast({
+        title: "Vehicle Check Required",
+        description: "You must complete a vehicle safety check before starting assessments",
+        variant: "destructive"
+      });
+      return;
+    }
     navigate(`/assessment?siteId=${siteId}`);
   };
 
   const handleStartRoute = (site: Site) => {
+    if (!vehicleCheckCompleted) {
+      toast({
+        title: "Vehicle Check Required",
+        description: "You must complete a vehicle safety check before starting your route",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!site.address) {
       toast({
         title: "Navigation Error",
@@ -177,25 +197,27 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
           </div>
         ) : (
           <div className="p-4 space-y-4">
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-blue-50 border border-blue-100 p-4 rounded-md mb-4 flex items-center shadow-sm"
-            >
-              <Car className="text-blue-600 mr-3 h-5 w-5" />
-              <div>
-                <p className="text-blue-800 font-medium">Vehicle Safety Check Required</p>
-                <p className="text-blue-600 text-sm">Complete a vehicle check before starting assessments</p>
-              </div>
-              <Button 
-                onClick={handleVehicleCheckStart} 
-                className="ml-auto bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow transition-all"
-                size="sm"
+            {!vehicleCheckCompleted && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-blue-50 border border-blue-100 p-4 rounded-md mb-4 flex items-center shadow-sm"
               >
-                Start Vehicle Check
-              </Button>
-            </motion.div>
+                <Car className="text-blue-600 mr-3 h-5 w-5" />
+                <div>
+                  <p className="text-blue-800 font-medium">Vehicle Safety Check Required</p>
+                  <p className="text-blue-600 text-sm">Complete a vehicle check before starting assessments</p>
+                </div>
+                <Button 
+                  onClick={handleVehicleCheckStart} 
+                  className="ml-auto bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow transition-all"
+                  size="sm"
+                >
+                  Start Vehicle Check
+                </Button>
+              </motion.div>
+            )}
 
             {/* Site list */}
             <div className="space-y-4">
@@ -206,7 +228,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  <Card className="border-l-4 border-l-akhanya hover:shadow-md transition-shadow duration-300">
+                  <Card className={`border-l-4 ${vehicleCheckCompleted ? 'border-l-akhanya' : 'border-l-gray-300'} hover:shadow-md transition-shadow duration-300`}>
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                         <div>
@@ -217,6 +239,12 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                           <div className="flex flex-wrap gap-2 mt-2 mb-3">
                             {getPriorityBadge(site.priority)}
                             {site.status && getStatusBadge(site.status)}
+                            {!vehicleCheckCompleted && (
+                              <BadgeWithAnimation variant="outline" className="flex items-center gap-1 border-orange-400 text-orange-700 bg-orange-50">
+                                <ShieldOff className="h-3 w-3" />
+                                Vehicle Check Required
+                              </BadgeWithAnimation>
+                            )}
                           </div>
                           {site.address && (
                             <div className="flex items-center text-gray-600 text-sm mt-2 group">
@@ -241,14 +269,24 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({
                           <Button
                             onClick={() => handleStartRoute(site)}
                             variant="outline"
-                            className="text-akhanya border-akhanya hover:bg-akhanya/10 transition-colors duration-200 group"
+                            className={`${
+                              vehicleCheckCompleted 
+                                ? "text-akhanya border-akhanya hover:bg-akhanya/10" 
+                                : "text-gray-500 border-gray-300 opacity-70"
+                            } transition-colors duration-200 group`}
+                            disabled={!vehicleCheckCompleted}
                           >
                             <Compass className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
                             Start Route
                           </Button>
                           <Button
                             onClick={() => handleAssessment(site.id)}
-                            className="bg-akhanya hover:bg-akhanya-dark transition-all duration-200 hover:shadow-lg"
+                            className={`${
+                              vehicleCheckCompleted 
+                                ? "bg-akhanya hover:bg-akhanya-dark" 
+                                : "bg-gray-400 hover:bg-gray-500"
+                            } transition-all duration-200 hover:shadow-lg`}
+                            disabled={!vehicleCheckCompleted}
                           >
                             Complete Assessment
                           </Button>

@@ -72,7 +72,11 @@ const aiInsights = [
   }
 ];
 
-const Dashboard = () => {
+interface DashboardProps {
+  vehicleCheckCompleted?: boolean;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ vehicleCheckCompleted = false }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [allocatedSites, setAllocatedSites] = useState([]);
@@ -128,6 +132,7 @@ const Dashboard = () => {
           <Button 
             onClick={() => navigate("/assessment")}
             className="bg-akhanya hover:bg-akhanya-dark"
+            disabled={!vehicleCheckCompleted}
           >
             New Assessment
           </Button>
@@ -178,6 +183,7 @@ const Dashboard = () => {
               distance: site.distance
             }))} 
             onVehicleCheck={handleVehicleCheck}
+            vehicleCheckCompleted={vehicleCheckCompleted}
           />
         )}
       </div>
