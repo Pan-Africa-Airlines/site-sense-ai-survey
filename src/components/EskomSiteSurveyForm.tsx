@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import ImageCapture from "./ImageCapture";
 import { Json } from "@/integrations/supabase/types";
-import { Save, MapPin, ChevronRight, ChevronLeft, PlusCircle, Trash2 } from "lucide-react";
+import { Save, MapPin, ChevronRight, ChevronLeft, PlusCircle, Trash2, Camera } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -54,7 +54,6 @@ const TableInputRow: React.FC<TableInputRowProps> = ({ label, name, value, onCha
   );
 };
 
-// Interface for site attendee
 interface SiteAttendee {
   date: string;
   name: string;
@@ -63,7 +62,6 @@ interface SiteAttendee {
   cellphone: string;
 }
 
-// Interface for approval section
 interface ApprovalSection {
   name: string;
   signature: string;
@@ -73,7 +71,6 @@ interface ApprovalSection {
   comments: string;
 }
 
-// Interface for equipment location
 interface EquipmentLocation {
   buildingName: string;
   buildingType: string;
@@ -81,21 +78,18 @@ interface EquipmentLocation {
   roomNumber: string;
 }
 
-// Interface for access procedure
 interface AccessProcedure {
   requirements: string;
   securityRequirements: string;
   vehicleType: string;
 }
 
-// Interface for site owner contact
 interface SiteOwnerContact {
   name: string;
   cellphone: string;
   email: string;
 }
 
-// Interface for equipment room general
 interface EquipmentRoomGeneral {
   cableAccess: string;
   roomLighting: string;
@@ -106,11 +100,27 @@ interface EquipmentRoomGeneral {
   equipmentRoomCondition: string;
 }
 
-// Interface for cabinet space planning
 interface CabinetSpacePlanning {
   roomLayoutDrawings: string[];
   roomLayoutImages: string[];
   numberOfRouters: number;
+}
+
+interface TransportPlatform {
+  linkNumber: number;
+  linkTypeDirectionCapacity: string;
+}
+
+interface DCPowerDistribution {
+  chargerALoadCurrent: string;
+  chargerBLoadCurrent: string;
+  cabinetsDirect: string;
+  cableLength: string;
+  eoaDbLayout: string;
+}
+
+interface EquipmentRoomPhotos {
+  photos: string[];
 }
 
 interface EskomSiteSurveyFormProps {
@@ -125,14 +135,12 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
   const [date, setDate] = useState("");
   const [buildingPhoto, setBuildingPhoto] = useState("");
   
-  // Site Information fields
   const [siteId, setSiteId] = useState("");
   const [siteType, setSiteType] = useState("");
   const [address, setAddress] = useState("");
   const [gpsCoordinates, setGpsCoordinates] = useState("");
   const [engineerId, setEngineerId] = useState("");
   
-  // Site visit attendees
   const [attendees, setAttendees] = useState<SiteAttendee[]>([
     { date: "", name: "", company: "", department: "", cellphone: "" },
     { date: "", name: "", company: "", department: "", cellphone: "" },
@@ -142,7 +150,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     { date: "", name: "", company: "", department: "", cellphone: "" },
   ]);
   
-  // Equipment location information
   const [equipmentLocation, setEquipmentLocation] = useState<EquipmentLocation>({
     buildingName: "",
     buildingType: "",
@@ -150,21 +157,18 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     roomNumber: ""
   });
 
-  // Access procedure information
   const [accessProcedure, setAccessProcedure] = useState<AccessProcedure>({
     requirements: "",
     securityRequirements: "",
     vehicleType: ""
   });
 
-  // Site owner contacts
   const [siteOwnerContacts, setSiteOwnerContacts] = useState<SiteOwnerContact[]>([
     { name: "", cellphone: "", email: "" },
     { name: "", cellphone: "", email: "" },
     { name: "", cellphone: "", email: "" }
   ]);
   
-  // Equipment room general information
   const [equipmentRoomGeneral, setEquipmentRoomGeneral] = useState<EquipmentRoomGeneral>({
     cableAccess: "",
     roomLighting: "",
@@ -175,20 +179,16 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     equipmentRoomCondition: ""
   });
   
-  // Cabinet space planning
   const [cabinetSpacePlanning, setCabinetSpacePlanning] = useState<CabinetSpacePlanning>({
     roomLayoutDrawings: [""],
     roomLayoutImages: [""],
     numberOfRouters: 0
   });
   
-  // Current drawing canvas index
   const [currentDrawingIndex, setCurrentDrawingIndex] = useState(0);
   
-  // Add a new state for the redline drawing
   const [redlineDrawing, setRedlineDrawing] = useState("");
   
-  // Approval sections
   const [oemContractor, setOemContractor] = useState<ApprovalSection>({
     name: "",
     signature: "",
@@ -216,13 +216,30 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     comments: ""
   });
   
-  // Use the geolocation hook
+  const [transportPlatforms, setTransportPlatforms] = useState<TransportPlatform[]>([
+    { linkNumber: 1, linkTypeDirectionCapacity: "" },
+    { linkNumber: 2, linkTypeDirectionCapacity: "" },
+    { linkNumber: 3, linkTypeDirectionCapacity: "" },
+    { linkNumber: 4, linkTypeDirectionCapacity: "" },
+  ]);
+
+  const [dcPowerDistribution, setDcPowerDistribution] = useState<DCPowerDistribution>({
+    chargerALoadCurrent: "",
+    chargerBLoadCurrent: "",
+    cabinetsDirect: "",
+    cableLength: "",
+    eoaDbLayout: "",
+  });
+
+  const [equipmentRoomPhotos, setEquipmentRoomPhotos] = useState<EquipmentRoomPhotos>({
+    photos: [""]
+  });
+
   const { latitude, longitude, loading, error, retry, address: geoAddress } = useGeolocation();
   
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Get the current user ID as engineer ID
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -234,19 +251,16 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     getUser();
   }, []);
 
-  // Set coordinates when geolocation data is available
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
       setGpsCoordinates(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
       
-      // Optionally set the address if it's available and the user hasn't manually entered one
       if (geoAddress && !address) {
         setAddress(geoAddress);
       }
     }
   }, [latitude, longitude, geoAddress]);
 
-  // Initialize the date field with today's date if it's empty
   useEffect(() => {
     if (!date) {
       const today = new Date().toISOString().split('T')[0];
@@ -254,7 +268,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     }
   }, [date]);
 
-  // Update form progress when fields change
   useEffect(() => {
     const filledFields = [siteName, region, date, buildingPhoto, siteId, siteType, address, gpsCoordinates].filter(Boolean).length;
     const totalFields = 8;
@@ -290,7 +303,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     }
   };
 
-  // Handle equipment location changes
   const handleEquipmentLocationChange = (field: keyof EquipmentLocation, value: string) => {
     setEquipmentLocation({
       ...equipmentLocation,
@@ -298,7 +310,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
 
-  // Handle access procedure changes
   const handleAccessProcedureChange = (field: keyof AccessProcedure, value: string) => {
     setAccessProcedure({
       ...accessProcedure,
@@ -306,7 +317,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
 
-  // Handle equipment room general changes
   const handleEquipmentRoomGeneralChange = (field: keyof EquipmentRoomGeneral, value: string) => {
     setEquipmentRoomGeneral({
       ...equipmentRoomGeneral,
@@ -314,7 +324,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
 
-  // Handle cabinet space planning changes
   const handleCabinetSpacePlanningChange = (field: keyof CabinetSpacePlanning, value: string | number | string[]) => {
     setCabinetSpacePlanning({
       ...cabinetSpacePlanning,
@@ -322,7 +331,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
 
-  // Handle room layout drawing image save
   const handleRoomLayoutImageSave = (dataUrl: string) => {
     const updatedImages = [...cabinetSpacePlanning.roomLayoutImages];
     updatedImages[currentDrawingIndex] = dataUrl;
@@ -337,8 +345,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
       description: `Room layout drawing #${currentDrawingIndex + 1} has been saved.`,
     });
   };
-  
-  // Handle redline drawing save
+
   const handleRedlineDrawingSave = (dataUrl: string) => {
     setRedlineDrawing(dataUrl);
     
@@ -348,7 +355,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
 
-  // Add a new drawing canvas
   const addNewDrawing = () => {
     const updatedImages = [...cabinetSpacePlanning.roomLayoutImages, ""];
     const updatedDrawings = [...cabinetSpacePlanning.roomLayoutDrawings, ""];
@@ -359,7 +365,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
       roomLayoutDrawings: updatedDrawings
     });
     
-    // Set the current drawing index to the new one
     setCurrentDrawingIndex(updatedImages.length - 1);
     
     toast({
@@ -368,7 +373,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
 
-  // Remove a drawing
   const removeDrawing = (index: number) => {
     if (cabinetSpacePlanning.roomLayoutImages.length <= 1) {
       toast({
@@ -391,7 +395,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
       roomLayoutDrawings: updatedDrawings
     });
     
-    // Adjust current drawing index if needed
     if (currentDrawingIndex >= updatedImages.length) {
       setCurrentDrawingIndex(updatedImages.length - 1);
     }
@@ -402,7 +405,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     });
   };
 
-  // Handle site owner contact changes
   const handleSiteOwnerContactChange = (index: number, field: keyof SiteOwnerContact, value: string) => {
     const updatedContacts = [...siteOwnerContacts];
     updatedContacts[index] = {
@@ -412,7 +414,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     setSiteOwnerContacts(updatedContacts);
   };
 
-  // Handle attendee changes
   const handleAttendeeChange = (index: number, field: keyof SiteAttendee, value: string) => {
     const updatedAttendees = [...attendees];
     updatedAttendees[index] = {
@@ -422,7 +423,6 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     setAttendees(updatedAttendees);
   };
 
-  // Handle approval section changes
   const handleApprovalChange = (
     section: "oemContractor" | "oemEngineer" | "eskomRepresentative",
     field: keyof ApprovalSection,
@@ -445,6 +445,42 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
     setBuildingPhoto(photoUrl);
   };
 
+  const handleTransportPlatformChange = (index: number, value: string) => {
+    const updatedPlatforms = [...transportPlatforms];
+    updatedPlatforms[index] = {
+      ...updatedPlatforms[index],
+      linkTypeDirectionCapacity: value
+    };
+    setTransportPlatforms(updatedPlatforms);
+  };
+
+  const handleDcPowerDistributionChange = (field: keyof DCPowerDistribution, value: string) => {
+    setDcPowerDistribution({
+      ...dcPowerDistribution,
+      [field]: value
+    });
+  };
+
+  const handleEquipmentRoomPhotoUpload = (photoUrl: string) => {
+    setEquipmentRoomPhotos({
+      photos: [...equipmentRoomPhotos.photos, photoUrl]
+    });
+    
+    toast({
+      title: "Photo uploaded",
+      description: "Equipment room photo has been saved.",
+    });
+  };
+
+  const removeEquipmentRoomPhoto = (index: number) => {
+    const updatedPhotos = [...equipmentRoomPhotos.photos];
+    updatedPhotos.splice(index, 1);
+    
+    setEquipmentRoomPhotos({
+      photos: updatedPhotos.length ? updatedPhotos : [""]
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -453,9 +489,9 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
       const surveyData = {
         engineerId,
         lastUpdated: new Date().toISOString(),
-        approved: false,  // Initial approval status
-        approvedBy: null, // Will be filled by admin later
-        approvalDate: null, // Will be filled by admin later
+        approved: false,
+        approvedBy: null,
+        approvalDate: null,
         attendees,
         equipmentLocation,
         accessProcedure,
@@ -463,6 +499,9 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         equipmentRoomGeneral,
         cabinetSpacePlanning,
         redlineDrawing,
+        transportPlatforms,
+        dcPowerDistribution,
+        equipmentRoomPhotos,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -529,6 +568,9 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
         equipmentRoomGeneral,
         cabinetSpacePlanning,
         redlineDrawing,
+        transportPlatforms,
+        dcPowerDistribution,
+        equipmentRoomPhotos,
         approvals: {
           oemContractor,
           oemEngineer,
@@ -587,11 +629,15 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
       setCurrentTab("equipment-details");
     } else if (currentTab === "equipment-details") {
       setCurrentTab("equipment-room");
+    } else if (currentTab === "equipment-room") {
+      setCurrentTab("technical-details");
     }
   };
 
   const prevTab = () => {
-    if (currentTab === "equipment-room") {
+    if (currentTab === "technical-details") {
+      setCurrentTab("equipment-room");
+    } else if (currentTab === "equipment-room") {
       setCurrentTab("equipment-details");
     } else if (currentTab === "equipment-details") {
       setCurrentTab("site-info");
@@ -610,7 +656,7 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
 
       <form onSubmit={handleSubmit}>
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="cover" className="flex items-center justify-center gap-2 relative">
               <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">1</div>
               <span>Cover Page</span>
@@ -634,6 +680,10 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
             <TabsTrigger value="equipment-room" className="flex items-center justify-center gap-2">
               <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">6</div>
               <span>Room Details</span>
+            </TabsTrigger>
+            <TabsTrigger value="technical-details" className="flex items-center justify-center gap-2">
+              <div className="bg-akhanya text-white w-6 h-6 rounded-full flex items-center justify-center font-medium">7</div>
+              <span>Technical</span>
             </TabsTrigger>
           </TabsList>
           
@@ -1217,6 +1267,181 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
                   
                   <div className="text-right mt-4">
                     <p className="text-sm text-gray-500">Page 6 of 17</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex justify-between mt-4">
+              <Button type="button" onClick={prevTab} className="flex items-center">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <div className="space-x-3">
+                <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
+                  <Save className="mr-2 h-4 w-4" /> Save for Later
+                </Button>
+                <Button type="submit" className="flex items-center bg-akhanya hover:bg-akhanya-dark">
+                  Submit Survey <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="technical-details" className="mt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-8">
+                  <div className="flex justify-end mb-4">
+                    <img 
+                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
+                      alt="BCX Logo" 
+                      className="w-32"
+                    />
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">3.2. TRANSPORT PLATFORMS</h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300 mb-8">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
+                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {transportPlatforms.map((platform, index) => (
+                          <tr key={index} className="border border-gray-300">
+                            <td className="border border-gray-300 p-2 font-medium">
+                              Link {platform.linkNumber} – Link Type, Direction, Capacity
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <Input 
+                                type="text" 
+                                value={platform.linkTypeDirectionCapacity}
+                                onChange={(e) => handleTransportPlatformChange(index, e.target.value)}
+                                className="border-0 focus-visible:ring-0 h-full w-full"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">3.3. 50V DC POWER DISTRIBUTION</h3>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300 mb-8">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
+                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">
+                            50V Charger A: DC Load Current (Total Amps)
+                          </td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={dcPowerDistribution.chargerALoadCurrent}
+                              onChange={(e) => handleDcPowerDistributionChange('chargerALoadCurrent', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">
+                            50V Charger B: DC Load Current (Total Amps)
+                          </td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={dcPowerDistribution.chargerBLoadCurrent}
+                              onChange={(e) => handleDcPowerDistributionChange('chargerBLoadCurrent', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">
+                            Are cabinets supplied by the 50V DC Charger direct or via End of Aisle (EOA) DB boards?
+                          </td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={dcPowerDistribution.cabinetsDirect}
+                              onChange={(e) => handleDcPowerDistributionChange('cabinetsDirect', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">
+                            Measure DC Cable length required to OTN cabinet
+                          </td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={dcPowerDistribution.cableLength}
+                              onChange={(e) => handleDcPowerDistributionChange('cableLength', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                            />
+                          </td>
+                        </tr>
+                        <tr className="border border-gray-300">
+                          <td className="border border-gray-300 p-2 font-medium">
+                            Where cabinets are supplied via EOA DB, please complete End of Aisle DB Layout, Annexure D
+                          </td>
+                          <td className="border border-gray-300 p-1">
+                            <Input 
+                              type="text" 
+                              value={dcPowerDistribution.eoaDbLayout}
+                              onChange={(e) => handleDcPowerDistributionChange('eoaDbLayout', e.target.value)}
+                              className="border-0 focus-visible:ring-0 h-full w-full"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-center mb-6">3.4. ESKOM EQUIPMENT ROOM PHOTOS</h3>
+                  
+                  <div className="mb-4">
+                    <p className="mb-4">
+                      Please provide clear colour photographs that shows general equipment room layout, including Telecomms
+                      equipment cabinets, front and back (BME, ADM, Bearer Comms, Fibre Optic, 50V Charger, etc)
+                    </p>
+                    
+                    {equipmentRoomPhotos.photos.filter(p => p).map((photo, index) => (
+                      <div key={index} className="mb-4 border rounded-md p-4 relative">
+                        <img src={photo} alt={`Equipment Room ${index + 1}`} className="max-w-full h-auto" />
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          size="sm" 
+                          className="absolute top-2 right-2" 
+                          onClick={() => removeEquipmentRoomPhoto(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    
+                    <div className="mt-4">
+                      <ImageCapture 
+                        onImageCaptured={handleEquipmentRoomPhotoUpload}
+                        buttonText="Take Equipment Room Photo"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="text-right mt-4">
+                    <p className="text-sm text-gray-500">Page 7 of 17</p>
                   </div>
                 </div>
               </CardContent>
