@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import OpticalFrame from "./survey/OpticalFrame";
 import SurveyOutcome from "./survey/SurveyOutcome";
 import RoomLayoutDrawing from "./survey/RoomLayoutDrawing";
 import FinalChecklist from "./survey/FinalChecklist";
+import BCXLogo from "./ui/logo";
 import html2pdf from 'html2pdf.js';
 import { toast } from "sonner";
 
@@ -215,20 +215,17 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     }
   };
   
-  // Helper function to create a full PDF content with all tabs
   const prepareFullPDFContent = () => {
-    // Create a temporary container to hold all content
     const container = document.createElement('div');
     container.className = 'pdf-container';
     container.style.padding = '20px';
     container.style.backgroundColor = 'white';
     container.style.fontFamily = 'Arial, sans-serif';
     
-    // Add survey title and site info
     const header = document.createElement('div');
     header.innerHTML = `
       <div style="text-align: center; margin-bottom: 20px;">
-        <img src="/lovable-uploads/f3b0d24a-bde2-40c2-84a6-ed83f7605bce.png" alt="BCX Logo" style="height: 80px;" />
+        <div id="bcx-logo-container" style="margin-bottom: 15px;"></div>
         <h1 style="margin-top: 10px; color: #333;">Eskom OT IP/MPLS Network Site Survey</h1>
         <h2 style="color: #666; font-weight: normal;">${formData.siteName || 'Site'} - ${formData.siteId || 'ID'}</h2>
         <p style="margin-top: 5px; color: #888;">Survey Date: ${formData.date || new Date().toLocaleDateString()}</p>
@@ -236,7 +233,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     `;
     container.appendChild(header);
     
-    // Clone all content from each tab
     tabs.forEach(tab => {
       const tabContent = document.querySelector(`[data-state="inactive"][data-orientation="horizontal"][data-value="${tab.id}"]`);
       
@@ -255,35 +251,30 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
         
         section.appendChild(title);
         
-        // Clone the content
         const content = tabContent.cloneNode(true) as HTMLElement;
         
-        // Remove any buttons and action elements not needed in PDF
         content.querySelectorAll('button').forEach(btn => btn.remove());
         content.querySelectorAll('input[type="file"]').forEach(input => input.remove());
+        content.querySelectorAll('.copy-icon').forEach(icon => icon.remove());
         
         section.appendChild(content);
         container.appendChild(section);
       }
     });
     
-    // Add special section for images
     if (hasAnyImages()) {
       addImagesSection(container);
     }
     
-    // Add special section for drawings
     if (hasAnyDrawings()) {
       addDrawingsSection(container);
     }
     
-    // Add signature section
     addSignatureSection(container);
     
     return container;
   };
   
-  // Check if there are any images
   const hasAnyImages = () => {
     const imageFields = [
       'buildingPhoto', 'googleMapView', 
@@ -300,7 +291,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     });
   };
   
-  // Check if there are any drawings
   const hasAnyDrawings = () => {
     const drawingFields = [
       'roomLayoutDrawing', 'cabinetLayoutDrawing', 'scannedRoomLayout', 'additionalDrawings'
@@ -314,7 +304,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     });
   };
   
-  // Add images section to PDF
   const addImagesSection = (container: HTMLElement) => {
     const section = document.createElement('div');
     section.className = 'pdf-section images-section';
@@ -330,7 +319,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     
     section.appendChild(title);
     
-    // Add building photos
     if (formData.buildingPhoto) {
       addImageToSection(section, formData.buildingPhoto, 'Building Exterior');
     }
@@ -339,7 +327,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
       addImageToSection(section, formData.googleMapView, 'Google Map View');
     }
     
-    // Add equipment room photos
     if (formData.equipmentRoomPhotos && formData.equipmentRoomPhotos.length > 0) {
       const photoSection = document.createElement('div');
       photoSection.className = 'photo-category';
@@ -361,7 +348,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
       section.appendChild(photoSection);
     }
     
-    // Add all other photo categories with similar pattern
     const photoCategories = [
       { field: 'cabinetLocationPhotos', title: 'Cabinet Location Photos' },
       { field: 'powerDistributionPhotos', title: 'Power Distribution Photos' },
@@ -400,7 +386,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     container.appendChild(section);
   };
   
-  // Add a single image to a section
   const addImageToSection = (section: HTMLElement, imageUrl: string, caption: string) => {
     if (!imageUrl || imageUrl.trim() === '') return;
     
@@ -429,7 +414,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     section.appendChild(imgContainer);
   };
   
-  // Add drawings section to PDF
   const addDrawingsSection = (container: HTMLElement) => {
     const section = document.createElement('div');
     section.className = 'pdf-section drawings-section';
@@ -445,22 +429,18 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     
     section.appendChild(title);
     
-    // Room layout drawing
     if (formData.roomLayoutDrawing) {
       addImageToSection(section, formData.roomLayoutDrawing, 'Room Layout Drawing');
     }
     
-    // Cabinet layout drawing
     if (formData.cabinetLayoutDrawing) {
       addImageToSection(section, formData.cabinetLayoutDrawing, 'Cabinet Layout Drawing');
     }
     
-    // Scanned room layout
     if (formData.scannedRoomLayout) {
       addImageToSection(section, formData.scannedRoomLayout, 'Scanned Room Layout');
     }
     
-    // Additional drawings
     if (formData.additionalDrawings && formData.additionalDrawings.length > 0) {
       formData.additionalDrawings.forEach((drawing: string, index: number) => {
         if (drawing && drawing.trim() !== '') {
@@ -472,7 +452,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     container.appendChild(section);
   };
   
-  // Add signature section to PDF
   const addSignatureSection = (container: HTMLElement) => {
     const section = document.createElement('div');
     section.className = 'pdf-section signature-section';
@@ -494,7 +473,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     signaturesTable.style.borderCollapse = 'collapse';
     signaturesTable.style.marginTop = '20px';
     
-    // Create table header
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
     
@@ -510,10 +488,8 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     thead.appendChild(headerRow);
     signaturesTable.appendChild(thead);
     
-    // Create table body
     const tbody = document.createElement('tbody');
     
-    // Add OEM Contractor row
     const contractorRow = document.createElement('tr');
     addTableCell(contractorRow, 'OEM Contractor');
     addTableCell(contractorRow, formData.oemContractor.name || '');
@@ -522,7 +498,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     addTableCell(contractorRow, formData.oemContractor.comments || '');
     tbody.appendChild(contractorRow);
     
-    // Add OEM Engineer row
     const engineerRow = document.createElement('tr');
     addTableCell(engineerRow, 'OEM Engineer');
     addTableCell(engineerRow, formData.oemEngineer.name || '');
@@ -531,7 +506,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     addTableCell(engineerRow, formData.oemEngineer.comments || '');
     tbody.appendChild(engineerRow);
     
-    // Add Eskom Representative row
     const eskomRow = document.createElement('tr');
     addTableCell(eskomRow, 'Eskom Representative');
     addTableCell(eskomRow, formData.eskomRepresentative.name || '');
@@ -543,7 +517,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     signaturesTable.appendChild(tbody);
     section.appendChild(signaturesTable);
     
-    // Add signature images if they exist
     const signatureSection = document.createElement('div');
     signatureSection.className = 'signatures';
     signatureSection.style.marginTop = '30px';
@@ -566,7 +539,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     container.appendChild(section);
   };
   
-  // Helper to add a cell to a table row
   const addTableCell = (row: HTMLTableRowElement, content: string) => {
     const cell = document.createElement('td');
     cell.textContent = content;
@@ -575,7 +547,6 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     row.appendChild(cell);
   };
   
-  // Helper to add a signature image
   const addSignatureImage = (container: HTMLElement, imageUrl: string, title: string) => {
     const signatureDiv = document.createElement('div');
     signatureDiv.className = 'signature';
@@ -603,11 +574,41 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     setIsGeneratingPDF(true);
     toast.info("Generating PDF with all images and drawings, please wait...");
     
-    // Get full PDF content with all tabs, images and drawings
     const fullContent = prepareFullPDFContent();
     
-    // Temporarily append to the body to access it
     document.body.appendChild(fullContent);
+    
+    const logoContainer = fullContent.querySelector('#bcx-logo-container');
+    if (logoContainer) {
+      const logoSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      logoSvg.setAttribute("width", "120");
+      logoSvg.setAttribute("height", "60");
+      logoSvg.setAttribute("viewBox", "0 0 120 60");
+      logoSvg.setAttribute("fill", "none");
+      
+      const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path1.setAttribute("d", "M43.5 15H64C69.5 15 74 19.5 74 25C74 30.5 69.5 35 64 35H43.5V15Z");
+      path1.setAttribute("fill", "#747474");
+      
+      const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path2.setAttribute("d", "M43.5 40H69C74.5 40 79 44.5 79 50C79 55.5 74.5 60 69 60H43.5V40Z");
+      path2.setAttribute("fill", "#747474");
+      
+      const path3 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path3.setAttribute("d", "M84 15H104.5C110 15 114.5 19.5 114.5 25C114.5 30.5 110 35 104.5 35H84V15Z");
+      path3.setAttribute("fill", "#747474");
+      
+      const path4 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path4.setAttribute("d", "M99 40H104.5L114.5 60H104.5L99 40Z");
+      path4.setAttribute("fill", "#d33a37");
+      
+      logoSvg.appendChild(path1);
+      logoSvg.appendChild(path2);
+      logoSvg.appendChild(path3);
+      logoSvg.appendChild(path4);
+      
+      logoContainer.appendChild(logoSvg);
+    }
     
     const opt = {
       margin: 10,
@@ -631,14 +632,12 @@ const EskomSurveyTabs: React.FC<EskomSurveyTabsProps> = ({
     html2pdf().from(fullContent).set(opt).save()
       .then(() => {
         toast.success("PDF generated successfully with all images and drawings!");
-        // Remove the temporary content
         document.body.removeChild(fullContent);
         setIsGeneratingPDF(false);
       })
       .catch((error) => {
         console.error("PDF generation failed:", error);
         toast.error("Failed to generate PDF: " + (error.message || "Unknown error"));
-        // Remove the temporary content
         document.body.removeChild(fullContent);
         setIsGeneratingPDF(false);
       });

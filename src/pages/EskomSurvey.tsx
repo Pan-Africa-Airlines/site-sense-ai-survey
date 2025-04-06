@@ -190,19 +190,21 @@ const EskomSurvey = () => {
   });
   
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => {
+    setFormData(prevData => {
       // Handle nested fields with dot notation (e.g., "oemContractor.name")
       if (field.includes('.')) {
         const [parentField, childField] = field.split('.');
-        const updatedParent = {
-          ...prev[parentField as keyof typeof prev],
-          [childField]: value
-        };
-        
-        return {
-          ...prev,
-          [parentField]: updatedParent
-        };
+        const parentData = prevData[parentField as keyof typeof prevData];
+        if (parentData && typeof parentData === 'object') {
+          return {
+            ...prevData,
+            [parentField]: {
+              ...parentData,
+              [childField]: value
+            }
+          };
+        }
+        return prevData;
       }
       
       // Handle array indexing with square brackets (e.g., "additionalDrawings[0]")
@@ -211,10 +213,10 @@ const EskomSurvey = () => {
         if (match) {
           const [, arrayName, indexStr] = match;
           const index = parseInt(indexStr);
-          const array = [...(prev[arrayName as keyof typeof prev] as any[])];
+          const array = [...(prevData[arrayName as keyof typeof prevData] as any[])];
           array[index] = value;
           return {
-            ...prev,
+            ...prevData,
             [arrayName]: array
           };
         }
@@ -222,7 +224,7 @@ const EskomSurvey = () => {
       
       // Handle regular fields
       return {
-        ...prev,
+        ...prevData,
         [field]: value
       };
     });
