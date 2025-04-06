@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,9 +28,9 @@ import MyAllocations from "./pages/MyAllocations";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean | null>(null);
   
-  useEffect(() => {
+  React.useEffect(() => {
     const loggedIn = localStorage.getItem("loggedIn") === "true";
     setIsLoggedIn(loggedIn);
   }, []);
@@ -47,7 +47,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  useEffect(() => {
+  React.useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
       document.documentElement.classList.add("dark");

@@ -1,9 +1,8 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import DynamicHeader from "@/components/DynamicHeader";
 import Dashboard from "./Dashboard";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
