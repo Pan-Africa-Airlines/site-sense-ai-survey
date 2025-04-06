@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,30 +27,6 @@ const FormTab: React.FC<FormTabProps> = ({ children, active }) => {
     <div className={`${active ? "block" : "hidden"}`}>
       {children}
     </div>
-  );
-};
-
-interface TableInputRowProps {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-const TableInputRow: React.FC<TableInputRowProps> = ({ label, name, value, onChange }) => {
-  return (
-    <tr className="border border-gray-300">
-      <td className="border border-gray-300 p-2 font-medium">{label}</td>
-      <td className="border border-gray-300 p-1">
-        <Input 
-          type="text" 
-          name={name} 
-          value={value} 
-          onChange={onChange}
-          className="border-0 focus-visible:ring-0 h-full w-full"
-        />
-      </td>
-    </tr>
   );
 };
 
@@ -112,7 +87,32 @@ interface CabinetSpacePlanning {
   roomLayoutDrawings: string[];
   roomLayoutImages: string[];
   numberOfRouters: number;
+  redlineDrawing: string; // Added for redline drawing
 }
+
+interface TableInputRowProps {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const TableInputRow: React.FC<TableInputRowProps> = ({ label, name, value, onChange }) => {
+  return (
+    <tr className="border border-gray-300">
+      <td className="border border-gray-300 p-2 font-medium">{label}</td>
+      <td className="border border-gray-300 p-1">
+        <Input 
+          type="text" 
+          name={name} 
+          value={value} 
+          onChange={onChange}
+          className="border-0 focus-visible:ring-0 h-full w-full"
+        />
+      </td>
+    </tr>
+  );
+};
 
 interface EskomSiteSurveyFormProps {
   showAIRecommendations?: boolean;
@@ -180,7 +180,8 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
   const [cabinetSpacePlanning, setCabinetSpacePlanning] = useState<CabinetSpacePlanning>({
     roomLayoutDrawings: [""],
     roomLayoutImages: [""],
-    numberOfRouters: 0
+    numberOfRouters: 0,
+    redlineDrawing: "" // Added for redline drawing
   });
   
   // Current drawing canvas index
@@ -286,6 +287,19 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
       default:
         break;
     }
+  };
+
+  // Handle redlining drawing save
+  const handleRedlineDrawingSave = (dataUrl: string) => {
+    setCabinetSpacePlanning({
+      ...cabinetSpacePlanning,
+      redlineDrawing: dataUrl
+    });
+    
+    toast({
+      title: "Redline drawing saved",
+      description: "Your redline drawing has been saved."
+    });
   };
 
   // Handle equipment location changes
@@ -925,297 +939,3 @@ const EskomSiteSurveyForm: React.FC<EskomSiteSurveyFormProps> = ({ showAIRecomme
                       </tbody>
                     </table>
                   </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 4 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="equipment-details" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">1. EQUIPMENT DETAILS</h3>
-                  
-                  <h4 className="text-xl font-semibold mt-4 mb-3">1.1. Equipment Location</h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <TableInputRow
-                          label="Building Name"
-                          name="buildingName"
-                          value={equipmentLocation.buildingName}
-                          onChange={(e) => handleEquipmentLocationChange('buildingName', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Building Type"
-                          name="buildingType"
-                          value={equipmentLocation.buildingType}
-                          onChange={(e) => handleEquipmentLocationChange('buildingType', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Floor Level"
-                          name="floorLevel"
-                          value={equipmentLocation.floorLevel}
-                          onChange={(e) => handleEquipmentLocationChange('floorLevel', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Room Number"
-                          name="roomNumber"
-                          value={equipmentLocation.roomNumber}
-                          onChange={(e) => handleEquipmentLocationChange('roomNumber', e.target.value)}
-                        />
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 5 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <Button type="button" onClick={nextTab} className="flex items-center">
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="equipment-room" className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-8">
-                  <div className="flex justify-end mb-4">
-                    <img 
-                      src="/public/lovable-uploads/86add713-b146-4f31-ab69-d80b3051168b.png" 
-                      alt="BCX Logo" 
-                      className="w-32"
-                    />
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center mb-6">2. EQUIPMENT ROOM (GENERAL)</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                          <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <TableInputRow
-                          label="Cable access to the cabinet (Underfloor, Overhead)"
-                          name="cableAccess"
-                          value={equipmentRoomGeneral.cableAccess}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('cableAccess', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Room lighting (Indicate if any lights are faulty)"
-                          name="roomLighting"
-                          value={equipmentRoomGeneral.roomLighting}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('roomLighting', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Fire Protection"
-                          name="fireProtection"
-                          value={equipmentRoomGeneral.fireProtection}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('fireProtection', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Cooling Method (Air-conditioning, Fans etc)"
-                          name="coolingMethod"
-                          value={equipmentRoomGeneral.coolingMethod}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('coolingMethod', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Cooling Rating (BTU or Central Controlled)"
-                          name="coolingRating"
-                          value={equipmentRoomGeneral.coolingRating}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('coolingRating', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="Measured room temperature (Deg C)"
-                          name="roomTemperature"
-                          value={equipmentRoomGeneral.roomTemperature}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('roomTemperature', e.target.value)}
-                        />
-                        <TableInputRow
-                          label="General condition of equipment room"
-                          name="equipmentRoomCondition"
-                          value={equipmentRoomGeneral.equipmentRoomCondition}
-                          onChange={(e) => handleEquipmentRoomGeneralChange('equipmentRoomCondition', e.target.value)}
-                        />
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <h3 className="text-2xl font-semibold text-center my-6">3. DETAILED SITE RECORDS</h3>
-                  <h4 className="text-xl font-semibold mt-4 mb-3">3.1. Equipment Cabinet Space Planning</h4>
-                  
-                  <div className="mb-4">
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse border border-gray-300 mb-6">
-                        <thead>
-                          <tr className="bg-gray-100">
-                            <th className="border border-gray-300 p-2 text-left w-1/3">Subject</th>
-                            <th className="border border-gray-300 p-2 text-left w-2/3">Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border border-gray-300">
-                            <td className="border border-gray-300 p-2">
-                              <p className="font-medium">Room Layout Drawing (Prior to site visit, Eskom will supply PDF version, as available). OEM to printout copies and bring to site). Red-lined scanned version to be attached to the site survey report.</p>
-                              <p className="mt-2 text-sm text-gray-600">Where no Room Layout drawing available, a free hand drawing (not to scale) to be provided by the OEM.</p>
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                              <div className="mb-2">
-                                <div className="flex justify-between items-center mb-4">
-                                  <div className="flex items-center gap-2">
-                                    <h5 className="font-semibold">Drawing #{currentDrawingIndex + 1}</h5>
-                                    {cabinetSpacePlanning.roomLayoutImages.length > 1 && (
-                                      <div className="flex gap-1">
-                                        {cabinetSpacePlanning.roomLayoutImages.map((_, index) => (
-                                          <Button 
-                                            key={index}
-                                            type="button"
-                                            variant={currentDrawingIndex === index ? "default" : "outline"}
-                                            size="sm"
-                                            onClick={() => setCurrentDrawingIndex(index)}
-                                            className="h-7 w-7 p-0"
-                                          >
-                                            {index + 1}
-                                          </Button>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={addNewDrawing}
-                                      className="flex items-center gap-1"
-                                    >
-                                      <PlusCircle className="h-4 w-4" /> Add Drawing
-                                    </Button>
-                                    {cabinetSpacePlanning.roomLayoutImages.length > 1 && (
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => removeDrawing(currentDrawingIndex)}
-                                        className="flex items-center gap-1 text-red-500 hover:text-red-700"
-                                      >
-                                        <Trash2 className="h-4 w-4" /> Remove
-                                      </Button>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                <DrawingCanvas 
-                                  onSave={handleRoomLayoutImageSave} 
-                                  initialValue={cabinetSpacePlanning.roomLayoutImages[currentDrawingIndex]}
-                                />
-                              </div>
-                            </td>
-                          </tr>
-                          <tr className="border border-gray-300">
-                            <td className="border border-gray-300 p-2 font-medium">
-                              Please indicate number of new routers required?
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <Input 
-                                type="number" 
-                                name="numberOfRouters"
-                                value={cabinetSpacePlanning.numberOfRouters.toString()}
-                                onChange={(e) => handleCabinetSpacePlanningChange('numberOfRouters', parseInt(e.target.value) || 0)}
-                                className="border-0 focus-visible:ring-0 h-full w-full"
-                              />
-                            </td>
-                          </tr>
-                          <tr className="border border-gray-300">
-                            <td className="border border-gray-300 p-2">
-                              <p className="font-medium">Please red-line Room Layout Drawing to indicate:</p>
-                              <ul className="list-disc pl-6 mt-2 space-y-1">
-                                <li>Location of new IP/MPLS Cabinet(s).</li>
-                                <li>Location of existing ODFs needed for project.</li>
-                                <li>Location of existing Ericsson ADM.</li>
-                                <li>Location of the OTN Box.</li>
-                                <li>Location of existing BME (Transmission sites).</li>
-                                <li>Location of existing FOX.</li>
-                                <li>Location of existing OT Router (ASR Network).</li>
-                                <li>Location of existing DC Chargers.</li>
-                                <li>Location of existing EOA DB board.</li>
-                                <li>Location of air-conditioners.</li>
-                              </ul>
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                              <p className="text-sm text-gray-600">Use the drawing tool above to mark these items on your room layout</p>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right mt-4">
-                    <p className="text-sm text-gray-500">Page 6 of 17</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-between mt-4">
-              <Button type="button" onClick={prevTab} className="flex items-center">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <div className="space-x-3">
-                <Button type="button" variant="outline" onClick={handleSaveForLater} className="flex items-center">
-                  <Save className="mr-2 h-4 w-4" /> Save for Later
-                </Button>
-                <Button type="submit" className="flex items-center bg-akhanya hover:bg-akhanya-dark">
-                  Submit Survey <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </form>
-    </div>
-  );
-};
-
-export default EskomSiteSurveyForm;
