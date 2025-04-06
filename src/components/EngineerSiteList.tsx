@@ -19,15 +19,9 @@ interface Site {
 
 interface EngineerSiteListProps {
   sites: Site[];
-  onVehicleCheck: () => void;
-  vehicleCheckCompleted: boolean;
 }
 
-const EngineerSiteList: React.FC<EngineerSiteListProps> = ({ 
-  sites, 
-  onVehicleCheck,
-  vehicleCheckCompleted
-}) => {
+const EngineerSiteList: React.FC<EngineerSiteListProps> = ({ sites }) => {
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [isNavigationOpen, setIsNavigationOpen] = useState(false);
   

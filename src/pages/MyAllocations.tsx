@@ -70,19 +70,11 @@ const MyAllocations = () => {
           </TabsList>
           
           <TabsContent value="pending">
-            <EngineerSiteList 
-              sites={sitesData} 
-              onVehicleCheck={() => {}}
-              vehicleCheckCompleted={true}
-            />
+            <EngineerSiteList sites={sitesData} />
           </TabsContent>
           
           <TabsContent value="completed">
-            <EngineerSiteList 
-              sites={completedSites}
-              onVehicleCheck={() => {}}
-              vehicleCheckCompleted={true}
-            />
+            <EngineerSiteList sites={completedSites} />
           </TabsContent>
         </Tabs>
       </div>

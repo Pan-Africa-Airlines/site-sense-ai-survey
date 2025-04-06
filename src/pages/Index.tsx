@@ -18,7 +18,7 @@ const Index = () => {
   return (
     <>
       <NavigationBar />
-      <Dashboard vehicleCheckCompleted={true} />
+      <Dashboard />
     </>
   );
 };
