@@ -29,14 +29,15 @@ export const useUserCreation = (): UseUserCreationReturn => {
     try {
       console.log("Creating new user with data:", data);
       
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Use signUp instead of admin.createUser
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-        email_confirm: true, // Skip email verification
-        user_metadata: {
-          name: data.name,
-          role: data.role
+        options: {
+          data: {
+            name: data.name,
+            role: data.role
+          }
         }
       });
       
