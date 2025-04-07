@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Download, Upload, Settings, UserPlus, Building } from "lucide-react";
+import ConfigFieldCard from "@/components/ConfigFieldCard";
 
 const Configuration = () => {
   const navigate = useNavigate();
@@ -166,7 +167,7 @@ const Configuration = () => {
           
           <TabsContent value="system" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FieldConfigCard 
+              <ConfigFieldCard 
                 title="Email Notifications" 
                 description="Configure system email settings"
                 fields={[
@@ -177,7 +178,7 @@ const Configuration = () => {
                 ]}
               />
               
-              <FieldConfigCard 
+              <ConfigFieldCard 
                 title="Data Retention" 
                 description="Configure data retention policies"
                 fields={[
@@ -188,7 +189,7 @@ const Configuration = () => {
                 ]}
               />
               
-              <FieldConfigCard 
+              <ConfigFieldCard 
                 title="API Integration" 
                 description="Configure external API connections"
                 fields={[
@@ -199,7 +200,7 @@ const Configuration = () => {
                 ]}
               />
               
-              <FieldConfigCard 
+              <ConfigFieldCard 
                 title="Security Settings" 
                 description="Configure system security options"
                 fields={[

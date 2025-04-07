@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AdminNavBar from "@/components/AdminNavBar";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +19,7 @@ const AdminMap = () => {
     }
   }, [navigate]);
 
-  // Mock map locations
+  // Mock map locations that will be converted to the format MapView expects
   const mapLocations = [
     { id: 1, name: "Eskom Substation A", lat: -26.204103, lng: 28.047304, status: "completed" },
     { id: 2, name: "Power Station B", lat: -26.270513, lng: 27.981339, status: "pending" },
@@ -27,6 +27,18 @@ const AdminMap = () => {
     { id: 4, name: "Distribution Center D", lat: -26.106896, lng: 28.056440, status: "in-progress" },
     { id: 5, name: "Renewable Plant E", lat: -26.041740, lng: 28.125747, status: "completed" },
   ];
+  
+  // Convert locations to engineers and sites format for MapView
+  const engineers = [];
+  const sites = mapLocations.map(location => ({
+    id: location.id,
+    name: location.name,
+    lat: location.lat,
+    lng: location.lng,
+    priority: location.status === "completed" ? "low" : 
+             location.status === "in-progress" ? "medium" : "high",
+    engineer: null
+  }));
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,9 +96,11 @@ const AdminMap = () => {
             <Card className="h-[600px]">
               <CardContent className="p-0 h-full">
                 <MapView 
-                  markers={mapLocations} 
+                  engineers={engineers} 
+                  sites={sites} 
                   center={{ lat: -26.204103, lng: 28.047304 }} 
-                  zoom={10} 
+                  selectedEngineer={null}
+                  optimizedRoutes={{}}
                 />
               </CardContent>
             </Card>
