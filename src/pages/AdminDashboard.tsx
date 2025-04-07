@@ -9,18 +9,14 @@ import SiteAllocationsTable from "@/components/admin/dashboard/SiteAllocationsTa
 import EngineerAvailabilityTable from "@/components/admin/dashboard/EngineerAvailabilityTable";
 import DashboardCharts from "@/components/admin/dashboard/DashboardCharts";
 import RecentActivitiesCards from "@/components/admin/dashboard/RecentActivitiesCards";
-import { getEngineerAllocations } from "@/utils/dbHelpers";
+import { getEngineerAllocations, getEngineerProfiles } from "@/utils/dbHelpers";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(true); // Default to true to show content
   const [engineerAllocations, setEngineerAllocations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [engineers, setEngineers] = useState([
-    { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
-    { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
-    { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
-  ]);
+  const [engineers, setEngineers] = useState([]);
 
   useEffect(() => {
     console.log("AdminDashboard mounted");
@@ -39,61 +35,39 @@ const AdminDashboard = () => {
       // Fetch allocations from the database
       const allocations = await getEngineerAllocations();
       console.log("Engineer allocations fetched:", allocations);
+      setEngineerAllocations(allocations);
       
-      // If no allocations found, use mock data
-      if (!allocations || allocations.length === 0) {
-        console.log("No allocations found, using mock data");
-        setEngineerAllocations([
-          {
-            id: "1",
-            site_id: "site-1",
-            site_name: "Johannesburg Substation",
-            region: "Gauteng",
-            priority: "high",
-            status: "pending",
-            scheduled_date: "2025-04-10",
-            engineer_name: "John Doe"
-          },
-          {
-            id: "2",
-            site_id: "site-2",
-            site_name: "Cape Town Network Hub",
-            region: "Western Cape",
-            priority: "medium",
-            status: "in-progress",
-            scheduled_date: "2025-04-12",
-            engineer_name: "Jane Smith"
-          }
-        ]);
+      // Fetch engineer profiles
+      const profiles = await getEngineerProfiles();
+      console.log("Engineer profiles fetched:", profiles);
+      
+      if (profiles && profiles.length > 0) {
+        // Map profiles to engineer data format
+        const engineerData = profiles.map(profile => ({
+          id: profile.id,
+          name: profile.name || "Unknown Engineer",
+          status: "available", // Default status
+          vehicle: "Assigned Vehicle" // Default vehicle
+        }));
+        setEngineers(engineerData);
       } else {
-        setEngineerAllocations(allocations);
+        // Fallback mock data
+        setEngineers([
+          { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+          { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+          { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
+        ]);
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
       toast.error("Failed to load dashboard data");
       
-      // Always set mock data as fallback
-      setEngineerAllocations([
-        {
-          id: "1",
-          site_id: "site-1",
-          site_name: "Johannesburg Substation",
-          region: "Gauteng",
-          priority: "high",
-          status: "pending",
-          scheduled_date: "2025-04-10",
-          engineer_name: "John Doe"
-        },
-        {
-          id: "2",
-          site_id: "site-2",
-          site_name: "Cape Town Network Hub",
-          region: "Western Cape",
-          priority: "medium",
-          status: "in-progress",
-          scheduled_date: "2025-04-12",
-          engineer_name: "Jane Smith"
-        }
+      // Set fallback data
+      setEngineerAllocations([]);
+      setEngineers([
+        { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+        { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+        { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
       ]);
     } finally {
       setIsLoading(false);

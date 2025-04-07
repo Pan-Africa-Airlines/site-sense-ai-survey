@@ -17,39 +17,31 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
   engineerAllocations = [],
   isLoading = false
 }) => {
-  // Default mock data
-  const mockAllocations = [
-    {
-      id: "1",
-      site_id: "site-1",
-      site_name: "Johannesburg Substation",
-      region: "Gauteng",
-      priority: "high",
-      status: "pending",
-      scheduled_date: "2025-04-10",
-      engineer_name: "John Doe"
-    },
-    {
-      id: "2",
-      site_id: "site-2",
-      site_name: "Cape Town Network Hub",
-      region: "Western Cape",
-      priority: "medium",
-      status: "in-progress",
-      scheduled_date: "2025-04-12",
-      engineer_name: "Jane Smith"
-    }
-  ];
-
-  // Use external allocations if provided and not empty, otherwise use mock data
-  const allocations = (engineerAllocations && engineerAllocations.length > 0) 
-    ? engineerAllocations 
-    : mockAllocations;
-
+  const userEmail = localStorage.getItem("userEmail");
+  
+  // Filter allocations to only show those for the logged-in engineer if an email is available
+  const filteredAllocations = userEmail 
+    ? engineerAllocations.filter(site => {
+        // If we have engineer_id field, match by that
+        if (site.engineer_id) {
+          return site.engineer_id === userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        }
+        // Fallback to matching by engineer_name if available
+        if (site.engineer_name) {
+          const userName = userEmail.split('@')[0].split('.').map(name => 
+            name.charAt(0).toUpperCase() + name.slice(1)
+          ).join(' ');
+          return site.engineer_name === userName;
+        }
+        return true; // If no engineer info, show all (fallback)
+      })
+    : engineerAllocations;
+  
   console.log("SiteAllocationsTable rendering with:", { 
     allocationsProvided: !!engineerAllocations,
-    allocationsCount: allocations.length,
-    isLoading
+    allocationsCount: filteredAllocations.length,
+    isLoading,
+    userEmail
   });
 
   return (
@@ -57,7 +49,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
       <h2 className="text-2xl font-bold mb-4 flex items-center justify-between text-akhanya">
         <div className="flex items-center">
           <MapPin className="mr-2 h-5 w-5" />
-          Engineer Site Allocations
+          {userEmail ? "My Site Allocations" : "Engineer Site Allocations"}
         </div>
         <Button 
           onClick={navigateToSiteAllocation}
@@ -73,6 +65,15 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
               <Loader className="h-6 w-6 animate-spin mx-auto mb-2" />
               <p className="text-gray-500">Loading allocations...</p>
             </div>
+          ) : filteredAllocations.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-gray-500">No site allocations found</p>
+              <p className="text-sm text-gray-400 mt-1">
+                {userEmail 
+                  ? "You currently don't have any site allocations assigned to you." 
+                  : "There are no site allocations in the system."}
+              </p>
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -87,7 +88,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allocations.map((site) => (
+                  {filteredAllocations.map((site) => (
                     <TableRow key={site.id}>
                       <TableCell className="font-medium">{site.site_name}</TableCell>
                       <TableCell>{site.region}</TableCell>

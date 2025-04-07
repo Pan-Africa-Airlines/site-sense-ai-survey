@@ -9,10 +9,10 @@ import ApprovedAssessmentsStatsCard from "./stats/ApprovedAssessmentsStatsCard";
 const DashboardStatsCards = () => {
   // Initialize with fallback data immediately
   const [stats, setStats] = useState({
-    completedAssessments: 5,
-    installations: 3,
-    vehicleChecks: 7,
-    pendingApprovals: 2
+    completedAssessments: 0,
+    installations: 0,
+    vehicleChecks: 0,
+    pendingApprovals: 0
   });
   const [loading, setLoading] = useState(true);
 

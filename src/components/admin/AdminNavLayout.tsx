@@ -5,7 +5,7 @@ import AdminLayout from "./AdminLayout";
 export const AdminNavLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <AdminLayout>
-      <div className="p-4 md:p-6 bg-gray-50 min-h-screen w-full">
+      <div className="p-4 md:p-6 bg-gray-50 min-h-screen w-full flex-1 overflow-auto">
         {children}
       </div>
     </AdminLayout>

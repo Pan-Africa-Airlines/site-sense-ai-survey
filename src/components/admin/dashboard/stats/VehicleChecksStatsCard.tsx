@@ -13,11 +13,11 @@ const VehicleChecksStatsCard: React.FC<VehicleChecksStatsCardProps> = ({ count, 
     <Card>
       <CardContent className="p-6">
         <div className="flex items-center space-x-4">
-          <div className="bg-amber-100 p-3 rounded-full">
-            <Car className="h-6 w-6 text-amber-600" />
+          <div className="bg-orange-100 p-3 rounded-full">
+            <Car className="h-6 w-6 text-orange-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">Engineer Vehicle Checks</p>
+            <p className="text-sm text-gray-500">Vehicle Checks</p>
             {loading ? (
               <div className="flex items-center">
                 <Loader className="h-4 w-4 animate-spin mr-2" />
