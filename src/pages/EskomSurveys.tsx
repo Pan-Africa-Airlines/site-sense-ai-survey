@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
@@ -50,6 +49,7 @@ const EskomSurveys = () => {
 
   useEffect(() => {
     fetchSurveys();
+    fetchRegions();
   }, [statusFilter, regionFilter, searchQuery, dateFilter]);
 
   const fetchSurveys = async () => {
@@ -89,15 +89,31 @@ const EskomSurveys = () => {
       
       if (data) {
         setSurveys(data as SiteSurvey[]);
-        
-        const uniqueRegions = [...new Set(data.map(item => item.region))];
-        setRegions(uniqueRegions);
       }
     } catch (error) {
       console.error('Error fetching surveys:', error);
       toast.error("Failed to load surveys. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRegions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('eskom_sites')
+        .select('region')
+        .not('region', 'is', null);
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Extract unique regions
+        const uniqueRegions = [...new Set(data.map(item => item.region).filter(Boolean))];
+        setRegions(uniqueRegions as string[]);
+      }
+    } catch (error) {
+      console.error('Error fetching regions:', error);
     }
   };
 

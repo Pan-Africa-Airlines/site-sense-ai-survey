@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 // Generate dummy AI insights based on engineer performance
@@ -123,6 +124,26 @@ export const getEngineerAllocations = async () => {
     return data || [];
   } catch (error) {
     console.error("Error in getEngineerAllocations:", error);
+    return [];
+  }
+};
+
+// Helper function to get all sites from configuration
+export const getConfiguredSites = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('eskom_sites')
+      .select('*')
+      .order('name');
+      
+    if (error) {
+      console.error("Error fetching sites:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getConfiguredSites:", error);
     return [];
   }
 };
