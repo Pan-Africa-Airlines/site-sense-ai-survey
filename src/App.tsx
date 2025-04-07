@@ -1,246 +1,58 @@
-import React from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AIProvider } from "@/contexts/AIContext";
-import { DashboardProvider } from "@/contexts/DashboardContext";
-import Index from "./pages/Index";
-import Installation from "./pages/Installation";
-import CarCheckup from "./pages/CarCheckup";
-import Configuration from "./pages/Configuration";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import Footer from "./components/Footer";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminAssessments from "./pages/AdminAssessments";
-import AdminUsers from "./pages/AdminUsers";
-import AdminInstallations from "./pages/AdminInstallations";
-import AdminLogin from "./pages/AdminLogin";
-import AdminProtectedRoute from "./components/AdminProtectedRoute";
-import EskomSurvey from "./pages/EskomSurvey";
-import EskomSurveys from "./pages/EskomSurveys";
-import AdminMap from "./pages/AdminMap";
-import MyAllocations from "./pages/MyAllocations";
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Index from './pages/Index';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Assessment from './pages/Assessment';
+import Installation from './pages/Installation';
+import MyAllocations from './pages/MyAllocations';
+import CarCheckup from './pages/CarCheckup';
+import EskomSurvey from './pages/EskomSurvey';
+import EskomSurveys from './pages/EskomSurveys';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminAssessments from './pages/AdminAssessments';
+import AdminInstallations from './pages/AdminInstallations';
+import AdminMap from './pages/AdminMap';
+import AdminUsers from './pages/AdminUsers';
+import Configuration from './pages/Configuration';
+import NotFound from './pages/NotFound';
+import Footer from './components/Footer';
+import { Toaster } from "sonner";
+import AdminSiteAllocation from './pages/AdminSiteAllocation';
 
-const queryClient = new QueryClient();
-
-const useThemeSetup = () => {
-  React.useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-};
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean | null>(null);
-  
-  React.useEffect(() => {
-    const loggedIn = localStorage.getItem("loggedIn") === "true";
-    setIsLoggedIn(loggedIn);
-  }, []);
-  
-  if (isLoggedIn === null) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-  
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-const App = () => {
-  useThemeSetup();
-
+const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AIProvider>
-        <DashboardProvider>
-          <BrowserRouter>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <div className="flex flex-col min-h-screen">
-                <Routes>
-                  <Route path="/login" element={
-                    <>
-                      <Login />
-                      <Footer />
-                    </>
-                  } />
-                  
-                  <Route path="/admin/login" element={
-                    <>
-                      <AdminLogin />
-                      <Footer />
-                    </>
-                  } />
-                  
-                  <Route 
-                    path="/" 
-                    element={
-                      <ProtectedRoute>
-                        <div className="flex flex-col min-h-screen">
-                          <Index />
-                          <Footer />
-                        </div>
-                      </ProtectedRoute>
-                    } 
-                  />
-
-                  <Route 
-                    path="/my-allocations" 
-                    element={
-                      <ProtectedRoute>
-                        <div className="flex flex-col min-h-screen">
-                          <MyAllocations />
-                          <Footer />
-                        </div>
-                      </ProtectedRoute>
-                    } 
-                  />
-
-                  <Route 
-                    path="/eskom-survey" 
-                    element={
-                      <ProtectedRoute>
-                        <EskomSurveys />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  
-                  <Route 
-                    path="/eskom-survey/new" 
-                    element={
-                      <ProtectedRoute>
-                        <EskomSurvey />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  
-                  <Route 
-                    path="/eskom-survey/:id" 
-                    element={
-                      <ProtectedRoute>
-                        <EskomSurvey />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  
-                  <Route 
-                    path="/eskom-site-survey" 
-                    element={<Navigate to="/eskom-survey" replace />} 
-                  />
-                  
-                  <Route 
-                    path="/eskom-surveys" 
-                    element={
-                      <ProtectedRoute>
-                        <div className="flex flex-col min-h-screen">
-                          <EskomSurveys />
-                          <Footer />
-                        </div>
-                      </ProtectedRoute>
-                    } 
-                  />
-                  
-                  <Route 
-                    path="/assessment" 
-                    element={<Navigate to="/eskom-survey" replace />} 
-                  />
-                  
-                  <Route 
-                    path="/installation" 
-                    element={
-                      <ProtectedRoute>
-                        <div className="flex flex-col min-h-screen">
-                          <Installation />
-                          <Footer />
-                        </div>
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/car-check" 
-                    element={
-                      <ProtectedRoute>
-                        <div className="flex flex-col min-h-screen">
-                          <CarCheckup />
-                          <Footer />
-                        </div>
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/configuration" 
-                    element={
-                      <AdminProtectedRoute>
-                        <Configuration />
-                      </AdminProtectedRoute>
-                    } 
-                  />
-                  
-                  <Route 
-                    path="/admin/dashboard" 
-                    element={
-                      <AdminProtectedRoute>
-                        <AdminDashboard />
-                      </AdminProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/assessments" 
-                    element={
-                      <AdminProtectedRoute>
-                        <AdminAssessments />
-                      </AdminProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/users" 
-                    element={
-                      <AdminProtectedRoute>
-                        <AdminUsers />
-                      </AdminProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/installations" 
-                    element={
-                      <AdminProtectedRoute>
-                        <AdminInstallations />
-                      </AdminProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/map" 
-                    element={
-                      <AdminProtectedRoute>
-                        <AdminMap />
-                      </AdminProtectedRoute>
-                    } 
-                  />
-                  
-                  <Route path="*" element={
-                    <div className="flex flex-col min-h-screen">
-                      <NotFound />
-                      <Footer />
-                    </div>
-                  } />
-                </Routes>
-              </div>
-            </TooltipProvider>
-          </BrowserRouter>
-        </DashboardProvider>
-      </AIProvider>
-    </QueryClientProvider>
+    <div className="App">
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/installation" element={<Installation />} />
+          <Route path="/my-allocations" element={<MyAllocations />} />
+          <Route path="/car-checkup" element={<CarCheckup />} />
+          <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
+          <Route path="/eskom-survey/new" element={<EskomSurvey />} />
+          <Route path="/eskom-surveys" element={<EskomSurveys />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/assessments" element={<AdminAssessments />} />
+          <Route path="/admin/installations" element={<AdminInstallations />} />
+          <Route path="/admin/map" element={<AdminMap />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/site-allocation" element={<AdminSiteAllocation />} />
+          <Route path="/configuration" element={<Configuration />} />
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Footer />
+        <Toaster />
+      </Router>
+    </div>
   );
 };
 
