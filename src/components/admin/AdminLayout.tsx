@@ -48,7 +48,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             { path: "/admin/users", icon: () => <></>, label: "Users" },
             { path: "/admin/map", icon: () => <></>, label: "Map" },
             { path: "/admin/site-allocation", icon: () => <></>, label: "Site Allocation" },
-            { path: "/configuration", icon: () => <></>, label: "Configuration" },
+            { path: "/admin/configuration", icon: () => <></>, label: "Configuration" },
           ]}
         />
         <div className="flex-1 overflow-auto bg-gray-50">

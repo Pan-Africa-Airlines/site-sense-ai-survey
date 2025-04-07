@@ -46,7 +46,7 @@ const App: React.FC = () => {
           <Route path="/admin/map" element={<AdminMap />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/site-allocation" element={<AdminSiteAllocation />} />
-          <Route path="/configuration" element={<Configuration />} />
+          <Route path="/admin/configuration" element={<Configuration />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
