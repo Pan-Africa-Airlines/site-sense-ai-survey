@@ -11,5 +11,3 @@ export const AdminNavLayout: React.FC<{ children: React.ReactNode }> = ({ childr
     </AdminLayout>
   );
 };
-
-export default AdminNavLayout;
