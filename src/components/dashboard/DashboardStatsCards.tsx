@@ -2,12 +2,14 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DashboardTotals } from "@/types/dashboard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardStatsCardsProps {
   totals: DashboardTotals;
+  isLoading?: boolean;
 }
 
-const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals }) => {
+const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals, isLoading = false }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className="card-dashboard overflow-hidden h-full">
@@ -17,7 +19,11 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals }) => 
           <CardDescription>All time site assessments</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold mb-4 text-akhanya">{totals.assessments}</div>
+          {isLoading ? (
+            <Skeleton className="h-10 w-20 mb-4" />
+          ) : (
+            <div className="text-3xl font-bold mb-4 text-akhanya">{totals.assessments}</div>
+          )}
           <div className="text-sm text-green-600">+5% from last month</div>
         </CardContent>
       </Card>
@@ -29,7 +35,11 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals }) => 
           <CardDescription>Successfully completed installations</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold mb-4 text-akhanya">{totals.completedInstallations}</div>
+          {isLoading ? (
+            <Skeleton className="h-10 w-20 mb-4" />
+          ) : (
+            <div className="text-3xl font-bold mb-4 text-akhanya">{totals.completedInstallations}</div>
+          )}
           <div className="text-sm text-green-600">+3% from last month</div>
         </CardContent>
       </Card>
@@ -41,7 +51,11 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals }) => 
           <CardDescription>Satisfaction rating</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold mb-4 text-akhanya">{totals.satisfactionRate}%</div>
+          {isLoading ? (
+            <Skeleton className="h-10 w-20 mb-4" />
+          ) : (
+            <div className="text-3xl font-bold mb-4 text-akhanya">{totals.satisfactionRate}%</div>
+          )}
           <div className="text-sm text-blue-600">satisfaction rate</div>
         </CardContent>
       </Card>

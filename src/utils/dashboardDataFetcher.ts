@@ -58,19 +58,23 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       return null;
     }
     
-    // Get installation count
+    // Get installation count - specifically for this engineer
     const { data: installations, error: installationsError } = await supabase
       .from('site_installations')
       .select('*')
       .eq('engineer_id', engId);
       
-    const installationsCount = installations?.length || 32; // Fallback to mock data
+    const installationsCount = installations?.length || 0;
     
     // Get site assessment count from site_surveys table
     const { data: siteAssessments, error: assessmentsError } = await supabase
       .from('site_surveys')
       .select('*')
       .eq('user_id', user.id);
+    
+    if (assessmentsError) {
+      console.error("Error fetching site assessments:", assessmentsError);
+    }
     
     // Calculate total assessments count
     const assessmentsCount = siteAssessments?.length || 0;
@@ -92,17 +96,21 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       satisfactionRate = 95; // Mock fallback
     }
     
-    // Set chart data
+    // Set chart data based on the real assessments and installations
     const chartData = {
-      assessments: processAssessmentData([]),
-      installations: processInstallationData([])
+      assessments: siteAssessments && siteAssessments.length > 0 
+        ? processAssessmentData(siteAssessments) 
+        : processAssessmentData([]),
+      installations: installations && installations.length > 0
+        ? processInstallationData(installations)
+        : processInstallationData([])
     };
     
-    // Set totals - use real assessments count with fallback
+    // Set totals - use real data with fallbacks only if needed
     const totals = {
-      assessments: assessmentsCount || vehicleChecks?.length || 39, // Use real data with fallback
-      completedInstallations: installationsCount,
-      satisfactionRate: satisfactionRate
+      assessments: assessmentsCount || vehicleChecks?.length || 0,
+      completedInstallations: installationsCount || 0,
+      satisfactionRate: satisfactionRate || 0
     };
     
     // Fetch recent activities
