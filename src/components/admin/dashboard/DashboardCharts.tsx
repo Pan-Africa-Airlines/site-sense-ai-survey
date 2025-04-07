@@ -76,6 +76,10 @@ const DashboardCharts = () => {
     );
   }
 
+  // Ensure chart data exists before rendering
+  const assessmentData = chartData?.assessments || [];
+  const installationData = chartData?.installations || [];
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
       <Card className="overflow-hidden">
@@ -90,7 +94,7 @@ const DashboardCharts = () => {
               config={chartConfig}
               className="w-full h-full"
             >
-              <BarChart data={chartData?.assessments || []}>
+              <BarChart data={assessmentData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -116,7 +120,7 @@ const DashboardCharts = () => {
               config={chartConfig}
               className="w-full h-full"
             >
-              <LineChart data={chartData?.installations || []}>
+              <LineChart data={installationData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />

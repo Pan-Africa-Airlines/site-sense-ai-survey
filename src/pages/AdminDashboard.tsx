@@ -66,9 +66,9 @@ const AdminDashboard = () => {
           
         // Update stats with real data if available
         setStats({
-          assessmentCount: surveysCount !== null ? surveysCount : 32,
-          installationCount: installationsCount !== null ? installationsCount : 18,
-          vehicleCheckCount: checksCount !== null ? checksCount : 27,
+          assessmentCount: surveysCount !== null ? surveysCount : stats.assessmentCount,
+          installationCount: installationsCount !== null ? installationsCount : stats.installationCount,
+          vehicleCheckCount: checksCount !== null ? checksCount : stats.vehicleCheckCount,
           pendingApprovalCount: 8 // This could be replaced with a real count if available
         });
 
