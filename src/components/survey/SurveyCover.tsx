@@ -8,6 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { EskomSite } from "@/types/site";
 
 interface SurveyCoverProps {
   formData: any;
@@ -20,6 +24,30 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
   onInputChange,
   showAIRecommendations = false
 }) => {
+  const [sites, setSites] = useState<EskomSite[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from("eskom_sites")
+          .select("*")
+          .order("name");
+
+        if (error) throw error;
+        setSites((data || []) as EskomSite[]);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSites();
+  }, []);
+
   // Handle signature capture
   const handleSignatureCapture = (role: string, url: string) => {
     onInputChange(`${role}.signature`, url);
@@ -40,6 +68,19 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
     onInputChange("attendees", newAttendees);
   };
 
+  // Handle site selection
+  const handleSiteChange = (siteName: string) => {
+    // Find the selected site
+    const selectedSite = sites.find(site => site.name === siteName);
+    
+    onInputChange("siteName", siteName);
+    
+    // If site has a type, update that too
+    if (selectedSite?.type) {
+      onInputChange("siteType", selectedSite.type);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-center mb-6">
@@ -56,12 +97,32 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="siteName">Site Name:</Label>
-              <Input
-                id="siteName"
-                value={formData.siteName || ""}
-                onChange={(e) => onInputChange("siteName", e.target.value)}
-                placeholder="Enter site name"
-              />
+              {loading ? (
+                <Input value="Loading sites..." disabled />
+              ) : sites.length > 0 ? (
+                <Select 
+                  value={formData.siteName} 
+                  onValueChange={handleSiteChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a site" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sites.map((site) => (
+                      <SelectItem key={site.id} value={site.name}>
+                        {site.name} {site.type ? `(${site.type})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="siteName"
+                  value={formData.siteName || ""}
+                  onChange={(e) => onInputChange("siteName", e.target.value)}
+                  placeholder="Enter site name or configure sites in admin"
+                />
+              )}
             </div>
             
             <div className="space-y-2">
@@ -418,4 +479,3 @@ const SurveyCover: React.FC<SurveyCoverProps> = ({
 };
 
 export default SurveyCover;
-
