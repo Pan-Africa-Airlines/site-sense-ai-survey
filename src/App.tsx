@@ -16,6 +16,8 @@ import AdminInstallations from './pages/AdminInstallations';
 import AdminMap from './pages/AdminMap';
 import AdminUsers from './pages/AdminUsers';
 import Configuration from './pages/Configuration';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import Footer from './components/Footer';
 import { Toaster } from "sonner";
@@ -41,6 +43,8 @@ const App: React.FC = () => {
             <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
             <Route path="/eskom-survey/new" element={<EskomSurvey />} />
             <Route path="/eskom-surveys" element={<EskomSurveys />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
             
             {/* Redirects for backward compatibility */}
             <Route path="/eskom-site-survey" element={<Navigate to="/eskom-survey/new" replace />} />
