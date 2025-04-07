@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Calendar, Map } from "lucide-react";
 import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
 import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
-import { supabase } from "@/integrations/supabase/client";
+import { getLatestVehicleCheck } from "@/utils/dbHelpers";
 
 interface EngineerProfileCardProps {
   engineerProfile: {
@@ -26,24 +26,14 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
   useEffect(() => {
     const fetchVehicleCheckStatus = async () => {
       try {
-        // Get the most recent vehicle check
-        const { data: checks, error: checksError } = await supabase
-          .from('vehicle_checks')
-          .select('*')
-          .eq('engineer_id', engineerProfile.id)
-          .order('check_date', { ascending: false })
-          .limit(1);
-        
-        if (checksError) {
-          console.error("Error fetching vehicle checks:", checksError);
-          return;
-        }
-        
-        if (checks && checks.length > 0) {
-          const latestCheck = checks[0];
-          setVehicleStatus(latestCheck.status as "passed" | "fair" | "failed");
-          setLastCheckDate(latestCheck.check_date);
-          setVehicleName(latestCheck.vehicle_name);
+        if (engineerProfile?.id) {
+          const latestCheck = await getLatestVehicleCheck(engineerProfile.id);
+          
+          if (latestCheck) {
+            setVehicleStatus(latestCheck.status as "passed" | "fair" | "failed");
+            setLastCheckDate(latestCheck.check_date);
+            setVehicleName(latestCheck.vehicle_name);
+          }
         }
       } catch (error) {
         console.error("Error in fetching vehicle status:", error);

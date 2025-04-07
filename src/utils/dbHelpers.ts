@@ -5,10 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const generateAIInsights = async (engineerId: string) => {
   try {
     // Check if we already have insights for this engineer
-    const { data: existingInsights } = await (supabase as any)
+    const { data: existingInsights } = await supabase
       .from('ai_insights')
       .select('*')
-      .eq('engineer_id', engineerId);
+      .eq('engineer_id', engineerId) as { data: any[] | null };
       
     // If there are already insights, don't generate new ones
     if (existingInsights && existingInsights.length > 0) {
@@ -41,9 +41,9 @@ export const generateAIInsights = async (engineerId: string) => {
     ];
     
     // Insert the insights
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('ai_insights')
-      .insert(insights);
+      .insert(insights) as { error: any };
       
     if (error) {
       console.error("Error inserting AI insights:", error);
@@ -65,11 +65,11 @@ export const ensureEngineerProfile = async (
 ) => {
   try {
     // Check if profile exists
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('engineer_profiles')
       .select('*')
       .eq('id', id)
-      .maybeSingle();
+      .maybeSingle() as { data: any; error: any };
       
     if (error) {
       console.error("Error checking engineer profile:", error);
@@ -93,9 +93,9 @@ export const ensureEngineerProfile = async (
       specializations: ["Field Engineer"]
     };
     
-    const { error: insertError } = await (supabase as any)
+    const { error: insertError } = await supabase
       .from('engineer_profiles')
-      .insert(newProfile);
+      .insert(newProfile) as { error: any };
       
     if (insertError) {
       console.error("Error creating engineer profile:", insertError);
@@ -114,7 +114,7 @@ export const getEngineerAllocations = async () => {
   try {
     const { data, error } = await supabase
       .from('engineer_allocations')
-      .select('*');
+      .select('*') as { data: any[]; error: any };
       
     if (error) {
       console.error("Error fetching allocations:", error);
@@ -146,10 +146,10 @@ export const saveVehicleCheck = async (
       check_date: new Date().toISOString()
     };
     
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('vehicle_checks')
       .insert(checkData)
-      .select();
+      .select() as { data: any; error: any };
       
     if (error) {
       console.error("Error saving vehicle check:", error);
@@ -166,13 +166,13 @@ export const saveVehicleCheck = async (
 // Get the latest vehicle check for an engineer
 export const getLatestVehicleCheck = async (engineerId: string) => {
   try {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('vehicle_checks')
       .select('*')
       .eq('engineer_id', engineerId)
       .order('check_date', { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .maybeSingle() as { data: any; error: any };
       
     if (error) {
       console.error("Error fetching vehicle check:", error);

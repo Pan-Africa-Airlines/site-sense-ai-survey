@@ -25,11 +25,13 @@ const defaultContext: AIContextType = {
 
 const AIContext = createContext<AIContextType>(defaultContext);
 
+export const useAI = () => useContext(AIContext);
+
 interface AIProviderProps {
   children: ReactNode;
 }
 
-export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
+export const AIProvider = ({ children }: AIProviderProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const analyzeImage = async (imageData: string, context: string = "general"): Promise<string> => {
@@ -227,5 +229,3 @@ Overall vehicle status: Maintenance recommended.`;
     </AIContext.Provider>
   );
 };
-
-export const useAI = () => useContext(AIContext);
