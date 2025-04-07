@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { useNavigate } from "react-router-dom";
@@ -90,49 +89,16 @@ const AdminSiteAllocation = () => {
         .filter(Boolean) as string[])];
       setRegions(uniqueRegions);
       
-      // Fetch engineers - let's create a user_roles table to track this properly
+      // Fetch engineers - use mock data since user_roles table doesn't exist
       try {
-        // First check if we have a user_roles table
-        const { data: rolesCheck, error: rolesCheckError } = await supabase
-          .from('user_roles')
-          .select('id')
-          .limit(1);
-          
-        if (rolesCheckError || !rolesCheck) {
-          // Fall back to mock data if the table doesn't exist
-          console.log("Using mock engineer data");
-          const mockEngineers: Engineer[] = [
-            { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
-            { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
-            { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
-          ];
-          setEngineers(mockEngineers);
-        } else {
-          // Use the user_roles table to get engineers
-          const { data: engineerData, error: engineerError } = await supabase
-            .from('user_roles')
-            .select(`
-              id,
-              user_id,
-              profiles:user_id (
-                name,
-                email
-              )
-            `)
-            .eq('role', 'engineer');
-            
-          if (engineerError) throw engineerError;
-          
-          // Map user data to engineers format
-          const mappedEngineers = (engineerData || []).map(engineer => ({
-            id: engineer.user_id,
-            name: engineer.profiles?.name || 'Unknown Engineer',
-            status: "available", // Default to available
-            vehicle: "Not specified" // Default vehicle
-          }));
-          
-          setEngineers(mappedEngineers);
-        }
+        // Use mock data since the user_roles table doesn't exist
+        console.log("Using mock engineer data");
+        const mockEngineers: Engineer[] = [
+          { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+          { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+          { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
+        ];
+        setEngineers(mockEngineers);
       } catch (error) {
         console.error("Error fetching engineers:", error);
         
