@@ -16,10 +16,10 @@ const Index = () => {
   }, [navigate]);
   
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <NavigationBar />
       <Dashboard />
-    </>
+    </div>
   );
 };
 
