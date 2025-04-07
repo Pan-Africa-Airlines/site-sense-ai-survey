@@ -65,22 +65,8 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [showSurvey, setShowSurvey] = useState(false);
   const [selectedSite, setSelectedSite] = useState(null);
   const [chartData, setChartData] = useState({
-    assessments: [
-      { month: 'Jan', completed: 4, pending: 1 },
-      { month: 'Feb', completed: 5, pending: 0 },
-      { month: 'Mar', completed: 6, pending: 2 },
-      { month: 'Apr', completed: 8, pending: 1 },
-      { month: 'May', completed: 7, pending: 0 },
-      { month: 'Jun', completed: 9, pending: 1 },
-    ],
-    installations: [
-      { month: 'Jan', installations: 2 },
-      { month: 'Feb', installations: 4 },
-      { month: 'Mar', installations: 5 },
-      { month: 'Apr', installations: 7 },
-      { month: 'May', installations: 6 },
-      { month: 'Jun', installations: 8 },
-    ],
+    assessments: [],
+    installations: [],
   });
   const [totals, setTotals] = useState({
     assessments: 0,
@@ -90,7 +76,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [recentActivities, setRecentActivities] = useState([]);
 
   // Process assessment data for chart display
-  const processAssessmentData = (data: any[]) => {
+  const processAssessmentData = (data) => {
     if (!data || data.length === 0) {
       return [
         { month: 'Jan', completed: 4, pending: 1 },
@@ -114,7 +100,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
   
   // Process installation data for chart display
-  const processInstallationData = (data: any[]) => {
+  const processInstallationData = (data) => {
     if (!data || data.length === 0) {
       return [
         { month: 'Jan', installations: 2 },
@@ -138,7 +124,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
   
   // Process activities data for recent activities display
-  const processActivitiesData = (data: any[]) => {
+  const processActivitiesData = (data) => {
     if (!data || data.length === 0) {
       return [
         { action: "Completed site assessment", time: "2 hours ago", location: "Johannesburg CBD" },
@@ -157,7 +143,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     ];
   };
 
-  const handleOpenSurvey = (site: any) => {
+  const handleOpenSurvey = (site) => {
     setSelectedSite(site);
     setShowSurvey(true);
   };
@@ -188,7 +174,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         
         // Generate AI insights if needed
         const insights = await generateAIInsights(dummyEngId);
-        setAiInsights(insights || []);
+        setAiInsights(insights);
         
         // Fetch engineer allocations
         const { data: allocations, error: allocationsError } = await supabase
@@ -230,7 +216,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         // Set recent activities
         setRecentActivities(processActivitiesData([]));
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast({
         title: "Error loading dashboard",

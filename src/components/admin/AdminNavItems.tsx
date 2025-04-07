@@ -108,9 +108,9 @@ export const AdminNavItems: React.FC<AdminNavItemsProps> = ({
         Users
       </Button>
       <Button
-        variant={currentPath === "/admin/configuration" ? "default" : "ghost"}
+        variant={currentPath === "/configuration" ? "default" : "ghost"}
         className="w-full justify-start"
-        onClick={() => navigate("/admin/configuration")}
+        onClick={() => navigate("/configuration")}
       >
         <Settings className="mr-2 h-4 w-4" />
         Configuration

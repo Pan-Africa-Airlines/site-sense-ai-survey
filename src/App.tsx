@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
@@ -46,7 +45,7 @@ const App: React.FC = () => {
           <Route path="/admin/map" element={<AdminMap />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/site-allocation" element={<AdminSiteAllocation />} />
-          <Route path="/admin/configuration" element={<Configuration />} />
+          <Route path="/configuration" element={<Configuration />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

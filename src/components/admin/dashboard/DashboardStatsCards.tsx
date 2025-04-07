@@ -3,25 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClipboardList, HardHat, Car, Clock } from "lucide-react";
 
-interface DashboardStatsCardsProps {
-  assessmentCount?: number;
-  installationCount?: number;
-  vehicleCheckCount?: number;
-  pendingApprovalCount?: number;
-}
-
-const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
-  assessmentCount = 32,
-  installationCount = 18,
-  vehicleCheckCount = 27,
-  pendingApprovalCount = 8
-}) => {
-  // Ensure counts are numbers with fallbacks to defaults
-  const safeAssessmentCount = assessmentCount ?? 32;
-  const safeInstallationCount = installationCount ?? 18;
-  const safeVehicleCheckCount = vehicleCheckCount ?? 27;
-  const safePendingApprovalCount = pendingApprovalCount ?? 8;
-
+const DashboardStatsCards = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <Card>
@@ -32,7 +14,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Assessments</p>
-              <h3 className="text-2xl font-bold">{safeAssessmentCount}</h3>
+              <h3 className="text-2xl font-bold">32</h3>
             </div>
           </div>
         </CardContent>
@@ -46,7 +28,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Installations</p>
-              <h3 className="text-2xl font-bold">{safeInstallationCount}</h3>
+              <h3 className="text-2xl font-bold">18</h3>
             </div>
           </div>
         </CardContent>
@@ -60,7 +42,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Vehicle Checks</p>
-              <h3 className="text-2xl font-bold">{safeVehicleCheckCount}</h3>
+              <h3 className="text-2xl font-bold">27</h3>
             </div>
           </div>
         </CardContent>
@@ -74,7 +56,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Pending Approvals</p>
-              <h3 className="text-2xl font-bold">{safePendingApprovalCount}</h3>
+              <h3 className="text-2xl font-bold">8</h3>
             </div>
           </div>
         </CardContent>
