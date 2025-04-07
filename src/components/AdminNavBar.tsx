@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -68,7 +69,7 @@ const AdminNavBar: React.FC = () => {
   ];
 
   const MobileNav = () => (
-    <header className="bg-gray-900 text-white sticky top-0 z-10">
+    <header className="bg-gray-900 text-white sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -172,126 +173,85 @@ const AdminNavBar: React.FC = () => {
   );
 
   const DesktopNav = () => (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex flex-col min-h-screen w-full">
-        <header className="bg-gray-900 text-white sticky top-0 z-10 flex-shrink-0">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="flex items-center gap-3">
-                  <img 
-                    src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
-                    alt="Akhanya IT" 
-                    className="h-16 brightness-0 invert" 
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
-                    }}
-                  />
-                  <div className="h-8 w-px bg-gray-700 mx-2"></div>
-                  <img 
-                    src="/eskom-logo.png" 
-                    alt="Eskom" 
-                    className="h-12 brightness-0 invert"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/120x45?text=Eskom";
-                    }}
-                  />
-                </div>
-                <div className="h-8 w-px bg-gray-700 mx-4"></div>
-                <div className="text-white font-bold text-2xl mr-2">Admin Panel</div>
-                <div className="text-sm bg-red-600 text-white px-2 py-1 rounded">BACKOFFICE</div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <SidebarTrigger className="text-white" />
-                
-                <div className="text-sm text-gray-300 hidden md:block">{adminUsername}</div>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <Avatar>
-                        <AvatarFallback className="bg-red-600 text-white">
-                          {adminUsername.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    
-                    <DropdownMenuItem onClick={() => navigate("/admin/settings")}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuSeparator />
-                    
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+    <div className="flex h-screen">
+      <div className="bg-gray-900 text-white w-64 flex flex-col z-40">
+        <div className="p-4 border-b border-gray-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <img 
+                src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
+                alt="Akhanya IT" 
+                className="h-8 brightness-0 invert" 
+                onError={(e) => {
+                  e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
+                }}
+              />
+              <div className="ml-2 text-white font-bold text-lg">Admin</div>
             </div>
+            <div className="text-xs bg-red-600 text-white px-2 py-1 rounded">BACKOFFICE</div>
           </div>
-        </header>
-
-        <div className="flex flex-1 w-full">
-          <Sidebar>
-            <SidebarHeader className="border-b border-gray-700 py-4">
-              <div className="flex items-center px-4">
-                <Avatar className="h-8 w-8 mr-2">
-                  <AvatarFallback className="bg-red-600 text-white">
-                    {adminUsername.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="text-sm font-medium">{adminUsername}</div>
-              </div>
-            </SidebarHeader>
-            <SidebarContent>
-              <SidebarMenu>
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive(item.path)}
-                      onClick={() => navigate(item.path)}
-                      tooltip={item.label}
-                      className={isActive(item.path) ? "bg-red-600 hover:bg-red-700" : ""}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarContent>
-            <SidebarFooter>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleLogout}
-                className="w-full justify-start"
+        </div>
+        
+        <div className="flex-1 overflow-auto py-4">
+          <div className="space-y-1 px-2">
+            {navItems.map((item) => (
+              <Button
+                key={item.path}
+                variant={isActive(item.path) ? "default" : "ghost"}
+                size="sm"
+                onClick={() => navigate(item.path)}
+                className={`w-full justify-start ${isActive(item.path) ? "bg-red-600 hover:bg-red-700" : "text-white"}`}
               >
-                <LogOut className="w-4 h-4 mr-2" /> Logout
+                <item.icon className="w-4 h-4 mr-2" /> {item.label}
               </Button>
-            </SidebarFooter>
-          </Sidebar>
-          <SidebarInset className="bg-gray-50" />
+            ))}
+          </div>
+        </div>
+        
+        <div className="p-4 border-t border-gray-800">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-red-600 text-white">
+                  {adminUsername.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-sm font-medium">{adminUsername}</div>
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate("/admin/settings")}>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleLogout}
+            className="w-full justify-start text-white"
+          >
+            <LogOut className="w-4 h-4 mr-2" /> Logout
+          </Button>
         </div>
       </div>
-    </SidebarProvider>
-  );
-
-  return (
-    <div className="flex flex-col min-h-screen">
-      {isMobile ? <MobileNav /> : <DesktopNav />}
-      <div className="flex-1"></div>
     </div>
   );
+
+  return isMobile ? <MobileNav /> : <DesktopNav />;
 };
 
 export default AdminNavBar;
