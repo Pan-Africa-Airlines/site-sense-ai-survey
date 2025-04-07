@@ -3,6 +3,7 @@ import React from "react";
 import NavigationBar from "@/components/NavigationBar";
 import EngineerSiteList from "@/components/EngineerSiteList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const MyAllocations = () => {
   
@@ -63,20 +64,28 @@ const MyAllocations = () => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-akhanya mb-6">My Site Allocations</h1>
         
-        <Tabs defaultValue="pending" className="mb-8">
-          <TabsList className="mb-6">
-            <TabsTrigger value="pending">Pending Sites</TabsTrigger>
-            <TabsTrigger value="completed">Completed Sites</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="pending">
-            <EngineerSiteList sites={sitesData} />
-          </TabsContent>
-          
-          <TabsContent value="completed">
-            <EngineerSiteList sites={completedSites} />
-          </TabsContent>
-        </Tabs>
+        <Card className="overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+          <CardHeader>
+            <CardTitle className="text-akhanya">Site Allocation Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="pending" className="mb-8">
+              <TabsList className="mb-6">
+                <TabsTrigger value="pending">Pending Sites</TabsTrigger>
+                <TabsTrigger value="completed">Completed Sites</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="pending">
+                <EngineerSiteList sites={sitesData} />
+              </TabsContent>
+              
+              <TabsContent value="completed">
+                <EngineerSiteList sites={completedSites} />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

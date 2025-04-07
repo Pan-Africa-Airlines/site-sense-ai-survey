@@ -1,12 +1,14 @@
+
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Brain, TrendingUp, AlertTriangle, Check, MapPin } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Check, MapPin, Star, Calendar, User, Map } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import EngineerSiteList from "@/components/EngineerSiteList";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
@@ -50,6 +52,21 @@ const Dashboard: React.FC = () => {
       label: "Installations",
       color: "#E13B45"
     }
+  };
+
+  // Engineer profile data
+  const userEmail = localStorage.getItem("userEmail") || "john.doe@example.com";
+  const userName = userEmail.split('@')[0].split('.').map(name => 
+    name.charAt(0).toUpperCase() + name.slice(1)
+  ).join(' ');
+  
+  const engineerProfile = {
+    name: userName,
+    experience: "5 years",
+    regions: ["Gauteng", "Western Cape", "Eastern Cape"],
+    rating: 4.8,
+    totalReviews: 124,
+    specializations: ["Power Infrastructure", "Transmission Equipment"]
   };
 
   useEffect(() => {
@@ -141,6 +158,32 @@ const Dashboard: React.FC = () => {
     }
   ];
 
+  // Function to render rating stars
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(
+          <div key={i} className="relative">
+            <Star className="h-4 w-4 text-gray-300" />
+            <div className="absolute inset-0 overflow-hidden w-1/2">
+              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+            </div>
+          </div>
+        );
+      } else {
+        stars.push(<Star key={i} className="h-4 w-4 text-gray-300" />);
+      }
+    }
+    
+    return stars;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -148,6 +191,95 @@ const Dashboard: React.FC = () => {
           <h1 className="text-3xl font-bold text-akhanya">Dashboard</h1>
           <p className="text-gray-600">Welcome to the SiteSense monitoring platform</p>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        {/* Engineer Profile Card */}
+        <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-lg">Engineer Profile</CardTitle>
+              <User className="h-5 w-5 text-akhanya" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="bg-akhanya text-white rounded-full w-14 h-14 flex items-center justify-center text-xl font-bold">
+                  {userName.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">{engineerProfile.name}</h3>
+                  <div className="flex items-center space-x-1">
+                    {renderStars(engineerProfile.rating)}
+                    <span className="text-xs text-gray-500 ml-1">({engineerProfile.totalReviews} reviews)</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-akhanya" />
+                  <span className="text-sm">Experience: {engineerProfile.experience}</span>
+                </div>
+                
+                <div className="flex items-start space-x-2">
+                  <Map className="h-4 w-4 text-akhanya flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">Service Regions: {engineerProfile.regions.join(', ')}</span>
+                </div>
+                
+                <div className="pt-2">
+                  <p className="text-xs font-medium text-gray-500 mb-1">Specializations:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {engineerProfile.specializations.map((spec, i) => (
+                      <BadgeWithAnimation key={i} variant="success" className="text-xs">
+                        {spec}
+                      </BadgeWithAnimation>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Dashboard Metric Cards with the new styling */}
+        <Card className="card-dashboard overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-akhanya">My Total Assessments</CardTitle>
+            <CardDescription>All time site assessments</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.assessments}</div>
+            <div className="text-sm text-green-600">+5% from last month</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-dashboard overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-akhanya">My Installations Completed</CardTitle>
+            <CardDescription>Successfully completed installations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.completedInstallations}</div>
+            <div className="text-sm text-green-600">+3% from last month</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-dashboard overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-akhanya">Your Achievements</CardTitle>
+            <CardDescription>Performance highlights</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold mb-4 text-akhanya">95%</div>
+            <div className="text-sm text-blue-600">satisfaction rate</div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="mb-10">
@@ -197,43 +329,9 @@ const Dashboard: React.FC = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-        <Card className="card-dashboard">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-akhanya">My Total Assessments</CardTitle>
-            <CardDescription>All time site assessments</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.assessments}</div>
-            <div className="text-sm text-green-600">+5% from last month</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-dashboard">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-akhanya">My Installations Completed</CardTitle>
-            <CardDescription>Successfully completed installations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.completedInstallations}</div>
-            <div className="text-sm text-green-600">+3% from last month</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-dashboard">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-akhanya">Your Achievements</CardTitle>
-            <CardDescription>Performance highlights</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya">95%</div>
-            <div className="text-sm text-blue-600">satisfaction rate</div>
-          </CardContent>
-        </Card>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-        <Card>
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
           <CardHeader>
             <CardTitle className="text-akhanya">My Assessment Progress</CardTitle>
             <CardDescription>Monthly site assessments status</CardDescription>
@@ -258,7 +356,8 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
           <CardHeader>
             <CardTitle className="text-akhanya">My Installation Trend</CardTitle>
             <CardDescription>Monthly installations completed</CardDescription>
@@ -290,7 +389,8 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      <Card className="mb-20">
+      <Card className="mb-20 overflow-hidden">
+        <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
         <CardHeader>
           <CardTitle className="text-akhanya">My Recent Activity</CardTitle>
           <CardDescription>Latest activities</CardDescription>
