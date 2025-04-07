@@ -16,6 +16,7 @@ const DashboardStatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("DashboardStatsCards mounted, fetching statistics...");
     const fetchStats = async () => {
       setLoading(true);
       try {
@@ -37,7 +38,20 @@ const DashboardStatsCards = () => {
     };
 
     fetchStats();
+
+    // For debugging, also set a timeout to fetch stats again after 2 seconds
+    // in case the initial fetch fails
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log("Stats are still loading after timeout, trying again...");
+        fetchStats();
+      }
+    }, 2000);
+
+    return () => clearTimeout(timeoutId);
   }, []);
+
+  console.log("Rendering stats cards with data:", stats, "loading:", loading);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
