@@ -1,8 +1,10 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Calendar, Map } from "lucide-react";
 import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
+import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EngineerProfileCardProps {
   engineerProfile: {
@@ -17,6 +19,42 @@ interface EngineerProfileCardProps {
 }
 
 const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfile }) => {
+  const [vehicleStatus, setVehicleStatus] = useState<"passed" | "fair" | "failed" | "unknown">("unknown");
+  const [lastCheckDate, setLastCheckDate] = useState<string | null>(null);
+  const [vehicleName, setVehicleName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchVehicleCheckStatus = async () => {
+      try {
+        // Get the most recent vehicle check
+        const { data: checks, error: checksError } = await supabase
+          .from('vehicle_checks')
+          .select('*')
+          .eq('engineer_id', engineerProfile.id)
+          .order('check_date', { ascending: false })
+          .limit(1);
+        
+        if (checksError) {
+          console.error("Error fetching vehicle checks:", checksError);
+          return;
+        }
+        
+        if (checks && checks.length > 0) {
+          const latestCheck = checks[0];
+          setVehicleStatus(latestCheck.status as "passed" | "fair" | "failed");
+          setLastCheckDate(latestCheck.check_date);
+          setVehicleName(latestCheck.vehicle_name);
+        }
+      } catch (error) {
+        console.error("Error in fetching vehicle status:", error);
+      }
+    };
+    
+    if (engineerProfile?.id) {
+      fetchVehicleCheckStatus();
+    }
+  }, [engineerProfile?.id]);
+
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -75,6 +113,15 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
             <div className="flex items-start space-x-2">
               <Map className="h-4 w-4 text-akhanya flex-shrink-0 mt-0.5" />
               <span className="text-sm">Service Regions: {engineerProfile.regions.join(', ')}</span>
+            </div>
+            
+            {/* Vehicle Status Indicator */}
+            <div className="border-t border-gray-100 pt-3 mt-3">
+              <VehicleStatusIndicator 
+                status={vehicleStatus} 
+                lastCheckDate={lastCheckDate}
+                vehicleName={vehicleName}
+              />
             </div>
             
             <div className="pt-2">

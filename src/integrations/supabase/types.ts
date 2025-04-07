@@ -228,6 +228,72 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_checks: {
+        Row: {
+          check_date: string
+          created_at: string | null
+          details: Json | null
+          engineer_id: string
+          id: string
+          notes: string | null
+          status: string
+          vehicle_id: string | null
+          vehicle_name: string | null
+        }
+        Insert: {
+          check_date?: string
+          created_at?: string | null
+          details?: Json | null
+          engineer_id: string
+          id?: string
+          notes?: string | null
+          status: string
+          vehicle_id?: string | null
+          vehicle_name?: string | null
+        }
+        Update: {
+          check_date?: string
+          created_at?: string | null
+          details?: Json | null
+          engineer_id?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          vehicle_id?: string | null
+          vehicle_name?: string | null
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          created_at: string | null
+          engineer_id: string
+          id: string
+          model: string | null
+          name: string
+          registration: string | null
+          year: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          engineer_id: string
+          id?: string
+          model?: string | null
+          name: string
+          registration?: string | null
+          year?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          engineer_id?: string
+          id?: string
+          model?: string | null
+          name?: string
+          registration?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

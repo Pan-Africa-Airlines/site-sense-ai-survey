@@ -128,6 +128,64 @@ export const getEngineerAllocations = async () => {
   }
 };
 
+// Save vehicle check results
+export const saveVehicleCheck = async (
+  engineerId: string,
+  status: "passed" | "fair" | "failed",
+  vehicleName: string,
+  notes?: string,
+  details?: any
+) => {
+  try {
+    const checkData = {
+      engineer_id: engineerId,
+      status,
+      vehicle_name: vehicleName,
+      notes: notes || null,
+      details: details || {},
+      check_date: new Date().toISOString()
+    };
+    
+    const { data, error } = await (supabase as any)
+      .from('vehicle_checks')
+      .insert(checkData)
+      .select();
+      
+    if (error) {
+      console.error("Error saving vehicle check:", error);
+      return null;
+    }
+    
+    return data?.[0] || null;
+  } catch (error) {
+    console.error("Error in saveVehicleCheck:", error);
+    return null;
+  }
+};
+
+// Get the latest vehicle check for an engineer
+export const getLatestVehicleCheck = async (engineerId: string) => {
+  try {
+    const { data, error } = await (supabase as any)
+      .from('vehicle_checks')
+      .select('*')
+      .eq('engineer_id', engineerId)
+      .order('check_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+      
+    if (error) {
+      console.error("Error fetching vehicle check:", error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in getLatestVehicleCheck:", error);
+    return null;
+  }
+};
+
 // Utility to convert DB date to display format
 export const formatDbDate = (dbDate: string | null): string => {
   if (!dbDate) return "Not scheduled";

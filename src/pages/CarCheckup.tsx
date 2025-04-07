@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
 import NetworkingBanner from "@/components/NetworkingBanner";
@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ImageCapture from "@/components/ImageCapture";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { getLatestVehicleCheck } from "@/utils/dbHelpers";
+import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
 
 const CarCheckup = () => {
   const [activeTab, setActiveTab] = useState("engine");
@@ -27,6 +29,25 @@ const CarCheckup = () => {
   const [brakeAnalysis, setBrakeAnalysis] = useState("");
   const [anomaliesReport, setAnomaliesReport] = useState("");
   const [maintenanceRecommendations, setMaintenanceRecommendations] = useState("");
+  const [vehicleStatus, setVehicleStatus] = useState<"passed" | "fair" | "failed" | "unknown">("unknown");
+  const [lastCheckDate, setLastCheckDate] = useState<string | null>(null);
+
+  // Get the engineer ID - in a real app, this would come from auth context
+  const userEmail = localStorage.getItem("userEmail") || "john.doe@example.com";
+  const engineerId = userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+  useEffect(() => {
+    // Fetch the latest vehicle check when the component mounts
+    const fetchLatestCheck = async () => {
+      const latestCheck = await getLatestVehicleCheck(engineerId);
+      if (latestCheck) {
+        setVehicleStatus(latestCheck.status as "passed" | "fair" | "failed");
+        setLastCheckDate(latestCheck.check_date);
+      }
+    };
+    
+    fetchLatestCheck();
+  }, [engineerId]);
 
   const handleEngineImageCapture = (imageData: string) => {
     setEngineImage(imageData);
@@ -142,14 +163,30 @@ const CarCheckup = () => {
           </div>
         </div>
 
-        <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-lg flex items-start">
-          <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-          <div>
-            <h3 className="font-medium text-green-800">Safety Check Completed</h3>
-            <p className="text-green-700 text-sm">
-              Your vehicle has passed all the required safety checks and is ready for operation.
-            </p>
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-100 rounded-lg flex flex-col md:flex-row items-start gap-4">
+          <div className="flex items-start gap-3 flex-grow">
+            <Check className="h-5 w-5 text-green-500 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-gray-800">Safety Check Status</h3>
+              <p className="text-gray-600 text-sm mb-2">
+                Your vehicle's current roadworthiness status based on the most recent check.
+              </p>
+              
+              <VehicleStatusIndicator 
+                status={vehicleStatus} 
+                lastCheckDate={lastCheckDate}
+                vehicleName="Toyota Hilux" 
+              />
+            </div>
           </div>
+          
+          <Button 
+            onClick={() => toast.success("Safety check completed")}
+            className="mt-2 md:mt-0 ml-8"
+          >
+            <Car className="h-4 w-4 mr-2" />
+            New Safety Check
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import VoicePrompt from './VoicePrompt';
+import { saveVehicleCheck } from '@/utils/dbHelpers';
 
 import { 
   Car, 
@@ -45,6 +46,7 @@ interface VehicleCheckWizardProps {
   onConfirm: () => void;
   vehicle: string;
   isProcessing: boolean;
+  engineerId?: string;
 }
 
 const VehicleCheckWizard: React.FC<VehicleCheckWizardProps> = ({
@@ -52,7 +54,8 @@ const VehicleCheckWizard: React.FC<VehicleCheckWizardProps> = ({
   onClose,
   onConfirm,
   vehicle,
-  isProcessing
+  isProcessing,
+  engineerId = "eng-001" // Default engineer ID if not provided
 }) => {
   const { toast } = useToast();
   const [checks, setChecks] = useState<CheckState>({
@@ -66,6 +69,7 @@ const VehicleCheckWizard: React.FC<VehicleCheckWizardProps> = ({
   
   const [currentStep, setCurrentStep] = useState(0);
   const [playVoice, setPlayVoice] = useState(false);
+  const [notes, setNotes] = useState<Record<string, string>>({});
   
   const checkItems: CheckItem[] = [
     {
@@ -166,6 +170,41 @@ const VehicleCheckWizard: React.FC<VehicleCheckWizardProps> = ({
     onClose();
   };
   
+  const handleConfirm = async () => {
+    if (!engineerId || !allChecksCompleted) return;
+    
+    try {
+      // Calculate status based on checks
+      // For simplicity, we'll consider the status "passed" if all checks are good
+      // In a real app, you might have more complex logic based on specific check results
+      const checkStatus: "passed" | "fair" | "failed" = "passed";
+      
+      // Save check results to the database
+      await saveVehicleCheck(
+        engineerId,
+        checkStatus, 
+        vehicle,
+        "All checks passed successfully", // Note
+        { checks } // Details - storing the check state
+      );
+      
+      // Continue with the original onConfirm callback
+      onConfirm();
+      
+      toast({
+        title: "Vehicle Check Saved",
+        description: "Your vehicle check has been recorded",
+      });
+    } catch (error) {
+      console.error("Error saving vehicle check:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save vehicle check",
+        variant: "destructive"
+      });
+    }
+  };
+  
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-md">
@@ -262,7 +301,7 @@ const VehicleCheckWizard: React.FC<VehicleCheckWizardProps> = ({
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleDialogClose} size="sm">Cancel</Button>
             <Button 
-              onClick={onConfirm}
+              onClick={handleConfirm}
               disabled={!allChecksCompleted || isProcessing}
               className="min-w-[120px]"
             >
