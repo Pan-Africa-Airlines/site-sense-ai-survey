@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -109,29 +108,42 @@ export const useDashboardData = () => {
     try {
       setIsLoading(true);
       
-      // Get user info
-      const userEmail = localStorage.getItem("userEmail") || "john.doe@example.com";
-      const userName = userEmail.split('@')[0].split('.').map(name => 
+      // Check for authenticated user
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No authenticated session found");
+        return;
+      }
+      
+      // Get user info from auth
+      const user = session.user;
+      console.log("Authenticated user:", user);
+      
+      // Get metadata
+      const metadata = user.user_metadata || {};
+      const userEmail = user.email || localStorage.getItem("userEmail") || "john.doe@example.com";
+      const userName = metadata.name || userEmail.split('@')[0].split('.').map(name => 
         name.charAt(0).toUpperCase() + name.slice(1)
       ).join(' ');
       
       // Generate unique ID based on email - in production use auth.user.id
-      const dummyEngId = userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const engId = user.id || userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
       
       // Ensure engineer profile exists
-      const profile = await ensureEngineerProfile(dummyEngId, userName, userEmail);
+      const profile = await ensureEngineerProfile(engId, userName, userEmail);
       
       if (profile) {
         setEngineerProfile(profile);
         
         // Generate AI insights if needed
-        const insights = await generateAIInsights(dummyEngId);
+        const insights = await generateAIInsights(engId);
         setAiInsights(insights);
         
-        // Fetch engineer allocations
+        // Fetch engineer allocations for the specific engineer
         const { data: allocations, error: allocationsError } = await supabase
           .from('engineer_allocations')
-          .select('*');
+          .select('*')
+          .eq('engineer_id', engId);
         
         if (allocationsError) {
           console.error("Error fetching allocations:", allocationsError);
@@ -144,9 +156,20 @@ export const useDashboardData = () => {
           setAllocatedSites(allocations || []);
         }
         
-        // Get installation count - use mock data
-        const installationsCount = 32; // Mock data
+        // Get installation count
+        const { data: installations, error: installationsError } = await supabase
+          .from('site_installations')
+          .select('*')
+          .eq('engineer_id', engId);
+          
+        const installationsCount = installations?.length || 32; // Fallback to mock data
         
+        // Get vehicle check count
+        const { data: vehicleChecks, error: vehicleChecksError } = await supabase
+          .from('vehicle_checks')
+          .select('*')
+          .eq('engineer_id', engId);
+          
         // Use profile data for ratings if available, otherwise use mock
         let satisfactionRate = profile.average_rating 
           ? Math.round((profile.average_rating / 5) * 100) 
@@ -160,13 +183,31 @@ export const useDashboardData = () => {
         
         // Set totals
         setTotals({
-          assessments: 39, // Mock value
+          assessments: vehicleChecks?.length || 39, // Mock fallback
           completedInstallations: installationsCount,
           satisfactionRate: satisfactionRate
         });
         
-        // Set recent activities
-        setRecentActivities(processActivitiesData([]));
+        // Fetch recent activities
+        const { data: recentSurveys, error: surveysError } = await supabase
+          .from('site_surveys')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+          
+        // Process real activities if available
+        if (recentSurveys && recentSurveys.length > 0) {
+          const activitiesData = recentSurveys.map(survey => ({
+            action: `Completed site assessment for ${survey.site_name}`,
+            time: formatTimeAgo(new Date(survey.created_at)),
+            location: survey.region || "Unknown"
+          }));
+          setRecentActivities(activitiesData);
+        } else {
+          // Fallback to mock data
+          setRecentActivities(processActivitiesData([]));
+        }
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -178,6 +219,28 @@ export const useDashboardData = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Simple function to format time difference
+  const formatTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    
+    return Math.floor(seconds) + " seconds ago";
   };
 
   useEffect(() => {
