@@ -7,9 +7,14 @@ import { Loader } from "lucide-react";
 interface FormActionsProps {
   isSubmitting: boolean;
   onCancel: () => void;
+  submitLabel?: string;
 }
 
-const FormActions: React.FC<FormActionsProps> = ({ isSubmitting, onCancel }) => {
+const FormActions: React.FC<FormActionsProps> = ({ 
+  isSubmitting, 
+  onCancel, 
+  submitLabel = "Create User" 
+}) => {
   return (
     <SheetFooter className="mt-6">
       <Button 
@@ -30,7 +35,7 @@ const FormActions: React.FC<FormActionsProps> = ({ isSubmitting, onCancel }) => 
             <Loader className="h-4 w-4 animate-spin mr-2" />
             Creating...
           </>
-        ) : "Create User"}
+        ) : submitLabel}
       </Button>
     </SheetFooter>
   );

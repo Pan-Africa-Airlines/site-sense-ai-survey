@@ -1,16 +1,17 @@
+
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
-import { Form } from "@/components/ui/form";
+import { Form, FormField } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import UserFormFields from "./UserFormFields";
 import RegionSelector from "./RegionSelector";
 import FormActions from "./FormActions";
+import { useUserCreation } from "@/hooks/useUserCreation";
 
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,8 +30,8 @@ interface CreateUserFormProps {
 
 const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const { createUser, isSubmitting } = useUserCreation();
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -60,76 +61,15 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
   }, [selectedRegions, form]);
 
   const onSubmit = async (data: UserFormValues) => {
-    setIsSubmitting(true);
-    
     try {
-      console.log("Creating new user with data:", data);
-      
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: data.email,
-        password: data.password,
-        email_confirm: true, // Skip email verification
-        user_metadata: {
-          name: data.name,
-          role: data.role
-        }
-      });
-      
-      if (authError) {
-        console.error("Error creating auth user:", authError);
-        throw authError;
-      }
-      
-      const userId = authData?.user?.id;
-      
-      if (!userId) {
-        throw new Error("Failed to get user ID from auth response");
-      }
-      
-      // Then create the engineer profile
-      const { data: newEngineer, error } = await supabase
-        .from("engineer_profiles")
-        .insert({
-          id: userId,
-          name: data.name,
-          email: data.email,
-          specializations: [data.role],
-          regions: data.regions,
-          experience: data.experience || "New",
-          average_rating: 0,
-          total_reviews: 0,
-        })
-        .select();
-      
-      if (error) {
-        console.error("Error creating engineer profile:", error);
-        throw error;
-      }
-      
-      if (newEngineer && newEngineer.length > 0) {
-        const newUser = {
-          id: newEngineer[0].id,
-          name: newEngineer[0].name,
-          email: newEngineer[0].email,
-          role: newEngineer[0].specializations[0],
-          status: "active",
-          experience: newEngineer[0].experience,
-          regions: newEngineer[0].regions,
-        };
-        
-        onUserCreated(newUser);
-      }
-      
-      toast.success("User created successfully");
+      const newUser = await createUser(data);
+      onUserCreated(newUser);
       form.reset();
       setSelectedRegions([]);
       setIsSheetOpen(false);
     } catch (error) {
-      console.error("Error creating user:", error);
-      toast.error(error.message || "Failed to create user");
-    } finally {
-      setIsSubmitting(false);
+      // Error is already handled in the hook
+      console.error("Error in form submission:", error);
     }
   };
 
