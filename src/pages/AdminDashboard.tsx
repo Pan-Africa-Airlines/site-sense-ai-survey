@@ -53,8 +53,32 @@ const AdminDashboard = () => {
       }
     };
     
+    // Set up real-time listener for allocations table changes
+    const setupRealtimeSubscription = () => {
+      const channel = supabase
+        .channel('dashboard-allocation-changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'engineer_allocations' },
+          (payload) => {
+            console.log('Dashboard real-time update received:', payload);
+            // Refresh data when allocations change
+            fetchEngineerAllocations();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+    
     if (isAdminAuthenticated) {
       fetchEngineerAllocations();
+      const unsubscribe = setupRealtimeSubscription();
+      
+      return () => {
+        unsubscribe();
+      };
     }
   }, [isAdminAuthenticated]);
 

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader, MapPin, Users, Search, Filter } from "lucide-react";
+import { Loader, MapPin, Users, Search, Filter, CheckCircle2, PieChart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ interface Engineer {
   name: string;
   status: string;
   vehicle: string;
+  allocatedSites?: number;
 }
 
 interface AllocationSite {
@@ -34,6 +35,7 @@ const AdminSiteAllocation = () => {
   const [loading, setLoading] = useState(true);
   const [sites, setSites] = useState<EskomSite[]>([]);
   const [engineers, setEngineers] = useState<Engineer[]>([]);
+  const [allocations, setAllocations] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [regionFilter, setRegionFilter] = useState("");
   const [regions, setRegions] = useState<string[]>([]);
@@ -41,6 +43,7 @@ const AdminSiteAllocation = () => {
   const [selectedEngineer, setSelectedEngineer] = useState<Engineer | null>(null);
   const [selectedSites, setSelectedSites] = useState<number[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [pendingAllocations, setPendingAllocations] = useState<number>(0);
   
   useEffect(() => {
     const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
@@ -48,8 +51,27 @@ const AdminSiteAllocation = () => {
       navigate("/admin/login");
     } else {
       fetchData();
+      subscribeToRealTimeUpdates();
     }
   }, [navigate, searchQuery, regionFilter]);
+
+  const subscribeToRealTimeUpdates = () => {
+    const channel = supabase
+      .channel('allocation-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'engineer_allocations' },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          // Refresh data when allocations change
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -73,6 +95,22 @@ const AdminSiteAllocation = () => {
         .filter(Boolean) as string[])];
       setRegions(uniqueRegions);
       
+      // Fetch allocations
+      const { data: allocationData, error: allocationError } = await supabase
+        .from('engineer_allocations')
+        .select('*');
+      
+      if (allocationError) {
+        console.error("Error fetching allocations:", allocationError);
+        toast.error("Failed to load allocations. Please try again.");
+      } else {
+        setAllocations(allocationData || []);
+        
+        // Count pending allocations
+        const pendingCount = allocationData?.filter(a => a.status === 'pending').length || 0;
+        setPendingAllocations(pendingCount);
+      }
+      
       // Fetch engineers (mock data for now)
       // In a real implementation, you would fetch this from the database
       const mockEngineers: Engineer[] = [
@@ -80,7 +118,17 @@ const AdminSiteAllocation = () => {
         { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
         { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
       ];
-      setEngineers(mockEngineers);
+      
+      // Count allocated sites per engineer
+      const engineersWithAllocations = mockEngineers.map(engineer => {
+        const allocatedSites = allocationData?.filter(a => a.user_id === engineer.id).length || 0;
+        return {
+          ...engineer,
+          allocatedSites
+        };
+      });
+      
+      setEngineers(engineersWithAllocations);
       
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -112,12 +160,37 @@ const AdminSiteAllocation = () => {
     setIsProcessing(true);
     
     try {
-      // In a real implementation, you would update the database
-      // For now, we'll just show a success message
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Prepare allocation data for batch insert
+      const now = new Date().toISOString();
+      const allocationsToInsert = selectedSites.map(siteId => {
+        const site = sites.find(s => parseInt(s.id) === siteId);
+        return {
+          user_id: selectedEngineer.id,
+          site_id: site?.id.toString(),
+          site_name: site?.name,
+          region: site?.region,
+          address: site?.contact_name, // Using contact_name as a placeholder for address
+          priority: "medium", // Default priority
+          status: "allocated", // Set status to allocated
+          scheduled_date: now.split('T')[0], // Just the date part
+          created_at: now,
+          updated_at: now
+        };
+      });
+      
+      // Batch insert allocations
+      const { data, error } = await supabase
+        .from('engineer_allocations')
+        .insert(allocationsToInsert)
+        .select();
+      
+      if (error) {
+        throw error;
+      }
       
       toast.success(`Successfully allocated ${selectedSites.length} site(s) to ${selectedEngineer.name}`);
       setIsDialogOpen(false);
+      
       // Refresh data
       fetchData();
     } catch (error) {
@@ -140,6 +213,14 @@ const AdminSiteAllocation = () => {
       priority: "medium", // Default priority
       engineer: null // No engineer assigned by default
     }));
+  };
+  
+  const getAllocationStatusBadge = (count: number) => {
+    if (count === 0) {
+      return <Badge variant="outline">No Allocations</Badge>;
+    } else {
+      return <Badge variant="default" className="bg-akhanya">Allocated</Badge>;
+    }
   };
   
   return (
@@ -170,7 +251,7 @@ const AdminSiteAllocation = () => {
                     <SelectValue placeholder="All Regions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
+                    <SelectItem value="">All Regions</SelectItem>
                     {regions.map(region => (
                       <SelectItem key={region} value={region}>
                         {region}
@@ -217,12 +298,12 @@ const AdminSiteAllocation = () => {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center">
-                <Loader className="h-5 w-5 mr-2 text-akhanya" />
-                Pending Allocations
+                <PieChart className="h-5 w-5 mr-2 text-akhanya" />
+                Allocated Sites
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{allocations.length}</div>
             </CardContent>
           </Card>
         </div>
@@ -244,13 +325,14 @@ const AdminSiteAllocation = () => {
                     <TableHead>Name</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Vehicle</TableHead>
+                    <TableHead>Allocated Sites</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {engineers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-6">
+                      <TableCell colSpan={5} className="text-center py-6">
                         No engineers found
                       </TableCell>
                     </TableRow>
@@ -265,17 +347,81 @@ const AdminSiteAllocation = () => {
                         </TableCell>
                         <TableCell>{engineer.vehicle}</TableCell>
                         <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span>{engineer.allocatedSites || 0}</span>
+                            {getAllocationStatusBadge(engineer.allocatedSites || 0)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           <Button 
                             onClick={() => handleAllocateClick(engineer)}
                             disabled={engineer.status !== "available"}
                             className="bg-akhanya hover:bg-akhanya-dark"
                           >
-                            Allocate Sites
+                            {engineer.allocatedSites ? "Add More Sites" : "Allocate Sites"}
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))
                   )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+
+        {allocations.length > 0 && (
+          <Card className="mt-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center">
+                <CheckCircle2 className="h-5 w-5 mr-2 text-akhanya" />
+                Currently Allocated Sites
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Site Name</TableHead>
+                    <TableHead>Region</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Scheduled Date</TableHead>
+                    <TableHead>Engineer</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allocations.map(allocation => (
+                    <TableRow key={allocation.id}>
+                      <TableCell className="font-medium">{allocation.site_name}</TableCell>
+                      <TableCell>{allocation.region}</TableCell>
+                      <TableCell>
+                        <Badge variant={
+                          allocation.priority === 'high' ? 'destructive' : 
+                          allocation.priority === 'medium' ? 'default' : 'outline'
+                        }>
+                          {allocation.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={
+                          allocation.status === 'allocated' ? 'success' :
+                          allocation.status === 'completed' ? 'secondary' : 
+                          allocation.status === 'in-progress' ? 'default' : 'outline'
+                        }>
+                          {allocation.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{allocation.scheduled_date}</TableCell>
+                      <TableCell>
+                        {engineers.find(e => e.id === allocation.user_id)?.name || 
+                          <Badge variant="outline" className="bg-gray-100">
+                            Not Assigned
+                          </Badge>
+                        }
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -297,6 +443,7 @@ const AdminSiteAllocation = () => {
             selectedSites={selectedSites}
             onToggleSite={handleToggleSite}
             isProcessing={isProcessing}
+            allocatedCount={selectedEngineer.allocatedSites || 0}
           />
         )}
       </div>

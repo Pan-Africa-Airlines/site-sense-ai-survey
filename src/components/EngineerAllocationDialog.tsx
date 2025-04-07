@@ -3,7 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader, MapPin, CheckCircle } from "lucide-react";
+import { Loader, MapPin, CheckCircle, CalendarIcon } from "lucide-react";
 
 interface EngineerAllocationDialogProps {
   open: boolean;
@@ -24,6 +24,7 @@ interface EngineerAllocationDialogProps {
   selectedSites: number[];
   onToggleSite: (siteId: number) => void;
   isProcessing: boolean;
+  allocatedCount?: number;
 }
 
 const EngineerAllocationDialog: React.FC<EngineerAllocationDialogProps> = ({
@@ -34,7 +35,8 @@ const EngineerAllocationDialog: React.FC<EngineerAllocationDialogProps> = ({
   sites,
   selectedSites,
   onToggleSite,
-  isProcessing
+  isProcessing,
+  allocatedCount = 0
 }) => {
   // Filter sites that don't have an engineer or are assigned to the current engineer
   const availableSites = sites.filter(site => 
@@ -62,6 +64,10 @@ const EngineerAllocationDialog: React.FC<EngineerAllocationDialogProps> = ({
                 <p className="font-medium">{engineer.name}</p>
                 <p className="text-sm text-gray-500">{engineer.vehicle}</p>
               </div>
+            </div>
+            <div className="mt-2 flex items-center">
+              <CalendarIcon className="h-4 w-4 text-gray-500 mr-1" />
+              <span className="text-sm text-gray-500">Currently has {allocatedCount} allocated site(s)</span>
             </div>
           </div>
           

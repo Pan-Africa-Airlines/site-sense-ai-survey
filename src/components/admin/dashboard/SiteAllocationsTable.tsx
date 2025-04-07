@@ -72,6 +72,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
                       </TableCell>
                       <TableCell>
                         <Badge variant={
+                          site.status === 'allocated' ? 'success' :
                           site.status === 'completed' ? 'secondary' : 
                           site.status === 'in-progress' ? 'secondary' : 'outline'
                         }>
