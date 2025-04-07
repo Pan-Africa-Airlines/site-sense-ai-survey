@@ -17,39 +17,50 @@ import {
 
 interface SiteAllocationsTableProps {
   navigateToSiteAllocation: () => void;
+  engineerAllocations?: any[];
+  isLoading?: boolean;
 }
 
 const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
-  navigateToSiteAllocation
+  navigateToSiteAllocation,
+  engineerAllocations: externalAllocations,
+  isLoading: externalLoading
 }) => {
-  const [engineerAllocations, setEngineerAllocations] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [internalAllocations, setInternalAllocations] = useState([]);
+  const [isInternalLoading, setIsInternalLoading] = useState(true);
+
+  // Use external data if provided, otherwise fetch data internally
+  const allocations = externalAllocations || internalAllocations;
+  const loading = externalLoading !== undefined ? externalLoading : isInternalLoading;
 
   useEffect(() => {
-    const fetchAllocations = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Initialize demo data if needed
-        await createInitialAllocations();
-        
-        // Fetch allocations
-        const { data, error } = await supabase
-          .from('engineer_allocations')
-          .select('*');
-        
-        if (error) throw error;
-        
-        setEngineerAllocations(data || []);
-      } catch (error) {
-        console.error("Error fetching allocations:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchAllocations();
-  }, []);
+    // Only fetch data if no external data is provided
+    if (!externalAllocations) {
+      const fetchAllocations = async () => {
+        try {
+          setIsInternalLoading(true);
+          
+          // Initialize demo data if needed
+          await createInitialAllocations();
+          
+          // Fetch allocations
+          const { data, error } = await supabase
+            .from('engineer_allocations')
+            .select('*');
+          
+          if (error) throw error;
+          
+          setInternalAllocations(data || []);
+        } catch (error) {
+          console.error("Error fetching allocations:", error);
+        } finally {
+          setIsInternalLoading(false);
+        }
+      };
+      
+      fetchAllocations();
+    }
+  }, [externalAllocations]);
 
   return (
     <div className="mb-8">
@@ -67,7 +78,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
       </h2>
       <Card>
         <CardContent className="p-6">
-          {isLoading ? (
+          {loading ? (
             <div className="py-4 text-center">
               <Loader className="h-6 w-6 animate-spin mx-auto mb-2" />
               <p className="text-gray-500">Loading allocations...</p>
@@ -85,8 +96,8 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {engineerAllocations.length > 0 ? (
-                  engineerAllocations.map((site) => (
+                {allocations.length > 0 ? (
+                  allocations.map((site) => (
                     <TableRow key={site.id}>
                       <TableCell className="font-medium">{site.site_name}</TableCell>
                       <TableCell>{site.region}</TableCell>
