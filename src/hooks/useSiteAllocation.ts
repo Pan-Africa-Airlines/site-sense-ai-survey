@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getConfiguredSites } from "@/utils/dbHelpers";
+import { getConfiguredSites } from "@/utils/db";
 import { EskomSite } from "@/types/site";
 import { Engineer, EngineerAllocation } from "@/types/allocation";
 import { getSiteAllocationFormat, getAllocationStatusBadge } from "@/utils/allocationUtils";

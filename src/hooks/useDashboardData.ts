@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ensureEngineerProfile, generateAIInsights } from '@/utils/dbHelpers';
+import { ensureEngineerProfile, generateAIInsights } from '@/utils/db';
 import { processAssessmentData, processInstallationData, processActivitiesData } from '@/utils/dashboardUtils';
 import { 
   EngineerProfile, 
