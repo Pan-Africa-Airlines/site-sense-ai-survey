@@ -170,9 +170,11 @@ const AdminSiteAllocation = () => {
                     <SelectValue placeholder="All Regions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Regions</SelectItem>
+                    <SelectItem value="all">All Regions</SelectItem>
                     {regions.map(region => (
-                      <SelectItem key={region} value={region}>{region}</SelectItem>
+                      <SelectItem key={region} value={region}>
+                        {region}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
