@@ -9,6 +9,14 @@ import { useAI } from "@/contexts/AIContext";
 import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define a type for Eskom sites that matches the database structure
+interface EskomSite {
+  id: string;
+  name: string;
+  type: string | null;
+  created_at?: string;
+}
+
 // Mock site data based on siteId
 const MOCK_SITE_DATA: Record<string, any> = {
   "1": {
@@ -36,7 +44,7 @@ const MOCK_SITE_DATA: Record<string, any> = {
 
 const Assessment = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
-  const [configSites, setConfigSites] = useState<any[]>([]);
+  const [configSites, setConfigSites] = useState<EskomSite[]>([]);
   const { isProcessing } = useAI();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draftId');
@@ -49,16 +57,16 @@ const Assessment = () => {
     const fetchConfiguredSites = async () => {
       try {
         const { data, error } = await supabase
-          .from("eskom_sites")
+          .from("eskom_sites" as any)
           .select("*")
           .order("name");
 
         if (error) throw error;
-        setConfigSites(data || []);
+        setConfigSites(data as EskomSite[] || []);
         
         // Add configured sites to MOCK_SITE_DATA
         if (data && data.length > 0) {
-          data.forEach((site, index) => {
+          data.forEach((site: EskomSite, index: number) => {
             const siteKey = (100 + index).toString();
             MOCK_SITE_DATA[siteKey] = {
               siteName: site.name,

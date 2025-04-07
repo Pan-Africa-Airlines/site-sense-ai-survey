@@ -147,6 +147,27 @@ export type Database = {
         }
         Relationships: []
       }
+      eskom_sites: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
       site_installations: {
         Row: {
           details: Json | null

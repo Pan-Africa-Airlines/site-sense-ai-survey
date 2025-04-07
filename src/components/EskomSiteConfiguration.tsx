@@ -7,10 +7,12 @@ import { toast } from "sonner";
 import { Plus, Trash, Edit, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define a type for Eskom sites that matches the database structure
 interface Site {
   id: string;
   name: string;
-  type: string;
+  type: string | null;
+  created_at?: string;
 }
 
 const EskomSiteConfiguration = () => {
@@ -25,13 +27,15 @@ const EskomSiteConfiguration = () => {
   const fetchSites = async () => {
     try {
       setLoading(true);
+      // Use 'from' with string literal type assertion
       const { data, error } = await supabase
-        .from("eskom_sites")
+        .from("eskom_sites" as any)
         .select("*")
         .order("name");
 
       if (error) throw error;
-      setSites(data || []);
+      // Type assertion to ensure data matches our Site interface
+      setSites(data as Site[] || []);
     } catch (error) {
       console.error("Error fetching sites:", error);
       toast.error("Failed to load sites");
@@ -52,13 +56,13 @@ const EskomSiteConfiguration = () => {
 
     try {
       const { data, error } = await supabase
-        .from("eskom_sites")
+        .from("eskom_sites" as any)
         .insert([{ name: newSiteName, type: newSiteType }])
         .select();
 
       if (error) throw error;
       
-      setSites([...sites, data[0]]);
+      setSites([...sites, data[0] as Site]);
       setNewSiteName("");
       setNewSiteType("");
       toast.success("Site added successfully");
@@ -71,7 +75,7 @@ const EskomSiteConfiguration = () => {
   const handleDeleteSite = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("eskom_sites")
+        .from("eskom_sites" as any)
         .delete()
         .eq("id", id);
 
@@ -105,7 +109,7 @@ const EskomSiteConfiguration = () => {
 
     try {
       const { error } = await supabase
-        .from("eskom_sites")
+        .from("eskom_sites" as any)
         .update({ name: editName, type: editType })
         .eq("id", id);
 

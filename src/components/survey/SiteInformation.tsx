@@ -8,6 +8,14 @@ import ImageCapture from "@/components/ImageCapture";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define a type for Eskom sites that matches the database structure
+interface EskomSite {
+  id: string;
+  name: string;
+  type: string | null;
+  created_at?: string;
+}
+
 interface SiteInformationProps {
   formData: any;
   onInputChange: (field: string, value: any) => void;
@@ -19,7 +27,7 @@ const SiteInformation: React.FC<SiteInformationProps> = ({
   onInputChange,
   showAIRecommendations = false
 }) => {
-  const [sites, setSites] = useState<any[]>([]);
+  const [sites, setSites] = useState<EskomSite[]>([]);
   const [loading, setLoading] = useState(false);
 
   // South African regions
@@ -40,12 +48,12 @@ const SiteInformation: React.FC<SiteInformationProps> = ({
       try {
         setLoading(true);
         const { data, error } = await supabase
-          .from("eskom_sites")
+          .from("eskom_sites" as any)
           .select("*")
           .order("name");
 
         if (error) throw error;
-        setSites(data || []);
+        setSites(data as EskomSite[] || []);
       } catch (error) {
         console.error("Error fetching sites:", error);
       } finally {
