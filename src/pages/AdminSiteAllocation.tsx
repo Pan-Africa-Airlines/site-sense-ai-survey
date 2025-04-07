@@ -23,7 +23,7 @@ interface Engineer {
 }
 
 interface AllocationSite {
-  id: number | string;
+  id: string | number;
   name: string;
   priority: string;
   engineer: string | null;
@@ -39,7 +39,7 @@ const AdminSiteAllocation = () => {
   const [regions, setRegions] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<Engineer | null>(null);
-  const [selectedSites, setSelectedSites] = useState<(number | string)[]>([]);
+  const [selectedSites, setSelectedSites] = useState<(string | number)[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   
   useEffect(() => {
@@ -57,11 +57,28 @@ const AdminSiteAllocation = () => {
       // Fetch configured sites
       const sitesData = await getConfiguredSites();
       
+      // Get existing allocations to track which sites are already allocated
+      const { data: allocationsData, error: allocationsError } = await supabase
+        .from('engineer_allocations')
+        .select('site_id, engineer_id, engineer_name');
+      
+      if (allocationsError) throw allocationsError;
+      
+      // Add allocation info to sites data
+      const enhancedSites = sitesData.map(site => {
+        const allocation = allocationsData?.find(a => a.site_id === site.id);
+        return {
+          ...site,
+          priority: site.priority || "medium", // Default priority if missing
+          engineer: allocation ? allocation.engineer_name : null
+        };
+      });
+      
       // Filter sites based on search and region filter
-      const filteredSites = sitesData.filter(site => {
+      const filteredSites = enhancedSites.filter(site => {
         const matchesSearch = !searchQuery || 
           site.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesRegion = !regionFilter || site.region === regionFilter;
+        const matchesRegion = !regionFilter || regionFilter === 'all-regions' || site.region === regionFilter;
         return matchesSearch && matchesRegion;
       });
       
@@ -73,15 +90,35 @@ const AdminSiteAllocation = () => {
         .filter(Boolean) as string[])];
       setRegions(uniqueRegions);
       
-      // Fetch engineers from users admin
-      // In a real implementation, you would fetch this from the database
-      // For now, we'll use mock data
-      const mockEngineers: Engineer[] = [
-        { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
-        { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
-        { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
-      ];
-      setEngineers(mockEngineers);
+      // Fetch engineers from Users admin
+      // In the real implementation, this would come from the database
+      // For now, let's fetch actual users with "Field Engineer" role
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'Field Engineer');
+      
+      if (userError) {
+        console.error("Error fetching users:", userError);
+        
+        // Fallback to mock data if the users table doesn't exist yet
+        const mockEngineers: Engineer[] = [
+          { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+          { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+          { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
+        ];
+        setEngineers(mockEngineers);
+      } else {
+        // Map user data to engineers format
+        const mappedEngineers = (userData || []).map(user => ({
+          id: user.id,
+          name: user.name || user.email,
+          status: user.status || "available",
+          vehicle: user.vehicle || "Not specified"
+        }));
+        
+        setEngineers(mappedEngineers);
+      }
       
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -97,7 +134,7 @@ const AdminSiteAllocation = () => {
     setIsDialogOpen(true);
   };
   
-  const handleToggleSite = (siteId: number | string) => {
+  const handleToggleSite = (siteId: string | number) => {
     setSelectedSites(prev => {
       if (prev.includes(siteId)) {
         return prev.filter(id => id !== siteId);
@@ -231,7 +268,9 @@ const AdminSiteAllocation = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">
+                {sites.filter(site => !site.engineer).length}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -297,7 +336,7 @@ const AdminSiteAllocation = () => {
             onClose={() => setIsDialogOpen(false)}
             onConfirm={handleConfirmAllocation}
             engineer={{
-              id: parseInt(selectedEngineer.id),
+              id: selectedEngineer.id,
               name: selectedEngineer.name,
               status: selectedEngineer.status,
               vehicle: selectedEngineer.vehicle

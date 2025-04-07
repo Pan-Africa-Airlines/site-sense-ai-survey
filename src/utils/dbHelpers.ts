@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { EskomSite } from "@/types/site";
 import { toast } from "sonner";

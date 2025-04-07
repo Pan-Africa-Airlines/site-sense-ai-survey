@@ -43,6 +43,11 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
     if (selectedSite?.type) {
       onInputChange("siteType", selectedSite.type);
     }
+    
+    // If site has a region, update that too
+    if (selectedSite?.region) {
+      onInputChange("region", selectedSite.region);
+    }
   };
 
   return (
@@ -58,13 +63,14 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
               <Input value="Loading sites..." disabled />
             ) : sites.length > 0 ? (
               <Select 
-                value={formData.siteName || ""} 
+                value={formData.siteName || "select-site"} 
                 onValueChange={handleSiteChange}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a site" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="select-site">Select a site</SelectItem>
                   {sites.map((site) => (
                     <SelectItem key={site.id} value={site.name || `site-${site.id}`}>
                       {site.name} {site.type ? `(${site.type})` : ''}
@@ -103,13 +109,14 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
           <div className="space-y-2">
             <Label htmlFor="region">Region</Label>
             <Select 
-              value={formData.region || ""} 
+              value={formData.region || "select-region"} 
               onValueChange={(value) => onInputChange("region", value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a region" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="select-region">Select a region</SelectItem>
                 {saRegions.map((region) => (
                   <SelectItem key={region} value={region}>
                     {region}

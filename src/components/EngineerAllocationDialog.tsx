@@ -10,7 +10,7 @@ interface EngineerAllocationDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   engineer: {
-    id: number;
+    id: string | number;
     name: string;
     status: string;
     vehicle: string;
@@ -38,7 +38,7 @@ const EngineerAllocationDialog: React.FC<EngineerAllocationDialogProps> = ({
 }) => {
   // Filter sites that don't have an engineer or are assigned to the current engineer
   const availableSites = sites.filter(site => 
-    site.engineer === null || site.engineer === engineer.id.toString()
+    site.engineer === null || site.engineer === engineer.name
   );
 
   return (
