@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { EskomSite } from "@/types/site";
 import { AllocationSite } from "@/types/allocation";
