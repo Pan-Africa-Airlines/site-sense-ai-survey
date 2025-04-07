@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -54,12 +53,11 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Engineer profile data
   const userEmail = localStorage.getItem("userEmail") || "john.doe@example.com";
   const userName = userEmail.split('@')[0].split('.').map(name => 
     name.charAt(0).toUpperCase() + name.slice(1)
   ).join(' ');
-  
+
   const engineerProfile = {
     name: userName,
     experience: "5 years",
@@ -158,7 +156,6 @@ const Dashboard: React.FC = () => {
     }
   ];
 
-  // Function to render rating stars
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -194,8 +191,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-        {/* Engineer Profile Card */}
-        <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden">
+        <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full">
           <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
@@ -206,7 +202,7 @@ const Dashboard: React.FC = () => {
           <CardContent>
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="bg-akhanya text-white rounded-full w-14 h-14 flex items-center justify-center text-xl font-bold">
+                <div className="bg-akhanya text-white rounded-full w-20 h-20 flex items-center justify-center text-2xl font-bold">
                   {userName.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div>
@@ -244,8 +240,7 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Dashboard Metric Cards with the new styling */}
-        <Card className="card-dashboard overflow-hidden">
+        <Card className="card-dashboard overflow-hidden h-full">
           <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-akhanya">My Total Assessments</CardTitle>
@@ -257,7 +252,7 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-dashboard overflow-hidden">
+        <Card className="card-dashboard overflow-hidden h-full">
           <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-akhanya">My Installations Completed</CardTitle>
@@ -269,7 +264,7 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-dashboard overflow-hidden">
+        <Card className="card-dashboard overflow-hidden h-full">
           <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-akhanya">Your Achievements</CardTitle>
