@@ -39,18 +39,48 @@ const EngineerRatingSurvey: React.FC<EngineerRatingSurveyProps> = ({
 
     setIsSubmitting(true);
     try {
-      // Since we need to insert into a custom table, we'll use a direct insert approach
-      const { error } = await supabase
-        .from("engineer_ratings")
-        .insert({
-          engineer_id: engineerId,
-          site_id: siteId,
-          rating,
-          feedback,
-          site_name: siteName,
-        });
+      // Insert the rating into the engineer_ratings table
+      const { error } = await supabase.from("engineer_ratings").insert({
+        engineer_id: engineerId,
+        site_id: siteId,
+        rating,
+        feedback,
+        site_name: siteName,
+      });
 
       if (error) throw error;
+
+      // Update the engineer's average rating and total reviews in engineer_profiles
+      const { data: engineerData, error: engineerError } = await supabase
+        .from("engineer_profiles")
+        .select("average_rating, total_reviews")
+        .eq("id", engineerId)
+        .single();
+
+      if (engineerError) {
+        console.error("Error fetching engineer profile:", engineerError);
+      } else if (engineerData) {
+        const currentTotalReviews = engineerData.total_reviews || 0;
+        const currentAvgRating = engineerData.average_rating || 0;
+        
+        // Calculate new average rating
+        const newTotalReviews = currentTotalReviews + 1;
+        const newAvgRating = 
+          ((currentAvgRating * currentTotalReviews) + rating) / newTotalReviews;
+          
+        // Update the engineer profile
+        const { error: updateError } = await supabase
+          .from("engineer_profiles")
+          .update({
+            average_rating: newAvgRating,
+            total_reviews: newTotalReviews
+          })
+          .eq("id", engineerId);
+          
+        if (updateError) {
+          console.error("Error updating engineer profile:", updateError);
+        }
+      }
 
       toast({
         title: "Thank you for your feedback!",

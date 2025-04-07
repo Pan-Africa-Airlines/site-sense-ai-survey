@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_insights: {
+        Row: {
+          created_at: string | null
+          description: string
+          engineer_id: string
+          icon: string | null
+          id: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          engineer_id: string
+          icon?: string | null
+          id?: string
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          engineer_id?: string
+          icon?: string | null
+          id?: string
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       engineer_allocations: {
         Row: {
           address: string | null
@@ -51,6 +81,99 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      engineer_profiles: {
+        Row: {
+          average_rating: number | null
+          email: string | null
+          experience: string | null
+          id: string
+          name: string | null
+          regions: string[] | null
+          specializations: string[] | null
+          total_reviews: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          email?: string | null
+          experience?: string | null
+          id: string
+          name?: string | null
+          regions?: string[] | null
+          specializations?: string[] | null
+          total_reviews?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          email?: string | null
+          experience?: string | null
+          id?: string
+          name?: string | null
+          regions?: string[] | null
+          specializations?: string[] | null
+          total_reviews?: number | null
+        }
+        Relationships: []
+      }
+      engineer_ratings: {
+        Row: {
+          created_at: string | null
+          engineer_id: string
+          feedback: string | null
+          id: string
+          rating: number
+          site_id: string
+          site_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          engineer_id: string
+          feedback?: string | null
+          id?: string
+          rating: number
+          site_id: string
+          site_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          engineer_id?: string
+          feedback?: string | null
+          id?: string
+          rating?: number
+          site_id?: string
+          site_name?: string | null
+        }
+        Relationships: []
+      }
+      site_installations: {
+        Row: {
+          details: Json | null
+          engineer_id: string
+          id: string
+          installation_date: string | null
+          site_id: string
+          site_name: string | null
+          status: string | null
+        }
+        Insert: {
+          details?: Json | null
+          engineer_id: string
+          id?: string
+          installation_date?: string | null
+          site_id: string
+          site_name?: string | null
+          status?: string | null
+        }
+        Update: {
+          details?: Json | null
+          engineer_id?: string
+          id?: string
+          installation_date?: string | null
+          site_id?: string
+          site_name?: string | null
+          status?: string | null
         }
         Relationships: []
       }

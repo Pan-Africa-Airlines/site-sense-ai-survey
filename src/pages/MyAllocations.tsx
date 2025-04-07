@@ -1,61 +1,70 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import EngineerSiteList from "@/components/EngineerSiteList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const MyAllocations = () => {
-  
-  // Mock data for site allocations
-  const sitesData = [
-    {
-      id: 1,
-      name: "Eskom Site A42",
-      priority: "high",
-      address: "123 Main St, Johannesburg, 2000",
-      scheduledDate: "Today, 15:00",
-      status: "pending",
-      distance: 12
-    },
-    {
-      id: 2,
-      name: "Maintenance Site B17",
-      priority: "medium",
-      address: "45 Power Ave, Pretoria, 0002",
-      scheduledDate: "Tomorrow, 10:00",
-      status: "pending",
-      distance: 24
-    },
-    {
-      id: 3,
-      name: "Transmission Tower C5",
-      priority: "low",
-      address: "789 Grid Road, Sandton, 2196",
-      scheduledDate: "Wed, 23 Apr, 14:30",
-      status: "pending",
-      distance: 8
-    }
-  ];
-  
-  const completedSites = [
-    {
-      id: 4,
-      name: "Substation D78",
-      priority: "high",
-      address: "32 Electric Lane, Midrand, 1685",
-      scheduledDate: "Completed on 5 Apr",
-      status: "completed"
-    },
-    {
-      id: 5,
-      name: "Power Station G19",
-      priority: "medium",
-      address: "156 Energy Road, Centurion, 0157",
-      scheduledDate: "Completed on 3 Apr",
-      status: "completed"
-    }
-  ];
+  const [pendingSites, setPendingSites] = useState([]);
+  const [completedSites, setCompletedSites] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchAllocations = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get pending allocations
+        const { data: pendingData, error: pendingError } = await supabase
+          .from('engineer_allocations')
+          .select('*')
+          .neq('status', 'completed');
+        
+        if (pendingError) {
+          throw pendingError;
+        }
+        
+        // Get completed allocations
+        const { data: completedData, error: completedError } = await supabase
+          .from('engineer_allocations')
+          .select('*')
+          .eq('status', 'completed');
+        
+        if (completedError) {
+          throw completedError;
+        }
+        
+        // Transform data to match the Site interface
+        const formatSite = (site) => ({
+          id: site.id,
+          name: site.site_name,
+          priority: site.priority,
+          address: site.address || "No address available",
+          scheduledDate: site.scheduled_date || "No date available",
+          status: site.status,
+          distance: site.distance
+        });
+        
+        setPendingSites(pendingData.map(formatSite));
+        setCompletedSites(completedData.map(formatSite));
+      } catch (error) {
+        console.error("Error fetching allocations:", error);
+        toast({
+          title: "Error fetching allocations",
+          description: "There was a problem loading your site allocations.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAllocations();
+  }, [toast]);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -77,11 +86,19 @@ const MyAllocations = () => {
               </TabsList>
               
               <TabsContent value="pending">
-                <EngineerSiteList sites={sitesData} />
+                {isLoading ? (
+                  <div className="text-center py-8">Loading site allocations...</div>
+                ) : (
+                  <EngineerSiteList sites={pendingSites} />
+                )}
               </TabsContent>
               
               <TabsContent value="completed">
-                <EngineerSiteList sites={completedSites} />
+                {isLoading ? (
+                  <div className="text-center py-8">Loading site allocations...</div>
+                ) : (
+                  <EngineerSiteList sites={completedSites} />
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
