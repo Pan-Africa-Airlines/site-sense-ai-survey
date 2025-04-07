@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -42,6 +42,8 @@ const App: React.FC = () => {
             <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
             <Route path="/eskom-survey/new" element={<EskomSurvey />} />
             <Route path="/eskom-surveys" element={<EskomSurveys />} />
+            {/* Add redirect for eskom-site-survey to eskom-survey/new */}
+            <Route path="/eskom-site-survey" element={<Navigate to="/eskom-survey/new" replace />} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
