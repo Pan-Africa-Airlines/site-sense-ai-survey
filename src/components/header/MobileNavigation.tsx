@@ -9,15 +9,8 @@ import {
   SheetTrigger,
   SheetClose
 } from "@/components/ui/sheet";
-import { NavigationItem } from "./types";
-import ThemeToggle from "./ThemeToggle";
+import { MobileNavigationProps } from "./types";
 import Logo from "./Logo";
-
-interface MobileNavigationProps {
-  navigationItems: NavigationItem[];
-  theme: string;
-  toggleTheme: () => void;
-}
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ 
   navigationItems,

@@ -2,12 +2,7 @@
 import React from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface ThemeToggleProps {
-  theme: string;
-  toggleTheme: () => void;
-  isMobile?: boolean;
-}
+import { ThemeToggleProps } from "./types";
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ 
   theme, 
