@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -80,6 +81,31 @@ export const getDashboardStats = async () => {
       installations: 2,
       pendingApprovals: 4
     };
+  }
+};
+
+/**
+ * Fetches engineer allocations from the database
+ * This function was missing and causing the build errors
+ */
+export const getEngineerAllocations = async () => {
+  try {
+    console.log("Fetching engineer allocations...");
+    const { data, error } = await supabase
+      .from('engineer_allocations')
+      .select('*');
+      
+    if (error) {
+      console.error("Error fetching engineer allocations:", error);
+      throw error;
+    }
+    
+    console.log(`Retrieved ${data?.length || 0} engineer allocations`);
+    return data || [];
+  } catch (error) {
+    console.error("Failed to get engineer allocations:", error);
+    // Return empty array as fallback
+    return [];
   }
 };
 
