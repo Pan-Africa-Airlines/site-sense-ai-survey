@@ -5,3 +5,4 @@ export * from './allocationHelpers';
 export * from './engineerHelpers';
 export * from './vehicleHelpers';
 export * from './filterHelpers';
+export * from './dashboardHelpers';

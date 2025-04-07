@@ -1,25 +1,60 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
+import { Loader } from "lucide-react";
+import { getRegionChartData, getStatusDistributionData } from "@/utils/dbHelpers";
 
 const DashboardCharts = () => {
-  const regionData = [
-    { name: "Gauteng", count: 12 },
-    { name: "Western Cape", count: 8 },
-    { name: "KwaZulu-Natal", count: 10 },
-    { name: "Free State", count: 5 },
-    { name: "Eastern Cape", count: 7 },
-    { name: "Northern Cape", count: 3 },
-  ];
+  const [regionData, setRegionData] = useState([]);
+  const [statusData, setStatusData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const statusData = [
-    { name: "Completed", value: 18 },
-    { name: "Pending", value: 8 },
-    { name: "Scheduled", value: 6 },
-  ];
+  useEffect(() => {
+    const fetchChartData = async () => {
+      setLoading(true);
+      try {
+        const [regionChartData, statusChartData] = await Promise.all([
+          getRegionChartData(),
+          getStatusDistributionData()
+        ]);
+        
+        setRegionData(regionChartData);
+        setStatusData(statusChartData);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const COLORS = ["#00C49F", "#FFBB28", "#FF8042"];
+    fetchChartData();
+  }, []);
+
+  const COLORS = ["#00C49F", "#FFBB28", "#FF8042", "#E13B45", "#9C27B0"];
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-akhanya">Assessments by Region</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center items-center h-[300px]">
+            <Loader className="h-8 w-8 animate-spin text-akhanya" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-akhanya">Status Distribution</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center items-center h-[300px]">
+            <Loader className="h-8 w-8 animate-spin text-akhanya" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

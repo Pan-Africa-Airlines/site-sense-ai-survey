@@ -1,8 +1,6 @@
-
 import React, { useEffect, useState } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardStatsCards from "@/components/admin/dashboard/DashboardStatsCards";
@@ -10,6 +8,7 @@ import SiteAllocationsTable from "@/components/admin/dashboard/SiteAllocationsTa
 import EngineerAvailabilityTable from "@/components/admin/dashboard/EngineerAvailabilityTable";
 import DashboardCharts from "@/components/admin/dashboard/DashboardCharts";
 import RecentActivitiesCards from "@/components/admin/dashboard/RecentActivitiesCards";
+import { getEngineerAllocations } from "@/utils/dbHelpers";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -28,33 +27,56 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const fetchEngineerAllocations = async () => {
+    const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
-          .from('engineer_allocations')
-          .select('*');
         
-        if (error) {
-          console.error("Error fetching allocations:", error);
+        // Fetch allocations from the database
+        const allocations = await getEngineerAllocations();
+        setEngineerAllocations(allocations);
+        
+        // Get unique engineers from allocations
+        const uniqueEngineers = new Map();
+        allocations.forEach(allocation => {
+          if (allocation.engineer_id && allocation.engineer_name) {
+            if (!uniqueEngineers.has(allocation.engineer_id)) {
+              uniqueEngineers.set(allocation.engineer_id, {
+                id: allocation.engineer_id,
+                name: allocation.engineer_name,
+                status: "available",
+                vehicle: "Vehicle info not available"
+              });
+            }
+          }
+        });
+        
+        // If no engineers found from allocations, use mock data
+        if (uniqueEngineers.size === 0) {
+          setEngineers([
+            { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+            { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+            { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
+          ]);
         } else {
-          setEngineerAllocations(data || []);
+          setEngineers(Array.from(uniqueEngineers.values()));
         }
-
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        toast.error("Failed to load dashboard data");
+        
+        // Fallback to mock data
         setEngineers([
           { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
           { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
           { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
         ]);
-      } catch (err) {
-        console.error("Error:", err);
       } finally {
         setIsLoading(false);
       }
     };
     
     if (isAdminAuthenticated) {
-      fetchEngineerAllocations();
+      fetchDashboardData();
     }
   }, [isAdminAuthenticated]);
 

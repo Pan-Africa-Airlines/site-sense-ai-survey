@@ -4,10 +4,10 @@ export interface EskomSite {
   name: string;
   type?: string;
   region?: string;
-  contact_name?: string;
-  contact_phone?: string;
-  contact_email?: string;
-  created_at?: string;
   priority?: string;
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  created_at?: string;
   engineer?: string | null;
 }
