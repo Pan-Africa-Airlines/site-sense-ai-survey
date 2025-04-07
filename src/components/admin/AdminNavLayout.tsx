@@ -12,7 +12,7 @@ import {
   Users, 
   Cog, 
   Map,
-  Settings
+  MapPin
 } from "lucide-react";
 
 export const AdminNavLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -41,6 +41,7 @@ export const AdminNavLayout: React.FC<{ children: React.ReactNode }> = ({ childr
     { path: "/admin/installations", icon: Database, label: "Installations" },
     { path: "/admin/users", icon: Users, label: "Users" },
     { path: "/admin/map", icon: Map, label: "Map" },
+    { path: "/admin/site-allocation", icon: MapPin, label: "Site Allocation" },
     { path: "/configuration", icon: Cog, label: "Configuration" },
   ];
 

@@ -12,12 +12,14 @@ import {
   Users,
 } from "lucide-react";
 
+interface NavItem {
+  path: string;
+  icon: React.ElementType;
+  label: string;
+}
+
 interface AdminNavItemsProps {
-  navItems?: Array<{
-    path: string;
-    icon: React.ElementType;
-    label: string;
-  }>;
+  navItems?: NavItem[];
   isActive?: (path: string) => boolean;
   onClick?: (path: string) => void;
 }

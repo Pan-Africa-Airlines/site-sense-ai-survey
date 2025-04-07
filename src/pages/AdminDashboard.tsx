@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { ClipboardList, HardHat, Car, Clock, MapPin } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { ClipboardList, HardHat, Car, Clock, MapPin, Users } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const MOCK_ASSESSMENT_DATA = [
   { id: 1, siteName: "Eskom Substation A", region: "Gauteng", date: "2025-04-01", status: "completed" },
@@ -28,6 +30,7 @@ const AdminDashboard = () => {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean | null>(null);
   const [engineerAllocations, setEngineerAllocations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [engineers, setEngineers] = useState<any[]>([]);
 
   useEffect(() => {
     const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
@@ -51,6 +54,12 @@ const AdminDashboard = () => {
         } else {
           setEngineerAllocations(data || []);
         }
+
+        setEngineers([
+          { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+          { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+          { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
+        ]);
       } catch (err) {
         console.error("Error:", err);
       } finally {
@@ -63,12 +72,8 @@ const AdminDashboard = () => {
     }
   }, [isAdminAuthenticated]);
 
-  if (isAdminAuthenticated === null) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-
-  if (!isAdminAuthenticated) {
-    return null;
+  const navigateToSiteAllocation = () => {
+    navigate("/admin/site-allocation");
   }
 
   const regionData = [
@@ -154,9 +159,17 @@ const AdminDashboard = () => {
       </div>
       
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4 flex items-center text-akhanya">
-          <MapPin className="mr-2 h-5 w-5" />
-          Engineer Site Allocations
+        <h2 className="text-2xl font-bold mb-4 flex items-center justify-between text-akhanya">
+          <div className="flex items-center">
+            <MapPin className="mr-2 h-5 w-5" />
+            Engineer Site Allocations
+          </div>
+          <Button 
+            onClick={navigateToSiteAllocation}
+            className="bg-akhanya hover:bg-akhanya-dark"
+          >
+            Manage Allocations
+          </Button>
         </h2>
         <Card>
           <CardContent className="p-6">
@@ -173,6 +186,7 @@ const AdminDashboard = () => {
                     <TableHead>Priority</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Scheduled Date</TableHead>
+                    <TableHead>Engineer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -198,11 +212,18 @@ const AdminDashboard = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>{site.scheduled_date}</TableCell>
+                        <TableCell>
+                          {site.engineer_name || 
+                            <Badge variant="outline" className="bg-gray-100">
+                              Not Assigned
+                            </Badge>
+                          }
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-4">
+                      <TableCell colSpan={6} className="text-center py-4">
                         No site allocations found
                       </TableCell>
                     </TableRow>
@@ -210,6 +231,58 @@ const AdminDashboard = () => {
                 </TableBody>
               </Table>
             )}
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4 flex items-center text-akhanya">
+          <Users className="mr-2 h-5 w-5" />
+          Engineer Availability
+        </h2>
+        <Card>
+          <CardContent className="p-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Vehicle</TableHead>
+                  <TableHead>Allocated Sites</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {engineers.map((engineer) => {
+                  const engineerSites = engineerAllocations.filter(
+                    site => site.engineer_id === engineer.id
+                  ).length;
+                  
+                  return (
+                    <TableRow key={engineer.id}>
+                      <TableCell className="font-medium">{engineer.name}</TableCell>
+                      <TableCell>
+                        <Badge variant={engineer.status === "available" ? "default" : "secondary"}>
+                          {engineer.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{engineer.vehicle}</TableCell>
+                      <TableCell>{engineerSites}</TableCell>
+                      <TableCell>
+                        <Button 
+                          onClick={() => navigateToSiteAllocation()}
+                          variant="outline" 
+                          size="sm"
+                          className="text-akhanya border-akhanya hover:bg-akhanya hover:text-white"
+                        >
+                          Allocate Sites
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
