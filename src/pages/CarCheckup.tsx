@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { useAI } from "@/contexts/AIContext";
-import { Sparkles, FileText, AlertTriangle, Check, Car } from "lucide-react";
+import { Sparkles, FileText, AlertTriangle, Check, Car, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
@@ -14,6 +13,8 @@ import ImageCapture from "@/components/ImageCapture";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { getLatestVehicleCheck } from "@/utils/dbHelpers";
 import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
+import VehicleCheckWizard from "@/components/VehicleCheckWizard";
+import AIVehicleInspection from "@/components/AIVehicleInspection";
 
 const CarCheckup = () => {
   const [activeTab, setActiveTab] = useState("engine");
@@ -31,18 +32,22 @@ const CarCheckup = () => {
   const [maintenanceRecommendations, setMaintenanceRecommendations] = useState("");
   const [vehicleStatus, setVehicleStatus] = useState<"passed" | "fair" | "failed" | "unknown">("unknown");
   const [lastCheckDate, setLastCheckDate] = useState<string | null>(null);
+  const [vehicleName, setVehicleName] = useState("Toyota Hilux");
+  const [showCheckWizard, setShowCheckWizard] = useState(false);
+  const [showAIInspection, setShowAIInspection] = useState(false);
 
-  // Get the engineer ID - in a real app, this would come from auth context
   const userEmail = localStorage.getItem("userEmail") || "john.doe@example.com";
   const engineerId = userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
   useEffect(() => {
-    // Fetch the latest vehicle check when the component mounts
     const fetchLatestCheck = async () => {
       const latestCheck = await getLatestVehicleCheck(engineerId);
       if (latestCheck) {
         setVehicleStatus(latestCheck.status as "passed" | "fair" | "failed");
         setLastCheckDate(latestCheck.check_date);
+        if (latestCheck.vehicle_name) {
+          setVehicleName(latestCheck.vehicle_name);
+        }
       }
     };
     
@@ -101,6 +106,24 @@ const CarCheckup = () => {
     const recommendations = await recommendMaintenance(data, engineImage);
     setMaintenanceRecommendations(recommendations);
     toast.success("Maintenance recommendations generated");
+  };
+
+  const handleCheckComplete = () => {
+    setShowCheckWizard(false);
+    getLatestVehicleCheck(engineerId).then(latestCheck => {
+      if (latestCheck) {
+        setVehicleStatus(latestCheck.status as "passed" | "fair" | "failed");
+        setLastCheckDate(latestCheck.check_date);
+      }
+    });
+    toast.success("Vehicle check completed successfully");
+  };
+
+  const handleAIInspectionComplete = (status: "passed" | "fair" | "failed") => {
+    setShowAIInspection(false);
+    setVehicleStatus(status);
+    setLastCheckDate(new Date().toISOString());
+    toast.success("AI Vehicle inspection completed");
   };
 
   return (
@@ -175,18 +198,28 @@ const CarCheckup = () => {
               <VehicleStatusIndicator 
                 status={vehicleStatus} 
                 lastCheckDate={lastCheckDate}
-                vehicleName="Toyota Hilux" 
+                vehicleName={vehicleName}
               />
             </div>
           </div>
           
-          <Button 
-            onClick={() => toast.success("Safety check completed")}
-            className="mt-2 md:mt-0 ml-8"
-          >
-            <Car className="h-4 w-4 mr-2" />
-            New Safety Check
-          </Button>
+          <div className="flex flex-col space-y-2 mt-2 md:mt-0 ml-0 md:ml-8">
+            <Button 
+              onClick={() => setShowCheckWizard(true)}
+              className="w-full"
+            >
+              <Car className="h-4 w-4 mr-2" />
+              Basic Safety Check
+            </Button>
+            <Button 
+              onClick={() => setShowAIInspection(true)}
+              variant="outline"
+              className="w-full"
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              AI Critical Components Check
+            </Button>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -311,6 +344,32 @@ const CarCheckup = () => {
           </Button>
         </div>
       </div>
+
+      <VehicleCheckWizard
+        open={showCheckWizard}
+        onClose={() => setShowCheckWizard(false)}
+        onConfirm={handleCheckComplete}
+        vehicle={vehicleName}
+        isProcessing={false}
+        engineerId={engineerId}
+      />
+
+      <Dialog open={showAIInspection} onOpenChange={setShowAIInspection}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Shield className="h-5 w-5 mr-2 text-akhanya" />
+              AI Critical Components Inspection
+            </DialogTitle>
+          </DialogHeader>
+          
+          <AIVehicleInspection 
+            engineerId={engineerId}
+            vehicleName={vehicleName}
+            onComplete={handleAIInspectionComplete}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

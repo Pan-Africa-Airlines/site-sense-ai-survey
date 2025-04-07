@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export interface AIContextType {
@@ -10,6 +9,24 @@ export interface AIContextType {
   recommendMaintenance: (data: any, imageData?: string) => Promise<string>;
   optimizeRoute: (startLocation: any, destinations: any[]) => Promise<any[]>;
   predictETAs: (routes: any[]) => Promise<any[]>;
+  inspectVehicleComponent: (imageData: string, componentType: VehicleComponentType) => Promise<VehicleComponentAnalysis>;
+}
+
+export type VehicleComponentType = 
+  | "tires" 
+  | "windscreen" 
+  | "rear_windscreen"
+  | "odometer"
+  | "side_mirrors"
+  | "license_disc"
+  | "drivers_license";
+
+export interface VehicleComponentAnalysis {
+  score: number; // 0-100
+  condition: "excellent" | "good" | "fair" | "poor" | "critical";
+  details: string;
+  recommendations?: string;
+  expiryDate?: string; // For license related components
 }
 
 const defaultContext: AIContextType = {
@@ -21,6 +38,11 @@ const defaultContext: AIContextType = {
   recommendMaintenance: async (data: any, imageData?: string) => "No maintenance recommendations available",
   optimizeRoute: async (startLocation: any, destinations: any[]) => destinations,
   predictETAs: async (routes: any[]) => routes.map(() => ({ minutes: 30 })),
+  inspectVehicleComponent: async (imageData: string, componentType: VehicleComponentType): Promise<VehicleComponentAnalysis> => ({
+    score: 0,
+    condition: "fair",
+    details: "No analysis available",
+  }),
 };
 
 const AIContext = createContext<AIContextType>(defaultContext);
@@ -37,10 +59,8 @@ export const AIProvider = ({ children }: AIProviderProps) => {
   const analyzeImage = async (imageData: string, context: string = "general"): Promise<string> => {
     setIsProcessing(true);
     try {
-      // Simulate AI analysis with a delayed response
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
-      // Return a mock analysis based on the context
       let analysis = "";
       if (context === "site") {
         analysis = "This appears to be a commercial building with adequate infrastructure for installation.";
@@ -68,10 +88,8 @@ export const AIProvider = ({ children }: AIProviderProps) => {
   const getSuggestion = async (fieldName: string, currentValue: string): Promise<string> => {
     setIsProcessing(true);
     try {
-      // Simulate AI suggestion with a delayed response
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
-      // Return a mock suggestion based on the field name
       let suggestion = "";
       switch (fieldName) {
         case "siteType":
@@ -99,16 +117,14 @@ export const AIProvider = ({ children }: AIProviderProps) => {
   const enhanceNotes = async (notes: string, context: string = "general"): Promise<string> => {
     setIsProcessing(true);
     try {
-      // Simulate AI enhancement with a delayed response
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
-      // Return enhanced notes with added details
       const enhancedNotes = notes + "\n\n[AI Enhanced] Additional considerations: Ensure proper documentation of all installation steps. Verify compliance with safety regulations.";
       
       return enhancedNotes;
     } catch (error) {
       console.error("Error enhancing notes:", error);
-      return notes; // Return original notes if enhancement fails
+      return notes;
     } finally {
       setIsProcessing(false);
     }
@@ -117,10 +133,8 @@ export const AIProvider = ({ children }: AIProviderProps) => {
   const detectAnomalies = async (data: any): Promise<string> => {
     setIsProcessing(true);
     try {
-      // Simulate AI analysis with a delayed response
       await new Promise((resolve) => setTimeout(resolve, 2000));
       
-      // Mock anomaly detection response
       return `Potential issues detected:
 
 1. Engine: Warning - Oil level appears to be slightly low.
@@ -139,10 +153,8 @@ Overall vehicle status: Maintenance recommended.`;
   const recommendMaintenance = async (data: any, imageData?: string): Promise<string> => {
     setIsProcessing(true);
     try {
-      // Simulate AI analysis with a delayed response
       await new Promise((resolve) => setTimeout(resolve, 2000));
       
-      // Mock maintenance recommendations
       return `<h3>Recommended Maintenance</h3>
 
 <h4>High Priority (Within 15 days)</h4>
@@ -175,11 +187,8 @@ Overall vehicle status: Maintenance recommended.`;
   const optimizeRoute = async (startLocation: any, destinations: any[]): Promise<any[]> => {
     setIsProcessing(true);
     try {
-      // Simulate AI processing with a delayed response
       await new Promise((resolve) => setTimeout(resolve, 1800));
       
-      // Simply return the destinations in the same order for the mock implementation
-      // In a real implementation, this would use a routing algorithm
       return [...destinations];
     } catch (error) {
       console.error("Error optimizing route:", error);
@@ -192,12 +201,10 @@ Overall vehicle status: Maintenance recommended.`;
   const predictETAs = async (routes: any[]): Promise<any[]> => {
     setIsProcessing(true);
     try {
-      // Simulate AI processing with a delayed response
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
-      // Generate mock ETAs based on the routes
       return routes.map(route => {
-        const baseMinutes = Math.floor(route.distance * 1.5); // 1.5 minutes per km
+        const baseMinutes = Math.floor(route.distance * 1.5);
         const trafficFactor = route.traffic === 'heavy' ? 1.8 : 
                              route.traffic === 'moderate' ? 1.3 : 1.0;
         
@@ -208,7 +215,98 @@ Overall vehicle status: Maintenance recommended.`;
       });
     } catch (error) {
       console.error("Error predicting ETAs:", error);
-      return routes.map(() => ({ minutes: 30 })); // Default 30 minutes if error
+      return routes.map(() => ({ minutes: 30 }));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const inspectVehicleComponent = async (
+    imageData: string,
+    componentType: VehicleComponentType
+  ): Promise<VehicleComponentAnalysis> => {
+    setIsProcessing(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+      
+      let response: VehicleComponentAnalysis;
+      
+      switch (componentType) {
+        case "tires":
+          response = {
+            score: 85,
+            condition: "good",
+            details: "Tread depth is adequate at approximately 5mm. Minor wear on outer edges. No visible cuts or bulges detected.",
+            recommendations: "Consider rotation at next service interval. Monitor outer edge wear pattern."
+          };
+          break;
+        case "windscreen":
+          response = {
+            score: 95,
+            condition: "excellent",
+            details: "No cracks or chips detected. Visibility is clear. Wiper condition good with no streaking.",
+            recommendations: "No action required."
+          };
+          break;
+        case "rear_windscreen":
+          response = {
+            score: 90,
+            condition: "good",
+            details: "No cracks detected. Minor scratches present. Heating elements appear functional.",
+            recommendations: "No immediate action required."
+          };
+          break;
+        case "odometer":
+          response = {
+            score: 100,
+            condition: "excellent",
+            details: "Digital display is clear and functional. Reading appears accurate at 45,678 km.",
+            recommendations: "No action required."
+          };
+          break;
+        case "side_mirrors":
+          response = {
+            score: 75,
+            condition: "fair",
+            details: "Driver side mirror shows minor scratches. Passenger mirror has slight adjustment issues. Both are functional.",
+            recommendations: "Check passenger side mirror adjustment mechanism at next service."
+          };
+          break;
+        case "license_disc":
+          response = {
+            score: 65,
+            condition: "fair",
+            details: "License disc is present and valid. Expiry approaching in 45 days.",
+            recommendations: "Plan for renewal within next 30 days.",
+            expiryDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          };
+          break;
+        case "drivers_license":
+          response = {
+            score: 80,
+            condition: "good",
+            details: "Driver's license is valid with all required endorsements.",
+            recommendations: "No action required.",
+            expiryDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          };
+          break;
+        default:
+          response = {
+            score: 50,
+            condition: "fair",
+            details: "Component analyzed but specific details unavailable.",
+            recommendations: "Consider manual inspection."
+          };
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("Error analyzing vehicle component:", error);
+      return {
+        score: 0,
+        condition: "critical",
+        details: "Error analyzing component. Please retry or perform manual inspection.",
+      };
     } finally {
       setIsProcessing(false);
     }
@@ -223,7 +321,8 @@ Overall vehicle status: Maintenance recommended.`;
       detectAnomalies,
       recommendMaintenance,
       optimizeRoute,
-      predictETAs
+      predictETAs,
+      inspectVehicleComponent
     }}>
       {children}
     </AIContext.Provider>
