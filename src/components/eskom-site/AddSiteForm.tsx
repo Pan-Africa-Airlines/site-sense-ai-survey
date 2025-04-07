@@ -2,24 +2,27 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { SiteFormProps } from "./types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// South African regions
-const saRegions = [
-  "Gauteng",
-  "Western Cape",
-  "Eastern Cape",
-  "KwaZulu-Natal",
-  "Free State",
-  "North West",
-  "Mpumalanga",
-  "Limpopo",
-  "Northern Cape"
-];
+interface AddSiteFormProps {
+  newSiteName: string;
+  setNewSiteName: (value: string) => void;
+  newSiteType: string;
+  setNewSiteType: (value: string) => void;
+  newRegion: string;
+  setNewRegion: (value: string) => void;
+  newContactName: string;
+  setNewContactName: (value: string) => void;
+  newContactPhone: string;
+  setNewContactPhone: (value: string) => void;
+  newContactEmail: string;
+  setNewContactEmail: (value: string) => void;
+  handleAddSite: () => void;
+}
 
-const AddSiteForm: React.FC<SiteFormProps> = ({
+const AddSiteForm: React.FC<AddSiteFormProps> = ({
   newSiteName,
   setNewSiteName,
   newSiteType,
@@ -34,26 +37,45 @@ const AddSiteForm: React.FC<SiteFormProps> = ({
   setNewContactEmail,
   handleAddSite
 }) => {
+  const siteTypes = ["Substation", "Power Station", "Transmission", "Distribution", "Renewable"];
+  const regions = ["Gauteng", "Western Cape", "Eastern Cape", "KwaZulu-Natal", "Free State", "Northern Cape", "Limpopo", "Mpumalanga", "North West"];
+  
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-md border">
+      <div>
+        <Label htmlFor="site-name">Site Name</Label>
         <Input
-          placeholder="Site Name"
+          id="site-name"
+          placeholder="Enter site name"
           value={newSiteName}
           onChange={(e) => setNewSiteName(e.target.value)}
         />
-        <Input
-          placeholder="Site Type (optional)"
-          value={newSiteType}
-          onChange={(e) => setNewSiteType(e.target.value)}
-        />
-        
-        <Select value={newRegion} onValueChange={setNewRegion}>
+      </div>
+      
+      <div>
+        <Label htmlFor="site-type">Site Type</Label>
+        <Select value={newSiteType} onValueChange={setNewSiteType}>
           <SelectTrigger>
-            <SelectValue placeholder="Select Region" />
+            <SelectValue placeholder="Select site type" />
           </SelectTrigger>
           <SelectContent>
-            {saRegions.map((region) => (
+            {siteTypes.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div>
+        <Label htmlFor="region">Region</Label>
+        <Select value={newRegion} onValueChange={setNewRegion}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select region" />
+          </SelectTrigger>
+          <SelectContent>
+            {regions.map((region) => (
               <SelectItem key={region} value={region}>
                 {region}
               </SelectItem>
@@ -61,29 +83,43 @@ const AddSiteForm: React.FC<SiteFormProps> = ({
           </SelectContent>
         </Select>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      
+      <div>
+        <Label htmlFor="contact-name">Contact Name</Label>
         <Input
-          placeholder="Contact Name"
+          id="contact-name"
+          placeholder="Enter contact name"
           value={newContactName}
           onChange={(e) => setNewContactName(e.target.value)}
         />
+      </div>
+      
+      <div>
+        <Label htmlFor="contact-phone">Contact Phone</Label>
         <Input
-          placeholder="Contact Phone"
+          id="contact-phone"
+          placeholder="Enter contact phone"
           value={newContactPhone}
           onChange={(e) => setNewContactPhone(e.target.value)}
         />
+      </div>
+      
+      <div>
+        <Label htmlFor="contact-email">Contact Email</Label>
         <Input
-          placeholder="Contact Email"
+          id="contact-email"
+          placeholder="Enter contact email"
           value={newContactEmail}
           onChange={(e) => setNewContactEmail(e.target.value)}
         />
       </div>
       
-      <Button onClick={handleAddSite} className="whitespace-nowrap w-full md:w-auto">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Site
-      </Button>
+      <div className="md:col-span-2 flex justify-end mt-4">
+        <Button onClick={handleAddSite} className="bg-akhanya hover:bg-akhanya-dark">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Site
+        </Button>
+      </div>
     </div>
   );
 };

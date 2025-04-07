@@ -2,24 +2,35 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash, Edit, Check, X, ChevronDown, ChevronUp } from "lucide-react";
-import { SiteListProps } from "./types";
+import { Pencil, Save, X, Trash } from "lucide-react";
+import { EskomSite } from "@/types/site";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-// South African regions
-const saRegions = [
-  "Gauteng",
-  "Western Cape",
-  "Eastern Cape",
-  "KwaZulu-Natal",
-  "Free State",
-  "North West",
-  "Mpumalanga",
-  "Limpopo",
-  "Northern Cape"
-];
+interface SitesListProps {
+  sites: EskomSite[];
+  loading: boolean;
+  editingId: string | null;
+  editName: string;
+  editType: string;
+  editRegion: string;
+  editContactName: string;
+  editContactPhone: string;
+  editContactEmail: string;
+  setEditName: (value: string) => void;
+  setEditType: (value: string) => void;
+  setEditRegion: (value: string) => void;
+  setEditContactName: (value: string) => void;
+  setEditContactPhone: (value: string) => void;
+  setEditContactEmail: (value: string) => void;
+  startEditing: (site: EskomSite) => void;
+  cancelEditing: () => void;
+  saveEdit: (id: string) => void;
+  handleDeleteSite: (id: string) => void;
+}
 
-const SitesList: React.FC<SiteListProps> = ({
+const SitesList: React.FC<SitesListProps> = ({
   sites,
   loading,
   editingId,
@@ -40,140 +51,159 @@ const SitesList: React.FC<SiteListProps> = ({
   saveEdit,
   handleDeleteSite
 }) => {
-  const [expandedSite, setExpandedSite] = React.useState<string | null>(null);
-
-  const toggleSiteDetails = (siteId: string) => {
-    setExpandedSite(expandedSite === siteId ? null : siteId);
-  };
-
+  const siteTypes = ["Substation", "Power Station", "Transmission", "Distribution", "Renewable"];
+  const regions = ["Gauteng", "Western Cape", "Eastern Cape", "KwaZulu-Natal", "Free State", "Northern Cape", "Limpopo", "Mpumalanga", "North West"];
+  
+  if (loading) {
+    return <div className="text-center py-4">Loading sites...</div>;
+  }
+  
   return (
-    <div className="rounded-md border">
-      <div className="grid grid-cols-12 gap-4 p-4 font-medium border-b">
-        <div className="col-span-4">Site Name</div>
-        <div className="col-span-3">Type</div>
-        <div className="col-span-3">Region</div>
-        <div className="col-span-2">Actions</div>
-      </div>
-      
-      {loading ? (
-        <div className="p-4 text-center">Loading sites...</div>
-      ) : sites.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground">No sites configured</div>
-      ) : (
-        sites.map((site) => (
-          <React.Fragment key={site.id}>
-            <div className="grid grid-cols-12 gap-4 p-4 border-b last:border-0 hover:bg-gray-50">
-              {editingId === site.id ? (
-                <>
-                  <div className="col-span-4">
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <Input
-                      value={editType}
-                      onChange={(e) => setEditType(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <Select value={editRegion} onValueChange={setEditRegion}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Region" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {saRegions.map((region) => (
-                          <SelectItem key={region} value={region}>
-                            {region}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="col-span-2 flex space-x-1">
-                    <Button size="sm" variant="ghost" onClick={() => saveEdit(site.id)}>
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={cancelEditing}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="col-span-4">{site.name}</div>
-                  <div className="col-span-3">{site.type || "-"}</div>
-                  <div className="col-span-3">{site.region || "-"}</div>
-                  <div className="col-span-2 flex space-x-1">
-                    <Button size="sm" variant="ghost" onClick={() => startEditing(site)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDeleteSite(site.id)}>
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => toggleSiteDetails(site.id)}>
-                      {expandedSite === site.id ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-            
-            {expandedSite === site.id && (
-              <div className="p-4 bg-gray-50 border-b">
+    <div className="bg-white rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Site Name</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Region</TableHead>
+            <TableHead>Contact Person</TableHead>
+            <TableHead>Contact Info</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sites.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-4">
+                No sites found. Add your first site above.
+              </TableCell>
+            </TableRow>
+          ) : (
+            sites.map((site) => (
+              <TableRow key={site.id}>
                 {editingId === site.id ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-xs text-gray-500">Contact Name</label>
+                  // Editing mode
+                  <>
+                    <TableCell>
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Select value={editType} onValueChange={setEditType}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {siteTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Select value={editRegion} onValueChange={setEditRegion}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select region" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {regions.map((region) => (
+                            <SelectItem key={region} value={region}>
+                              {region}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
                       <Input
                         value={editContactName}
                         onChange={(e) => setEditContactName(e.target.value)}
-                        placeholder="Contact Name"
+                        className="w-full"
+                        placeholder="Contact name"
                       />
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-500">Contact Phone</label>
-                      <Input
-                        value={editContactPhone}
-                        onChange={(e) => setEditContactPhone(e.target.value)}
-                        placeholder="Contact Phone"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-500">Contact Email</label>
-                      <Input
-                        value={editContactEmail}
-                        onChange={(e) => setEditContactEmail(e.target.value)}
-                        placeholder="Contact Email"
-                      />
-                    </div>
-                  </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        <Input
+                          value={editContactPhone}
+                          onChange={(e) => setEditContactPhone(e.target.value)}
+                          className="w-full"
+                          placeholder="Phone"
+                        />
+                        <Input
+                          value={editContactEmail}
+                          onChange={(e) => setEditContactEmail(e.target.value)}
+                          className="w-full"
+                          placeholder="Email"
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={cancelEditing}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => saveEdit(site.id)}
+                          className="bg-akhanya hover:bg-akhanya-dark"
+                        >
+                          <Save className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-xs text-gray-500">Contact Name</label>
-                      <p>{site.contact_name || "Not specified"}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-500">Contact Phone</label>
-                      <p>{site.contact_phone || "Not specified"}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-500">Contact Email</label>
-                      <p>{site.contact_email || "Not specified"}</p>
-                    </div>
-                  </div>
+                  // View mode
+                  <>
+                    <TableCell className="font-medium">{site.name}</TableCell>
+                    <TableCell>{site.type || "—"}</TableCell>
+                    <TableCell>{site.region || "—"}</TableCell>
+                    <TableCell>{site.contact_name || "—"}</TableCell>
+                    <TableCell>
+                      <div>
+                        {site.contact_phone || "—"}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {site.contact_email || "—"}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => startEditing(site)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteSite(site.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </>
                 )}
-              </div>
-            )}
-          </React.Fragment>
-        ))
-      )}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 };
