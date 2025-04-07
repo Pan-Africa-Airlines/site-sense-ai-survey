@@ -7,7 +7,7 @@ import { Shield, Car } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getLatestVehicleCheck } from "@/utils/dbHelpers";
+import { getLatestVehicleCheck, saveVehicleCheck } from "@/utils/dbHelpers";
 import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
 import AIVehicleInspection from "@/components/AIVehicleInspection";
 
@@ -16,6 +16,7 @@ const CarCheckup = () => {
   const [lastCheckDate, setLastCheckDate] = useState<string | null>(null);
   const [vehicleName, setVehicleName] = useState("Toyota Hilux");
   const [showAIInspection, setShowAIInspection] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const userEmail = localStorage.getItem("userEmail") || "john.doe@example.com";
   const engineerId = userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -35,11 +36,30 @@ const CarCheckup = () => {
     fetchLatestCheck();
   }, [engineerId]);
 
-  const handleAIInspectionComplete = (status: "passed" | "fair" | "failed") => {
-    setShowAIInspection(false);
-    setVehicleStatus(status);
-    setLastCheckDate(new Date().toISOString());
-    toast.success("AI Vehicle inspection completed");
+  const handleAIInspectionComplete = async (status: "passed" | "fair" | "failed", score: number, details: any) => {
+    setIsProcessing(true);
+    try {
+      // Save to database
+      await saveVehicleCheck(
+        engineerId,
+        status,
+        vehicleName,
+        `AI Critical Components Check - Overall Score: ${score}/100`,
+        details
+      );
+      
+      // Update UI
+      setVehicleStatus(status);
+      setLastCheckDate(new Date().toISOString());
+      setShowAIInspection(false);
+      
+      toast.success("AI Vehicle inspection completed and saved to database");
+    } catch (error) {
+      console.error("Error saving inspection:", error);
+      toast.error("Failed to save inspection results");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -69,6 +89,7 @@ const CarCheckup = () => {
                   onClick={() => setShowAIInspection(true)}
                   size="lg"
                   className="bg-akhanya hover:bg-akhanya/90 text-white"
+                  disabled={isProcessing}
                 >
                   <Shield className="h-5 w-5 mr-2" />
                   Perform AI Critical Components Check
@@ -111,6 +132,7 @@ const CarCheckup = () => {
                   onClick={() => setShowAIInspection(true)}
                   size="lg"
                   className="bg-akhanya hover:bg-akhanya/90 text-white"
+                  disabled={isProcessing}
                 >
                   Start AI Critical Components Check
                 </Button>

@@ -9,12 +9,11 @@ import { toast } from "sonner";
 import { Camera, Shield, AlertTriangle, CheckCircle, RotateCw, Calendar } from "lucide-react";
 import ImageCapture from "@/components/ImageCapture";
 import { useAI, VehicleComponentType, VehicleComponentAnalysis } from "@/contexts/AIContext";
-import { saveVehicleCheck } from "@/utils/dbHelpers";
 
 interface AIVehicleInspectionProps {
   engineerId: string;
   vehicleName: string;
-  onComplete?: (status: "passed" | "fair" | "failed") => void;
+  onComplete?: (status: "passed" | "fair" | "failed", score: number, details: any) => void;
 }
 
 const componentLabels: Record<VehicleComponentType, string> = {
@@ -59,6 +58,7 @@ const AIVehicleInspection: React.FC<AIVehicleInspectionProps> = ({
   const [activeComponent, setActiveComponent] = useState<VehicleComponentType>("tires");
   const [capturedImages, setCapturedImages] = useState<Record<VehicleComponentType, string>>({} as Record<VehicleComponentType, string>);
   const [analyses, setAnalyses] = useState<Record<VehicleComponentType, VehicleComponentAnalysis | null>>({} as Record<VehicleComponentType, VehicleComponentAnalysis | null>);
+  const [isSaving, setIsSaving] = useState(false);
   
   const componentTypes: VehicleComponentType[] = [
     "tires", "windscreen", "rear_windscreen", "odometer", "side_mirrors", "license_disc", "drivers_license"
@@ -118,23 +118,22 @@ const AIVehicleInspection: React.FC<AIVehicleInspectionProps> = ({
       return;
     }
     
-    const status = getOverallStatus();
-    const overallScore = getOverallScore();
+    setIsSaving(true);
     
     try {
-      await saveVehicleCheck(
-        engineerId,
-        status,
-        vehicleName,
-        `AI Vehicle Inspection - Overall Score: ${overallScore}/100`,
-        { analyses }
-      );
+      const status = getOverallStatus();
+      const overallScore = getOverallScore();
       
-      toast.success("Vehicle inspection saved successfully");
-      if (onComplete) onComplete(status);
+      // Call the onComplete function with the results
+      if (onComplete) {
+        onComplete(status, overallScore, { analyses });
+      }
+      
     } catch (error) {
       console.error("Error saving inspection:", error);
       toast.error("Failed to save inspection");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -270,9 +269,16 @@ const AIVehicleInspection: React.FC<AIVehicleInspectionProps> = ({
         <div className="mt-6 flex justify-end">
           <Button 
             onClick={handleSaveInspection}
-            disabled={getCompletionPercentage() < 100 || isProcessing}
+            disabled={getCompletionPercentage() < 100 || isProcessing || isSaving}
           >
-            Complete Inspection
+            {isSaving ? (
+              <>
+                <RotateCw className="h-4 w-4 animate-spin mr-2" />
+                Saving...
+              </>
+            ) : (
+              "Complete Inspection"
+            )}
           </Button>
         </div>
       </CardContent>
