@@ -1,11 +1,10 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Loader } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
 
 interface SiteAllocationsTableProps {
   navigateToSiteAllocation: () => void;
@@ -54,7 +53,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
   });
 
   return (
-    <div className="mb-8">
+    <div>
       <h2 className="text-2xl font-bold mb-4 flex items-center justify-between text-akhanya">
         <div className="flex items-center">
           <MapPin className="mr-2 h-5 w-5" />
@@ -67,58 +66,60 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
           Manage Allocations
         </Button>
       </h2>
-      <Card>
-        <CardContent className="p-6">
+      <Card className="shadow-sm">
+        <CardContent className="p-4 md:p-6">
           {isLoading ? (
             <div className="py-4 text-center">
               <Loader className="h-6 w-6 animate-spin mx-auto mb-2" />
               <p className="text-gray-500">Loading allocations...</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Site Name</TableHead>
-                  <TableHead>Region</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Scheduled Date</TableHead>
-                  <TableHead>Engineer</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allocations.map((site) => (
-                  <TableRow key={site.id}>
-                    <TableCell className="font-medium">{site.site_name}</TableCell>
-                    <TableCell>{site.region}</TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        site.priority === 'high' ? 'destructive' : 
-                        site.priority === 'medium' ? 'default' : 'outline'
-                      }>
-                        {site.priority}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        site.status === 'completed' ? 'secondary' : 
-                        site.status === 'in-progress' ? 'secondary' : 'outline'
-                      }>
-                        {site.status || 'pending'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{site.scheduled_date || 'Not scheduled'}</TableCell>
-                    <TableCell>
-                      {site.engineer_name || 
-                        <Badge variant="outline" className="bg-gray-100">
-                          Not Assigned
-                        </Badge>
-                      }
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Site Name</TableHead>
+                    <TableHead>Region</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Scheduled Date</TableHead>
+                    <TableHead>Engineer</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {allocations.map((site) => (
+                    <TableRow key={site.id}>
+                      <TableCell className="font-medium">{site.site_name}</TableCell>
+                      <TableCell>{site.region}</TableCell>
+                      <TableCell>
+                        <Badge variant={
+                          site.priority === 'high' ? 'destructive' : 
+                          site.priority === 'medium' ? 'default' : 'outline'
+                        }>
+                          {site.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={
+                          site.status === 'completed' ? 'secondary' : 
+                          site.status === 'in-progress' ? 'secondary' : 'outline'
+                        }>
+                          {site.status || 'pending'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{site.scheduled_date || 'Not scheduled'}</TableCell>
+                      <TableCell>
+                        {site.engineer_name || 
+                          <Badge variant="outline" className="bg-gray-100">
+                            Not Assigned
+                          </Badge>
+                        }
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

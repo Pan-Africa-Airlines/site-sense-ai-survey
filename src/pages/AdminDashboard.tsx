@@ -104,37 +104,43 @@ const AdminDashboard = () => {
     navigate("/admin/site-allocation");
   }
 
-  // For debugging and testing
-  console.log("Rendering admin dashboard with:", {
-    isAuthenticated: isAdminAuthenticated,
-    allocations: engineerAllocations,
-    engineers: engineers,
-    isLoading: isLoading
-  });
-
-  // Always render dashboard content
   return (
     <AdminNavLayout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-akhanya">Admin Dashboard</h1>
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-akhanya">Admin Dashboard</h1>
+          <div className="text-sm text-gray-500">
+            Welcome to the Akhanya IT Admin Panel
+          </div>
+        </div>
         
-        <DashboardStatsCards />
+        <div className="mb-8">
+          <DashboardStatsCards />
+        </div>
         
-        <SiteAllocationsTable 
-          engineerAllocations={engineerAllocations}
-          isLoading={isLoading}
-          navigateToSiteAllocation={navigateToSiteAllocation}
-        />
+        <div className="mb-8">
+          <SiteAllocationsTable 
+            engineerAllocations={engineerAllocations}
+            isLoading={isLoading}
+            navigateToSiteAllocation={navigateToSiteAllocation}
+          />
+        </div>
         
-        <EngineerAvailabilityTable
-          engineers={engineers}
-          engineerAllocations={engineerAllocations}
-          navigateToSiteAllocation={navigateToSiteAllocation}
-        />
+        <div className="mb-8">
+          <EngineerAvailabilityTable
+            engineers={engineers}
+            engineerAllocations={engineerAllocations}
+            navigateToSiteAllocation={navigateToSiteAllocation}
+          />
+        </div>
         
-        <DashboardCharts />
+        <div className="mb-8">
+          <DashboardCharts />
+        </div>
         
-        <RecentActivitiesCards />
+        <div className="mb-8">
+          <RecentActivitiesCards />
+        </div>
       </div>
     </AdminNavLayout>
   );
