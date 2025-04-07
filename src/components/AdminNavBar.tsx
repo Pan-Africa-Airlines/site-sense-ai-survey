@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -59,7 +58,6 @@ const AdminNavBar: React.FC = () => {
   
   const adminUsername = localStorage.getItem("adminUsername") || "Admin";
 
-  // Navigation items to avoid duplication
   const navItems = [
     { path: "/admin/dashboard", icon: BarChart3, label: "Dashboard" },
     { path: "/admin/assessments", icon: ClipboardList, label: "Assessments" },
@@ -69,7 +67,6 @@ const AdminNavBar: React.FC = () => {
     { path: "/configuration", icon: Cog, label: "Configuration" },
   ];
 
-  // Mobile navigation with sheet
   const MobileNav = () => (
     <header className="bg-gray-900 text-white sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3">
@@ -174,7 +171,6 @@ const AdminNavBar: React.FC = () => {
     </header>
   );
 
-  // Desktop navigation with sidebar
   const DesktopNav = () => (
     <SidebarProvider defaultOpen={true}>
       <div className="flex flex-col min-h-screen w-full">
@@ -290,7 +286,12 @@ const AdminNavBar: React.FC = () => {
     </SidebarProvider>
   );
 
-  return isMobile ? <MobileNav /> : <DesktopNav />;
+  return (
+    <div className="flex flex-col min-h-screen">
+      {isMobile ? <MobileNav /> : <DesktopNav />}
+      <div className="flex-1"></div>
+    </div>
+  );
 };
 
 export default AdminNavBar;

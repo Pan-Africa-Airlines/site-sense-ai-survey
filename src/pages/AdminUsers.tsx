@@ -33,9 +33,9 @@ const AdminUsers = () => {
   ];
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <AdminNavBar />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-1">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-akhanya">Users</h1>
           <Button className="bg-akhanya hover:bg-akhanya-dark">
