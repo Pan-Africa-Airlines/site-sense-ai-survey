@@ -1,8 +1,10 @@
 
 import React, { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardList, HardHat, Car, Clock, Loader } from "lucide-react";
 import { getDashboardStats } from "@/utils/dbHelpers";
+import AssessmentStatsCard from "./stats/AssessmentStatsCard";
+import InstallationsStatsCard from "./stats/InstallationsStatsCard";
+import VehicleChecksStatsCard from "./stats/VehicleChecksStatsCard";
+import ApprovedAssessmentsStatsCard from "./stats/ApprovedAssessmentsStatsCard";
 
 const DashboardStatsCards = () => {
   const [stats, setStats] = useState({
@@ -31,89 +33,10 @@ const DashboardStatsCards = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="bg-blue-100 p-3 rounded-full">
-              <ClipboardList className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Total Assessments</p>
-              {loading ? (
-                <div className="flex items-center">
-                  <Loader className="h-4 w-4 animate-spin mr-2" />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                <h3 className="text-2xl font-bold">{stats.completedAssessments}</h3>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="bg-green-100 p-3 rounded-full">
-              <HardHat className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Installations</p>
-              {loading ? (
-                <div className="flex items-center">
-                  <Loader className="h-4 w-4 animate-spin mr-2" />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                <h3 className="text-2xl font-bold">{stats.installations}</h3>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="bg-amber-100 p-3 rounded-full">
-              <Car className="h-6 w-6 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Engineer Vehicle Checks</p>
-              {loading ? (
-                <div className="flex items-center">
-                  <Loader className="h-4 w-4 animate-spin mr-2" />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                <h3 className="text-2xl font-bold">{stats.vehicleChecks}</h3>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="bg-purple-100 p-3 rounded-full">
-              <Clock className="h-6 w-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Approved Assessments</p>
-              {loading ? (
-                <div className="flex items-center">
-                  <Loader className="h-4 w-4 animate-spin mr-2" />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                <h3 className="text-2xl font-bold">{stats.pendingApprovals}</h3>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <AssessmentStatsCard count={stats.completedAssessments} loading={loading} />
+      <InstallationsStatsCard count={stats.installations} loading={loading} />
+      <VehicleChecksStatsCard count={stats.vehicleChecks} loading={loading} />
+      <ApprovedAssessmentsStatsCard count={stats.pendingApprovals} loading={loading} />
     </div>
   );
 };
