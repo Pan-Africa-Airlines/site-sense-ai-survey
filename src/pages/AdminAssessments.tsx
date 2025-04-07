@@ -1,6 +1,5 @@
-
 import React, { useEffect } from "react";
-import AdminNavBar from "@/components/AdminNavBar";
+import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -32,104 +31,107 @@ const AdminAssessments = () => {
     { id: 8, siteName: "Control Room H", engineer: "Lisa Taylor", date: "2025-03-10", status: "rejected" },
   ];
   
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <AdminNavBar />
-      <div className="container mx-auto px-4 py-8 flex-1">
-        <h1 className="text-3xl font-bold mb-6 text-akhanya">Assessments</h1>
-        
-        <Card className="mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex items-center relative flex-1">
-                <Search className="absolute left-2 h-4 w-4 text-gray-500" />
-                <Input placeholder="Search assessments..." className="pl-8" />
-              </div>
-              <div className="flex gap-4">
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Date Range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="this-week">This Week</SelectItem>
-                    <SelectItem value="this-month">This Month</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="icon">
-                  <Filter className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon">
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
+  const assessmentsContent = (
+    <div className="container mx-auto px-4 py-8 flex-1">
+      <h1 className="text-3xl font-bold mb-6 text-akhanya">Assessments</h1>
+      
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex items-center relative flex-1">
+              <Search className="absolute left-2 h-4 w-4 text-gray-500" />
+              <Input placeholder="Search assessments..." className="pl-8" />
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Site Name</TableHead>
-                  <TableHead>Engineer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+            <div className="flex gap-4">
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Date Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="this-week">This Week</SelectItem>
+                  <SelectItem value="this-month">This Month</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <Download className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Site Name</TableHead>
+                <TableHead>Engineer</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {assessments.map((assessment) => (
+                <TableRow key={assessment.id}>
+                  <TableCell className="font-medium">{assessment.id}</TableCell>
+                  <TableCell>{assessment.siteName}</TableCell>
+                  <TableCell>{assessment.engineer}</TableCell>
+                  <TableCell>{assessment.date}</TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      assessment.status === 'completed' ? 'default' : 
+                      assessment.status === 'pending' ? 'secondary' : 
+                      'destructive'
+                    }>
+                      {assessment.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="ghost" size="icon">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assessments.map((assessment) => (
-                  <TableRow key={assessment.id}>
-                    <TableCell className="font-medium">{assessment.id}</TableCell>
-                    <TableCell>{assessment.siteName}</TableCell>
-                    <TableCell>{assessment.engineer}</TableCell>
-                    <TableCell>{assessment.date}</TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        assessment.status === 'completed' ? 'default' : 
-                        assessment.status === 'pending' ? 'secondary' : 
-                        'destructive'
-                      }>
-                        {assessment.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button variant="ghost" size="icon">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
+  );
+  
+  return (
+    <AdminNavLayout>
+      {assessmentsContent}
+    </AdminNavLayout>
   );
 };
 
