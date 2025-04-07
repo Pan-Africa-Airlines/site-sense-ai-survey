@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 interface Site {
   id: number | string;
   name: string;
-  priority: string;  // Using string to match DB schema
+  priority: string;
   address: string;
   scheduledDate: string;
   status: string;
@@ -67,7 +67,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({ sites }) => {
   };
 
   const handleSiteClick = (siteId: number | string) => {
-    navigate(`/assessment/${siteId}`);
+    navigate(`/eskom-survey/new?siteId=${siteId}`);
   };
 
   return (

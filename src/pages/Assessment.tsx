@@ -1,88 +1,60 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import NavigationBar from "@/components/NavigationBar";
+import NavigationBar from "@/components/navigation/NavigationBar";
 import { Button } from "@/components/ui/button";
 import SiteAssessmentForm from "@/components/SiteAssessmentForm";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { useAI } from "@/contexts/AIContext";
 import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-// Define a type for Eskom sites that matches the database structure
-interface EskomSite {
-  id: string;
-  name: string;
-  type: string | null;
-  created_at?: string;
-}
-
-// Mock site data based on siteId
-const MOCK_SITE_DATA: Record<string, any> = {
-  "1": {
-    siteName: "Eskom Substation Alpha",
-    siteAddress: "123 Main Road, Johannesburg",
-    siteType: "Substation",
-    customerName: "Eskom Holdings",
-    region: "Gauteng"
-  },
-  "2": {
-    siteName: "Power Station Beta",
-    siteAddress: "45 Industrial Way, Pretoria",
-    siteType: "Power Station",
-    customerName: "Eskom Holdings",
-    region: "Gauteng"
-  },
-  "3": {
-    siteName: "Transmission Tower Charlie",
-    siteAddress: "78 Hill Street, Midrand",
-    siteType: "Transmission Tower",
-    customerName: "Eskom Holdings",
-    region: "Gauteng"
-  }
-};
+import { getConfiguredSites } from "@/utils/dbHelpers";
+import { EskomSite } from "@/types/site";
 
 const Assessment = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const [configSites, setConfigSites] = useState<EskomSite[]>([]);
+  const [siteData, setSiteData] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(true);
   const { isProcessing } = useAI();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draftId');
   const siteId = searchParams.get('siteId');
   
-  // Get the site data based on siteId
-  const siteData = siteId ? MOCK_SITE_DATA[siteId] || {} : {};
-
   useEffect(() => {
-    const fetchConfiguredSites = async () => {
+    const fetchConfiguredSitesAndData = async () => {
       try {
-        const { data, error } = await supabase
-          .from("eskom_sites")
-          .select("*")
-          .order("name");
-
-        if (error) throw error;
-        setConfigSites((data || []) as EskomSite[]);
+        setIsLoading(true);
+        // Get all configured sites
+        const sites = await getConfiguredSites();
+        setConfigSites(sites);
         
-        // Add configured sites to MOCK_SITE_DATA
-        if (data && data.length > 0) {
-          data.forEach((site: EskomSite, index: number) => {
-            const siteKey = (100 + index).toString();
-            MOCK_SITE_DATA[siteKey] = {
+        // If a siteId is provided, find the matching site
+        if (siteId) {
+          const site = sites.find(s => s.id === siteId);
+          if (site) {
+            // Format site data for the form
+            setSiteData({
               siteName: site.name,
               siteType: site.type || "Not specified",
+              siteAddress: `Address for ${site.name}`, // Placeholder
               customerName: "Eskom Holdings",
-              region: "Gauteng" // Default region
-            };
-          });
+              region: site.region || "Not specified",
+              contactName: site.contact_name,
+              contactPhone: site.contact_phone,
+              contactEmail: site.contact_email
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching configured sites:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchConfiguredSites();
-  }, []);
+    fetchConfiguredSitesAndData();
+  }, [siteId]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -116,10 +88,14 @@ const Assessment = () => {
             AI Recommendations {showAIRecommendations ? "On" : "Off"}
           </Button>
         </div>
-        <SiteAssessmentForm 
-          showAIRecommendations={showAIRecommendations}
-          initialData={{...siteData, configSites}}
-        />
+        {isLoading ? (
+          <div className="text-center py-12">Loading site data...</div>
+        ) : (
+          <SiteAssessmentForm 
+            showAIRecommendations={showAIRecommendations}
+            initialData={{...siteData, configSites}}
+          />
+        )}
       </div>
     </div>
   );

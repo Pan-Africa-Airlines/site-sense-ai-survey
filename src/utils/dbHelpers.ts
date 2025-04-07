@@ -1,6 +1,11 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { EskomSite } from "@/types/site";
+import { toast } from "sonner";
 
+/**
+ * Fetches all configured sites from the database
+ */
 export const getConfiguredSites = async (): Promise<EskomSite[]> => {
   try {
     const { data, error } = await supabase
@@ -16,6 +21,9 @@ export const getConfiguredSites = async (): Promise<EskomSite[]> => {
   }
 };
 
+/**
+ * Creates initial site allocations based on configured sites
+ */
 export const createInitialAllocations = async () => {
   try {
     // Check if allocations already exist
@@ -31,54 +39,56 @@ export const createInitialAllocations = async () => {
       return;
     }
 
-    // Demo allocations data
-    const demoAllocations = [
-      {
-        site_id: "SITE001",
-        site_name: "Eskom Substation Alpha",
-        region: "Gauteng",
-        address: "123 Main Road, Johannesburg",
-        priority: "high",
-        status: "pending",
-        scheduled_date: "2025-04-10",
-        distance: 15
-      },
-      {
-        site_id: "SITE002",
-        site_name: "Power Station Beta",
-        region: "Western Cape",
-        address: "45 Industrial Way, Pretoria",
-        priority: "medium",
-        status: "in-progress",
-        scheduled_date: "2025-04-12",
-        distance: 28
-      },
-      {
-        site_id: "SITE003",
-        site_name: "Transmission Tower Charlie",
-        region: "KwaZulu-Natal",
-        address: "78 Hill Street, Midrand",
-        priority: "low",
-        status: "pending",
-        scheduled_date: "2025-04-15",
-        distance: 7
-      }
-    ];
-
-    // Insert demo allocations
-    const { error: insertError } = await supabase
-      .from("engineer_allocations")
-      .insert(demoAllocations);
-
-    if (insertError) throw insertError;
+    // Get configured sites
+    const configuredSites = await getConfiguredSites();
     
-    console.log("Demo allocations added successfully");
+    // If no configured sites, we can't create allocations
+    if (configuredSites.length === 0) {
+      console.log("No configured sites found. Add sites in the Configuration page first.");
+      return;
+    }
+
+    // Use up to 3 of the configured sites for demo allocations
+    const sitesToUse = configuredSites.slice(0, 3);
+    
+    // Create demo allocations from configured sites
+    const demoAllocations = sitesToUse.map((site, index) => {
+      const priority = index === 0 ? "high" : index === 1 ? "medium" : "low";
+      const status = index === 1 ? "in-progress" : "pending";
+      const date = new Date();
+      date.setDate(date.getDate() + (index + 1) * 2);
+      
+      return {
+        site_id: site.id,
+        site_name: site.name,
+        region: site.region || "Unknown",
+        address: `${index * 12 + 10} Main Road, ${site.region || "Unknown"}`,
+        priority,
+        status,
+        scheduled_date: date.toISOString().split('T')[0],
+        distance: (index + 1) * 7
+      };
+    });
+
+    // Insert demo allocations if we have any sites
+    if (demoAllocations.length > 0) {
+      const { error: insertError } = await supabase
+        .from("engineer_allocations")
+        .insert(demoAllocations);
+  
+      if (insertError) throw insertError;
+      
+      console.log("Demo allocations added successfully");
+    }
     
   } catch (error) {
     console.error("Error creating initial allocations:", error);
   }
 };
 
+/**
+ * Generates AI insights for an engineer
+ */
 export const generateAIInsights = async (engineerId: string) => {
   try {
     // Check if we already have insights for this engineer
@@ -134,6 +144,9 @@ export const generateAIInsights = async (engineerId: string) => {
   }
 };
 
+/**
+ * Creates or updates an engineer profile
+ */
 export const ensureEngineerProfile = async (
   id: string, 
   name: string, 
@@ -185,11 +198,20 @@ export const ensureEngineerProfile = async (
   }
 };
 
+/**
+ * Fetches all allocations for engineers
+ */
 export const getEngineerAllocations = async () => {
   try {
+    // First get all configured sites
+    const configuredSites = await getConfiguredSites();
+    const configuredSiteIds = configuredSites.map(site => site.id);
+    
+    // Then fetch allocations only for those sites
     const { data, error } = await supabase
       .from('engineer_allocations')
-      .select('*') as { data: any[]; error: any };
+      .select('*')
+      .in('site_id', configuredSiteIds) as { data: any[]; error: any };
       
     if (error) {
       console.error("Error fetching allocations:", error);
@@ -203,6 +225,9 @@ export const getEngineerAllocations = async () => {
   }
 };
 
+/**
+ * Saves a vehicle check record
+ */
 export const saveVehicleCheck = async (
   engineerId: string,
   status: "passed" | "fair" | "failed",
@@ -237,6 +262,9 @@ export const saveVehicleCheck = async (
   }
 };
 
+/**
+ * Gets the most recent vehicle check for an engineer
+ */
 export const getLatestVehicleCheck = async (engineerId: string) => {
   try {
     const { data, error } = await supabase
@@ -259,6 +287,9 @@ export const getLatestVehicleCheck = async (engineerId: string) => {
   }
 };
 
+/**
+ * Formats a database date for display
+ */
 export const formatDbDate = (dbDate: string | null): string => {
   if (!dbDate) return "Not scheduled";
   
@@ -274,5 +305,74 @@ export const formatDbDate = (dbDate: string | null): string => {
   } catch (error) {
     // If dbDate is already formatted or can't be parsed, return as is
     return dbDate;
+  }
+};
+
+/**
+ * Allocates a site to an engineer
+ */
+export const allocateSiteToEngineer = async (
+  siteId: string, 
+  engineerId: string, 
+  engineerName: string
+) => {
+  try {
+    // First check if this site is already allocated
+    const { data: existingAllocation, error: checkError } = await supabase
+      .from('engineer_allocations')
+      .select('*')
+      .eq('site_id', siteId)
+      .maybeSingle();
+      
+    if (checkError) throw checkError;
+    
+    // If allocation exists, update it
+    if (existingAllocation) {
+      const { error: updateError } = await supabase
+        .from('engineer_allocations')
+        .update({ 
+          engineer_id: engineerId,
+          engineer_name: engineerName,
+          status: 'assigned'
+        })
+        .eq('site_id', siteId);
+        
+      if (updateError) throw updateError;
+      
+      toast.success("Site allocation updated successfully");
+    } else {
+      // If no allocation exists, we need site info to create one
+      const { data: siteData, error: siteError } = await supabase
+        .from('eskom_sites')
+        .select('*')
+        .eq('id', siteId)
+        .single();
+        
+      if (siteError) throw siteError;
+      
+      // Create new allocation
+      const { error: insertError } = await supabase
+        .from('engineer_allocations')
+        .insert({
+          site_id: siteId,
+          site_name: siteData.name,
+          region: siteData.region || 'Unknown',
+          status: 'assigned',
+          priority: 'medium',
+          engineer_id: engineerId,
+          engineer_name: engineerName,
+          scheduled_date: new Date().toISOString().split('T')[0]
+        });
+        
+      if (insertError) throw insertError;
+      
+      toast.success("Site allocated successfully");
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error allocating site:", error);
+    toast.error("Failed to allocate site");
+    return false;
   }
 };

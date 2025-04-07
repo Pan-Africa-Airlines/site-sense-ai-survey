@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Loader } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { createInitialAllocations } from "@/utils/dbHelpers";
+import { createInitialAllocations, getConfiguredSites } from "@/utils/dbHelpers";
 import { 
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { EskomSite } from "@/types/site";
 
 interface SiteAllocationsTableProps {
   navigateToSiteAllocation: () => void;
@@ -28,6 +30,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
 }) => {
   const [internalAllocations, setInternalAllocations] = useState([]);
   const [isInternalLoading, setIsInternalLoading] = useState(true);
+  const [configuredSites, setConfiguredSites] = useState<EskomSite[]>([]);
 
   // Use external data if provided, otherwise fetch data internally
   const allocations = externalAllocations || internalAllocations;
@@ -40,19 +43,27 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
         try {
           setIsInternalLoading(true);
           
-          // Initialize demo data if needed
-          await createInitialAllocations();
+          // Get configured sites from admin settings
+          const sites = await getConfiguredSites();
+          setConfiguredSites(sites);
           
-          // Fetch allocations
+          // Fetch existing allocations
           const { data, error } = await supabase
             .from('engineer_allocations')
             .select('*');
           
           if (error) throw error;
           
-          setInternalAllocations(data || []);
+          // Filter allocations to only include configured sites
+          const siteIds = sites.map(site => site.id);
+          const filteredAllocations = data?.filter(
+            allocation => siteIds.includes(allocation.site_id)
+          ) || [];
+          
+          setInternalAllocations(filteredAllocations);
         } catch (error) {
           console.error("Error fetching allocations:", error);
+          toast.error("Failed to load allocations");
         } finally {
           setIsInternalLoading(false);
         }

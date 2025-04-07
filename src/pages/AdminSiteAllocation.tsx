@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import EngineerAllocationDialog from "@/components/EngineerAllocationDialog";
-import { getConfiguredSites } from "@/utils/dbHelpers";
+import { getConfiguredSites, allocateSiteToEngineer } from "@/utils/dbHelpers";
 import { EskomSite } from "@/types/site";
 
 interface Engineer {
@@ -23,7 +23,7 @@ interface Engineer {
 }
 
 interface AllocationSite {
-  id: number;
+  id: number | string;
   name: string;
   priority: string;
   engineer: string | null;
@@ -39,7 +39,7 @@ const AdminSiteAllocation = () => {
   const [regions, setRegions] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<Engineer | null>(null);
-  const [selectedSites, setSelectedSites] = useState<number[]>([]);
+  const [selectedSites, setSelectedSites] = useState<(number | string)[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   
   useEffect(() => {
@@ -54,7 +54,7 @@ const AdminSiteAllocation = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch sites
+      // Fetch configured sites
       const sitesData = await getConfiguredSites();
       
       // Filter sites based on search and region filter
@@ -73,8 +73,9 @@ const AdminSiteAllocation = () => {
         .filter(Boolean) as string[])];
       setRegions(uniqueRegions);
       
-      // Fetch engineers (mock data for now)
+      // Fetch engineers from users admin
       // In a real implementation, you would fetch this from the database
+      // For now, we'll use mock data
       const mockEngineers: Engineer[] = [
         { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
         { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
@@ -96,7 +97,7 @@ const AdminSiteAllocation = () => {
     setIsDialogOpen(true);
   };
   
-  const handleToggleSite = (siteId: number) => {
+  const handleToggleSite = (siteId: number | string) => {
     setSelectedSites(prev => {
       if (prev.includes(siteId)) {
         return prev.filter(id => id !== siteId);
@@ -112,12 +113,18 @@ const AdminSiteAllocation = () => {
     setIsProcessing(true);
     
     try {
-      // In a real implementation, you would update the database
-      // For now, we'll just show a success message
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Process each selected site
+      for (const siteId of selectedSites) {
+        await allocateSiteToEngineer(
+          siteId.toString(), 
+          selectedEngineer.id.toString(),
+          selectedEngineer.name
+        );
+      }
       
       toast.success(`Successfully allocated ${selectedSites.length} site(s) to ${selectedEngineer.name}`);
       setIsDialogOpen(false);
+      
       // Refresh data
       fetchData();
     } catch (error) {
@@ -135,7 +142,7 @@ const AdminSiteAllocation = () => {
   
   const getSiteAllocationFormat = (sites: EskomSite[]): AllocationSite[] => {
     return sites.map(site => ({
-      id: parseInt(site.id),
+      id: site.id,
       name: site.name,
       priority: "medium", // Default priority
       engineer: null // No engineer assigned by default
@@ -170,7 +177,7 @@ const AdminSiteAllocation = () => {
                     <SelectValue placeholder="All Regions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
+                    <SelectItem value="">All Regions</SelectItem>
                     {regions.map(region => (
                       <SelectItem key={region} value={region}>
                         {region}

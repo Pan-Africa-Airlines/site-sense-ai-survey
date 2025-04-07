@@ -1,50 +1,37 @@
 
 import React from "react";
-import { Home, Car, HardHat, FileSpreadsheet } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Store, Car, FileText, Wrench, Map, Calendar } from "lucide-react";
 import { MainNavigationProps } from "./types";
 
 const MainNavigation: React.FC<MainNavigationProps> = ({ 
   isCompact = false, 
-  iconSize, 
-  activePaths, 
-  onNavigate 
+  iconSize,
+  activePaths,
+  onNavigate
 }) => {
+  const menuItems = [
+    { path: "/", icon: Store, label: "Dashboard", isActive: activePaths["/"] },
+    { path: "/car-checkup", icon: Car, label: "Vehicle Check", isActive: activePaths["/car-checkup"] },
+    { path: "/eskom-survey/new", icon: FileText, label: "Site Survey", isActive: activePaths["/eskom-survey"] },
+    { path: "/my-allocations", icon: Map, label: "My Allocations", isActive: activePaths["/my-allocations"] }
+  ];
+
+  const textStyle = isCompact ? 'text-xs' : 'text-sm';
+  
   return (
-    <div className="flex space-x-3">
-      <Button
-        variant={activePaths["/"] ? "default" : "ghost"}
-        size="sm"
-        onClick={() => onNavigate("/")}
-        className={`!transition-none !duration-0 ${activePaths["/"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
-      >
-        <Home className={`mr-1 ${iconSize}`} /> Dashboard
-      </Button>
-      <Button
-        variant={activePaths["/car-checkup"] ? "default" : "ghost"}
-        size="sm"
-        onClick={() => onNavigate("/car-checkup")}
-        className={`!transition-none !duration-0 ${activePaths["/car-checkup"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
-      >
-        <Car className={`mr-1 ${iconSize}`} /> Vehicle Check
-      </Button>
-      <Button
-        variant={activePaths["/eskom-survey"] ? "default" : "ghost"}
-        size="sm"
-        onClick={() => onNavigate("/eskom-survey/new")}
-        className={`!transition-none !duration-0 ${activePaths["/eskom-survey"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
-      >
-        <FileSpreadsheet className={`mr-1 ${iconSize}`} /> Eskom Survey
-      </Button>
-      <Button
-        variant={activePaths["/installation"] ? "default" : "ghost"}
-        size="sm"
-        onClick={() => onNavigate("/installation")}
-        className={`!transition-none !duration-0 ${activePaths["/installation"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
-      >
-        <HardHat className={`mr-1 ${iconSize}`} /> Installation
-      </Button>
-    </div>
+    <nav className="flex items-center justify-center space-x-2 lg:space-x-4">
+      {menuItems.map(item => (
+        <button
+          key={item.path}
+          className={`px-3 py-2 rounded-lg flex flex-col items-center transition-colors
+            ${item.isActive ? 'bg-white/10 text-white' : 'text-gray-300 hover:text-white hover:bg-white/5'}`}
+          onClick={() => onNavigate(item.path)}
+        >
+          <item.icon className={iconSize} />
+          <span className={`${textStyle} mt-1 font-medium`}>{item.label}</span>
+        </button>
+      ))}
+    </nav>
   );
 };
 

@@ -1,12 +1,13 @@
 
 import React, { useEffect, useState } from "react";
-import NavigationBar from "@/components/NavigationBar";
+import NavigationBar from "@/components/navigation/NavigationBar";
 import EngineerSiteList from "@/components/EngineerSiteList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { createInitialAllocations } from "@/utils/dbHelpers";
+import { getConfiguredSites } from "@/utils/dbHelpers";
+import { EskomSite } from "@/types/site";
 
 const MyAllocations = () => {
   const [pendingSites, setPendingSites] = useState([]);
@@ -19,14 +20,16 @@ const MyAllocations = () => {
       try {
         setIsLoading(true);
         
-        // Initialize demo data if needed
-        await createInitialAllocations();
+        // Get configured sites from admin settings
+        const configuredSites = await getConfiguredSites();
+        const configuredSiteIds = configuredSites.map(site => site.id);
         
         // Get pending allocations
         const { data: pendingData, error: pendingError } = await supabase
           .from('engineer_allocations')
           .select('*')
-          .neq('status', 'completed');
+          .neq('status', 'completed')
+          .in('site_id', configuredSiteIds);
         
         if (pendingError) {
           throw pendingError;
@@ -36,7 +39,8 @@ const MyAllocations = () => {
         const { data: completedData, error: completedError } = await supabase
           .from('engineer_allocations')
           .select('*')
-          .eq('status', 'completed');
+          .eq('status', 'completed')
+          .in('site_id', configuredSiteIds);
         
         if (completedError) {
           throw completedError;
