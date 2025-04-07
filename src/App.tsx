@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
@@ -20,39 +21,45 @@ import NotFound from './pages/NotFound';
 import Footer from './components/Footer';
 import { Toaster } from "sonner";
 import AdminSiteAllocation from './pages/AdminSiteAllocation';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a client
+const queryClient = new QueryClient();
 
 const App: React.FC = () => {
   return (
-    <div className="App">
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/installation" element={<Installation />} />
-          <Route path="/my-allocations" element={<MyAllocations />} />
-          <Route path="/car-checkup" element={<CarCheckup />} />
-          <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
-          <Route path="/eskom-survey/new" element={<EskomSurvey />} />
-          <Route path="/eskom-surveys" element={<EskomSurveys />} />
-          
-          {/* Admin routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/assessments" element={<AdminAssessments />} />
-          <Route path="/admin/installations" element={<AdminInstallations />} />
-          <Route path="/admin/map" element={<AdminMap />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/site-allocation" element={<AdminSiteAllocation />} />
-          <Route path="/configuration" element={<Configuration />} />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Footer />
-        <Toaster />
-      </Router>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div className="App">
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/assessment" element={<Assessment />} />
+            <Route path="/installation" element={<Installation />} />
+            <Route path="/my-allocations" element={<MyAllocations />} />
+            <Route path="/car-checkup" element={<CarCheckup />} />
+            <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
+            <Route path="/eskom-survey/new" element={<EskomSurvey />} />
+            <Route path="/eskom-surveys" element={<EskomSurveys />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/assessments" element={<AdminAssessments />} />
+            <Route path="/admin/installations" element={<AdminInstallations />} />
+            <Route path="/admin/map" element={<AdminMap />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/site-allocation" element={<AdminSiteAllocation />} />
+            <Route path="/configuration" element={<Configuration />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Footer />
+          <Toaster />
+        </Router>
+      </div>
+    </QueryClientProvider>
   );
 };
 
