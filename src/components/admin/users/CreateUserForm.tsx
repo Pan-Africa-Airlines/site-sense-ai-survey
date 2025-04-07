@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.string(),
   regions: z.string().array().min(1, "Please select at least one region"),
   experience: z.string().optional(),
@@ -38,6 +39,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
     defaultValues: {
       name: "",
       email: "",
+      password: "",
       role: "Field Engineer",
       regions: [],
       experience: "",
@@ -65,12 +67,33 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
     try {
       console.log("Creating new user with data:", data);
       
-      const newUserId = uuidv4();
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: data.email,
+        password: data.password,
+        email_confirm: true, // Skip email verification
+        user_metadata: {
+          name: data.name,
+          role: data.role
+        }
+      });
       
+      if (authError) {
+        console.error("Error creating auth user:", authError);
+        throw authError;
+      }
+      
+      const userId = authData?.user?.id;
+      
+      if (!userId) {
+        throw new Error("Failed to get user ID from auth response");
+      }
+      
+      // Then create the engineer profile
       const { data: newEngineer, error } = await supabase
         .from("engineer_profiles")
         .insert({
-          id: newUserId,
+          id: userId,
           name: data.name,
           email: data.email,
           specializations: [data.role],
@@ -82,7 +105,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
         .select();
       
       if (error) {
-        console.error("Error creating user:", error);
+        console.error("Error creating engineer profile:", error);
         throw error;
       }
       
@@ -106,7 +129,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
       setIsSheetOpen(false);
     } catch (error) {
       console.error("Error creating user:", error);
-      toast.error("Failed to create user");
+      toast.error(error.message || "Failed to create user");
     } finally {
       setIsSubmitting(false);
     }
@@ -170,6 +193,20 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="Email Address" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
