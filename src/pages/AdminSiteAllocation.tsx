@@ -90,34 +90,59 @@ const AdminSiteAllocation = () => {
         .filter(Boolean) as string[])];
       setRegions(uniqueRegions);
       
-      // Fetch engineers from Users admin
-      // In the real implementation, this would come from the database
-      // For now, let's fetch actual users with "Field Engineer" role
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('role', 'Field Engineer');
-      
-      if (userError) {
-        console.error("Error fetching users:", userError);
+      // Fetch engineers - let's create a user_roles table to track this properly
+      try {
+        // First check if we have a user_roles table
+        const { data: rolesCheck, error: rolesCheckError } = await supabase
+          .from('user_roles')
+          .select('id')
+          .limit(1);
+          
+        if (rolesCheckError || !rolesCheck) {
+          // Fall back to mock data if the table doesn't exist
+          console.log("Using mock engineer data");
+          const mockEngineers: Engineer[] = [
+            { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+            { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+            { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
+          ];
+          setEngineers(mockEngineers);
+        } else {
+          // Use the user_roles table to get engineers
+          const { data: engineerData, error: engineerError } = await supabase
+            .from('user_roles')
+            .select(`
+              id,
+              user_id,
+              profiles:user_id (
+                name,
+                email
+              )
+            `)
+            .eq('role', 'engineer');
+            
+          if (engineerError) throw engineerError;
+          
+          // Map user data to engineers format
+          const mappedEngineers = (engineerData || []).map(engineer => ({
+            id: engineer.user_id,
+            name: engineer.profiles?.name || 'Unknown Engineer',
+            status: "available", // Default to available
+            vehicle: "Not specified" // Default vehicle
+          }));
+          
+          setEngineers(mappedEngineers);
+        }
+      } catch (error) {
+        console.error("Error fetching engineers:", error);
         
-        // Fallback to mock data if the users table doesn't exist yet
+        // Fallback to mock data
         const mockEngineers: Engineer[] = [
           { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
           { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
           { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
         ];
         setEngineers(mockEngineers);
-      } else {
-        // Map user data to engineers format
-        const mappedEngineers = (userData || []).map(user => ({
-          id: user.id,
-          name: user.name || user.email,
-          status: user.status || "available",
-          vehicle: user.vehicle || "Not specified"
-        }));
-        
-        setEngineers(mappedEngineers);
       }
       
     } catch (error) {

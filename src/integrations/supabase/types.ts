@@ -44,6 +44,8 @@ export type Database = {
           address: string | null
           created_at: string
           distance: number | null
+          engineer_id: string | null
+          engineer_name: string | null
           id: string
           priority: string
           region: string
@@ -58,6 +60,8 @@ export type Database = {
           address?: string | null
           created_at?: string
           distance?: number | null
+          engineer_id?: string | null
+          engineer_name?: string | null
           id?: string
           priority?: string
           region: string
@@ -72,6 +76,8 @@ export type Database = {
           address?: string | null
           created_at?: string
           distance?: number | null
+          engineer_id?: string | null
+          engineer_name?: string | null
           id?: string
           priority?: string
           region?: string
@@ -155,6 +161,7 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          priority: string | null
           region: string | null
           type: string | null
         }
@@ -165,6 +172,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name: string
+          priority?: string | null
           region?: string | null
           type?: string | null
         }
@@ -175,6 +183,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          priority?: string | null
           region?: string | null
           type?: string | null
         }

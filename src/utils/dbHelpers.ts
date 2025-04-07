@@ -357,7 +357,7 @@ export const allocateSiteToEngineer = async (
           site_name: siteData.name,
           region: siteData.region || 'Unknown',
           status: 'assigned',
-          priority: 'medium',
+          priority: siteData.priority || 'medium',
           engineer_id: engineerId,
           engineer_name: engineerName,
           scheduled_date: new Date().toISOString().split('T')[0]
