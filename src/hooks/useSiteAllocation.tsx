@@ -54,10 +54,8 @@ export const useSiteAllocation = (initialSearchQuery = "", initialRegionFilter =
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch sites
       const sitesData = await getConfiguredSites();
       
-      // Filter sites based on search and region filter
       const filteredSites = sitesData.filter(site => {
         const matchesSearch = !searchQuery || 
           site.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -67,13 +65,11 @@ export const useSiteAllocation = (initialSearchQuery = "", initialRegionFilter =
       
       setSites(filteredSites);
       
-      // Extract unique regions for filter dropdown
       const uniqueRegions = [...new Set(sitesData
         .map(site => site.region)
         .filter(Boolean) as string[])];
       setRegions(uniqueRegions);
       
-      // Fetch allocations
       const { data: allocationData, error: allocationError } = await supabase
         .from('engineer_allocations')
         .select('*');
@@ -84,20 +80,16 @@ export const useSiteAllocation = (initialSearchQuery = "", initialRegionFilter =
       } else {
         setAllocations(allocationData || []);
         
-        // Count pending allocations
         const pendingCount = allocationData?.filter(a => a.status === 'pending').length || 0;
         setPendingAllocations(pendingCount);
       }
       
-      // Fetch engineers (mock data for now)
-      // In a real implementation, you would fetch this from the database
       const mockEngineers: Engineer[] = [
         { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
         { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
         { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
       ];
       
-      // Count allocated sites per engineer
       const engineersWithAllocations = mockEngineers.map(engineer => {
         const allocatedSites = allocationData?.filter(a => a.user_id === engineer.id).length || 0;
         return {
@@ -138,7 +130,6 @@ export const useSiteAllocation = (initialSearchQuery = "", initialRegionFilter =
     setIsProcessing(true);
     
     try {
-      // Prepare allocation data for batch insert
       const now = new Date().toISOString();
       const allocationsToInsert = selectedSites.map(siteId => {
         const site = sites.find(s => parseInt(s.id) === siteId);
@@ -147,16 +138,15 @@ export const useSiteAllocation = (initialSearchQuery = "", initialRegionFilter =
           site_id: site?.id.toString(),
           site_name: site?.name,
           region: site?.region,
-          address: site?.contact_name, // Using contact_name as a placeholder for address
-          priority: "medium", // Default priority
-          status: "allocated", // Set status to allocated
-          scheduled_date: now.split('T')[0], // Just the date part
+          address: site?.contact_name,
+          priority: "medium",
+          status: "allocated",
+          scheduled_date: now.split('T')[0],
           created_at: now,
           updated_at: now
         };
       });
       
-      // Batch insert allocations
       const { data, error } = await supabase
         .from('engineer_allocations')
         .insert(allocationsToInsert)
@@ -169,7 +159,6 @@ export const useSiteAllocation = (initialSearchQuery = "", initialRegionFilter =
       toast.success(`Successfully allocated ${selectedSites.length} site(s) to ${selectedEngineer.name}`);
       setIsDialogOpen(false);
       
-      // Refresh data
       fetchData();
     } catch (error) {
       console.error("Error allocating sites:", error);
@@ -188,8 +177,8 @@ export const useSiteAllocation = (initialSearchQuery = "", initialRegionFilter =
     return sites.map(site => ({
       id: parseInt(site.id),
       name: site.name,
-      priority: "medium", // Default priority
-      engineer: null // No engineer assigned by default
+      priority: "medium",
+      engineer: null
     }));
   };
   
