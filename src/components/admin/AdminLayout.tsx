@@ -14,19 +14,6 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean | null>(null);
   
   useEffect(() => {
-    // Set dark mode for admin screens
-    document.documentElement.classList.add('dark');
-    
-    // Clean up function to remove dark mode when navigating away
-    return () => {
-      // Check if the next route is not an admin route
-      if (!window.location.pathname.startsWith('/admin')) {
-        document.documentElement.classList.remove('dark');
-      }
-    };
-  }, []);
-  
-  useEffect(() => {
     const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
     setIsAdminAuthenticated(adminLoggedIn);
     
@@ -38,8 +25,6 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const handleLogout = () => {
     localStorage.removeItem("adminLoggedIn");
     localStorage.removeItem("adminUsername");
-    // Remove dark mode when logging out
-    document.documentElement.classList.remove('dark');
     toast({
       title: "Logged out",
       description: "You have been logged out of the admin panel."
@@ -51,7 +36,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   if (isMobile) {
     return (
-      <div className="flex flex-col h-screen dark">
+      <div className="flex flex-col h-screen">
         <MobileAdminNav
           adminUsername={adminUsername}
           handleLogout={handleLogout}
@@ -66,7 +51,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             { path: "/admin/configuration", icon: () => <></>, label: "Configuration" },
           ]}
         />
-        <div className="flex-1 overflow-auto bg-background">
+        <div className="flex-1 overflow-auto bg-gray-50">
           {children}
         </div>
       </div>
@@ -75,12 +60,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full dark">
+      <div className="flex min-h-screen w-full">
         <AdminSidebar 
           adminUsername={adminUsername}
           handleLogout={handleLogout}
         />
-        <div className="flex-1 overflow-auto bg-background">
+        <div className="flex-1 overflow-auto bg-gray-50">
           {children}
         </div>
       </div>
