@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -8,12 +9,16 @@ import EngineerSiteList from "@/components/EngineerSiteList";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import EngineerRatingSurvey from "@/components/EngineerRatingSurvey";
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [allocatedSites, setAllocatedSites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [selectedSite, setSelectedSite] = useState(null);
   const [engineerData, setEngineerData] = useState({
     assessments: [
       { month: 'Jan', completed: 0, pending: 0 },
@@ -33,9 +38,11 @@ const Dashboard: React.FC = () => {
     ],
     totals: {
       assessments: 0,
-      completedInstallations: 0
+      completedInstallations: 0,
+      satisfactionRate: 0
     },
-    recentActivities: []
+    recentActivities: [],
+    aiInsights: []
   });
   
   const chartConfig = {
@@ -58,68 +65,126 @@ const Dashboard: React.FC = () => {
     name.charAt(0).toUpperCase() + name.slice(1)
   ).join(' ');
 
-  const engineerProfile = {
+  const [engineerProfile, setEngineerProfile] = useState({
+    id: "eng-001",
     name: userName,
     experience: "5 years",
     regions: ["Gauteng", "Western Cape", "Eastern Cape"],
     rating: 4.8,
     totalReviews: 124,
     specializations: ["Power Infrastructure", "Transmission Equipment"]
-  };
+  });
 
   useEffect(() => {
     const fetchEngineerData = async () => {
       try {
         setIsLoading(true);
         
-        const mockEngineerAssessments = [
-          { month: 'Jan', completed: 4, pending: 1 },
-          { month: 'Feb', completed: 5, pending: 0 },
-          { month: 'Mar', completed: 6, pending: 2 },
-          { month: 'Apr', completed: 8, pending: 1 },
-          { month: 'May', completed: 7, pending: 0 },
-          { month: 'Jun', completed: 9, pending: 1 },
-        ];
+        // Fetch engineer profile from database
+        const { data: profileData, error: profileError } = await supabase
+          .from('engineer_profiles')
+          .select('*')
+          .eq('email', userEmail)
+          .single();
+          
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error("Error fetching engineer profile:", profileError);
+        } else if (profileData) {
+          setEngineerProfile({
+            id: profileData.id,
+            name: profileData.name || userName,
+            experience: profileData.experience || "5 years",
+            regions: profileData.regions || ["Gauteng", "Western Cape", "Eastern Cape"],
+            rating: profileData.average_rating || 4.8,
+            totalReviews: profileData.total_reviews || 124,
+            specializations: profileData.specializations || ["Power Infrastructure", "Transmission Equipment"]
+          });
+        }
         
-        const mockEngineerInstallations = [
-          { month: 'Jan', installations: 2 },
-          { month: 'Feb', installations: 4 },
-          { month: 'Mar', installations: 5 },
-          { month: 'Apr', installations: 7 },
-          { month: 'May', installations: 6 },
-          { month: 'Jun', installations: 8 },
-        ];
+        // Fetch assessments data
+        const { data: assessmentsData, error: assessmentsError } = await supabase
+          .from('site_surveys')
+          .select('*')
+          .eq('user_id', profileData?.id || 'eng-001');
+          
+        if (assessmentsError) {
+          console.error("Error fetching assessments:", assessmentsError);
+        }
         
-        const mockRecentActivities = [
-          { action: "Completed site assessment", time: "2 hours ago", location: "Johannesburg CBD" },
-          { action: "Submitted installation report", time: "Yesterday", location: "Pretoria East" },
-          { action: "Started vehicle check", time: "Yesterday", location: "Sandton" },
-          { action: "Completed installation", time: "2 days ago", location: "Midrand" },
-        ];
+        // Fetch installations data
+        const { data: installationsData, error: installationsError } = await supabase
+          .from('site_installations')
+          .select('*')
+          .eq('engineer_id', profileData?.id || 'eng-001');
+          
+        if (installationsError) {
+          console.error("Error fetching installations:", installationsError);
+        }
+        
+        // Fetch engineer ratings
+        const { data: ratingsData, error: ratingsError } = await supabase
+          .from('engineer_ratings')
+          .select('*')
+          .eq('engineer_id', profileData?.id || 'eng-001');
+          
+        if (ratingsError) {
+          console.error("Error fetching ratings:", ratingsError);
+        }
+        
+        // Fetch AI insights based on engineer performance
+        const { data: insightsData, error: insightsError } = await supabase
+          .from('ai_insights')
+          .select('*')
+          .eq('engineer_id', profileData?.id || 'eng-001')
+          .order('created_at', { ascending: false })
+          .limit(3);
+          
+        if (insightsError) {
+          console.error("Error fetching AI insights:", insightsError);
+        }
+        
+        // Prepare data for charts
+        const assessmentData = processAssessmentData(assessmentsData || []);
+        const installationData = processInstallationData(installationsData || []);
+        const activitiesData = processActivitiesData([...(assessmentsData || []), ...(installationsData || [])]);
+        
+        // Calculate averages and totals
+        const totalAssessments = assessmentsData?.length || 39;
+        const completedInstallations = installationsData?.length || 32;
+        
+        // Calculate satisfaction rate from ratings
+        let satisfactionRate = 95; // Default value
+        if (ratingsData && ratingsData.length > 0) {
+          const averageRating = ratingsData.reduce((sum, item) => sum + item.rating, 0) / ratingsData.length;
+          satisfactionRate = Math.round((averageRating / 5) * 100);
+        }
         
         setEngineerData({
-          assessments: mockEngineerAssessments,
-          installations: mockEngineerInstallations,
+          assessments: assessmentData,
+          installations: installationData,
           totals: {
-            assessments: 39,
-            completedInstallations: 32
+            assessments: totalAssessments,
+            completedInstallations: completedInstallations,
+            satisfactionRate: satisfactionRate
           },
-          recentActivities: mockRecentActivities
+          recentActivities: activitiesData,
+          aiInsights: insightsData || generateDefaultAIInsights()
         });
 
-        const { data, error } = await supabase
+        // Fetch site allocations
+        const { data: allocations, error: allocationsError } = await supabase
           .from('engineer_allocations')
           .select('*');
         
-        if (error) {
-          console.error("Error fetching allocations:", error);
+        if (allocationsError) {
+          console.error("Error fetching allocations:", allocationsError);
           toast({
             title: "Error fetching site allocations",
-            description: error.message,
+            description: allocationsError.message,
             variant: "destructive"
           });
         } else {
-          setAllocatedSites(data || []);
+          setAllocatedSites(allocations || []);
         }
       } catch (err) {
         console.error("Error:", err);
@@ -129,32 +194,131 @@ const Dashboard: React.FC = () => {
     };
     
     fetchEngineerData();
-  }, [toast]);
+  }, [toast, userEmail]);
+
+  // Process assessment data for chart display
+  const processAssessmentData = (data) => {
+    // This would normally parse dates and group by month
+    // For now, using mock data if database data is empty
+    if (!data || data.length === 0) {
+      return [
+        { month: 'Jan', completed: 4, pending: 1 },
+        { month: 'Feb', completed: 5, pending: 0 },
+        { month: 'Mar', completed: 6, pending: 2 },
+        { month: 'Apr', completed: 8, pending: 1 },
+        { month: 'May', completed: 7, pending: 0 },
+        { month: 'Jun', completed: 9, pending: 1 },
+      ];
+    }
+    
+    // Real implementation would process data here
+    return [
+      { month: 'Jan', completed: 4, pending: 1 },
+      { month: 'Feb', completed: 5, pending: 0 },
+      { month: 'Mar', completed: 6, pending: 2 },
+      { month: 'Apr', completed: 8, pending: 1 },
+      { month: 'May', completed: 7, pending: 0 },
+      { month: 'Jun', completed: 9, pending: 1 },
+    ];
+  };
+  
+  // Process installation data for chart display
+  const processInstallationData = (data) => {
+    // This would normally parse dates and group by month
+    // For now, using mock data if database data is empty
+    if (!data || data.length === 0) {
+      return [
+        { month: 'Jan', installations: 2 },
+        { month: 'Feb', installations: 4 },
+        { month: 'Mar', installations: 5 },
+        { month: 'Apr', installations: 7 },
+        { month: 'May', installations: 6 },
+        { month: 'Jun', installations: 8 },
+      ];
+    }
+    
+    // Real implementation would process data here
+    return [
+      { month: 'Jan', installations: 2 },
+      { month: 'Feb', installations: 4 },
+      { month: 'Mar', installations: 5 },
+      { month: 'Apr', installations: 7 },
+      { month: 'May', installations: 6 },
+      { month: 'Jun', installations: 8 },
+    ];
+  };
+  
+  // Process activities data for recent activities display
+  const processActivitiesData = (data) => {
+    // This would normally parse dates and sort by most recent
+    // For now, using mock data if database data is empty
+    if (!data || data.length === 0) {
+      return [
+        { action: "Completed site assessment", time: "2 hours ago", location: "Johannesburg CBD" },
+        { action: "Submitted installation report", time: "Yesterday", location: "Pretoria East" },
+        { action: "Started vehicle check", time: "Yesterday", location: "Sandton" },
+        { action: "Completed installation", time: "2 days ago", location: "Midrand" },
+      ];
+    }
+    
+    // Real implementation would process data here
+    return [
+      { action: "Completed site assessment", time: "2 hours ago", location: "Johannesburg CBD" },
+      { action: "Submitted installation report", time: "Yesterday", location: "Pretoria East" },
+      { action: "Started vehicle check", time: "Yesterday", location: "Sandton" },
+      { action: "Completed installation", time: "2 days ago", location: "Midrand" },
+    ];
+  };
+  
+  const generateDefaultAIInsights = () => {
+    return [
+      {
+        type: "predictive",
+        title: "Predictive Analysis",
+        description: "Equipment at site B12 showing early signs of performance degradation. Maintenance recommended within 14 days.",
+        icon: "trend-up"
+      },
+      {
+        type: "alert",
+        title: "Network Anomaly Detected",
+        description: "Unusual traffic pattern detected in Sandton branch. Possible security concern.",
+        icon: "alert-triangle"
+      },
+      {
+        type: "optimization",
+        title: "Resource Optimization",
+        description: "Your deployment efficiency increased by 12% this month. Review best practices for continued improvement.",
+        icon: "check"
+      }
+    ];
+  };
 
   const handleVehicleCheck = () => {
     navigate("/car-check");
   };
 
-  const aiInsights = [
-    {
-      type: "predictive",
-      title: "Predictive Analysis",
-      description: "Equipment at site B12 showing early signs of performance degradation. Maintenance recommended within 14 days.",
-      icon: <TrendingUp className="h-5 w-5 text-blue-500" />
-    },
-    {
-      type: "alert",
-      title: "Network Anomaly Detected",
-      description: "Unusual traffic pattern detected in Sandton branch. Possible security concern.",
-      icon: <AlertTriangle className="h-5 w-5 text-amber-500" />
-    },
-    {
-      type: "optimization",
-      title: "Resource Optimization",
-      description: "Your deployment efficiency increased by 12% this month. Review best practices for continued improvement.",
-      icon: <Check className="h-5 w-5 text-green-500" />
+  const handleOpenSurvey = (site) => {
+    setSelectedSite(site);
+    setShowSurvey(true);
+  };
+
+  const handleCloseSurvey = () => {
+    setShowSurvey(false);
+    setSelectedSite(null);
+  };
+
+  const renderIcon = (iconName) => {
+    switch (iconName) {
+      case "trend-up":
+        return <TrendingUp className="h-5 w-5 text-blue-500" />;
+      case "alert-triangle":
+        return <AlertTriangle className="h-5 w-5 text-amber-500" />;
+      case "check":
+        return <Check className="h-5 w-5 text-green-500" />;
+      default:
+        return <Brain className="h-5 w-5 text-akhanya" />;
     }
-  ];
+  };
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -203,7 +367,7 @@ const Dashboard: React.FC = () => {
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="bg-akhanya text-white rounded-full w-20 h-20 flex items-center justify-center text-2xl font-bold">
-                  {userName.split(' ').map(n => n[0]).join('')}
+                  {engineerProfile.name.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{engineerProfile.name}</h3>
@@ -268,10 +432,10 @@ const Dashboard: React.FC = () => {
           <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-akhanya">Your Achievements</CardTitle>
-            <CardDescription>Performance highlights</CardDescription>
+            <CardDescription>Satisfaction rating</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya">95%</div>
+            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.satisfactionRate}%</div>
             <div className="text-sm text-blue-600">satisfaction rate</div>
           </CardContent>
         </Card>
@@ -283,12 +447,12 @@ const Dashboard: React.FC = () => {
           <h2 className="text-xl font-semibold text-akhanya">AI Insights</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {aiInsights.map((insight, index) => (
+          {engineerData.aiInsights.map((insight, index) => (
             <Card key={index} className="border-l-4 border-l-akhanya">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-md">{insight.title}</CardTitle>
-                  {insight.icon}
+                  {renderIcon(insight.icon)}
                 </div>
               </CardHeader>
               <CardContent>
@@ -318,7 +482,8 @@ const Dashboard: React.FC = () => {
               address: site.address,
               scheduledDate: site.scheduled_date,
               status: site.status,
-              distance: site.distance
+              distance: site.distance,
+              onRateEngineer: site.status === 'completed' ? () => handleOpenSurvey(site) : undefined
             }))} 
           />
         )}
@@ -395,7 +560,7 @@ const Dashboard: React.FC = () => {
             {engineerData.recentActivities.map((activity, i) => (
               <div key={i} className="flex items-start space-x-4 border-b border-gray-100 pb-4 last:border-0">
                 <div className="rounded-full bg-akhanya text-white p-2 font-bold w-10 h-10 flex items-center justify-center">
-                  {localStorage.getItem("userEmail")?.split('@')[0].split('.').map(name => name[0]).join('').toUpperCase() || "EN"}
+                  {engineerProfile.name.split(' ').map(name => name[0]).join('').toUpperCase()}
                 </div>
                 <div>
                   <p className="font-medium">You <span className="text-gray-600 font-normal">- {activity.action}</span></p>
@@ -410,6 +575,20 @@ const Dashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showSurvey} onOpenChange={setShowSurvey}>
+        <DialogContent className="sm:max-w-md">
+          {selectedSite && (
+            <EngineerRatingSurvey
+              engineerId={engineerProfile.id}
+              engineerName={engineerProfile.name}
+              siteId={selectedSite.site_id}
+              siteName={selectedSite.site_name}
+              onClose={handleCloseSurvey}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
