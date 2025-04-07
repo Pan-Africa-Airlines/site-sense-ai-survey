@@ -1,22 +1,14 @@
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Trash, Edit, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-// Define a type for Eskom sites that matches the database structure
-interface Site {
-  id: string;
-  name: string;
-  type: string | null;
-  created_at?: string;
-}
+import { EskomSite } from "@/types/site";
+import AddSiteForm from "./eskom-site/AddSiteForm";
+import SitesList from "./eskom-site/SitesList";
 
 const EskomSiteConfiguration = () => {
-  const [sites, setSites] = useState<Site[]>([]);
+  const [sites, setSites] = useState<EskomSite[]>([]);
   const [newSiteName, setNewSiteName] = useState("");
   const [newSiteType, setNewSiteType] = useState("");
   const [loading, setLoading] = useState(true);
@@ -33,8 +25,7 @@ const EskomSiteConfiguration = () => {
         .order("name");
 
       if (error) throw error;
-      // Use type assertion to ensure data matches our Site interface
-      setSites((data || []) as Site[]);
+      setSites((data || []) as EskomSite[]);
     } catch (error) {
       console.error("Error fetching sites:", error);
       toast.error("Failed to load sites");
@@ -61,7 +52,7 @@ const EskomSiteConfiguration = () => {
 
       if (error) throw error;
       
-      setSites([...sites, (data[0] as Site)]);
+      setSites([...sites, (data[0] as EskomSite)]);
       setNewSiteName("");
       setNewSiteType("");
       toast.success("Site added successfully");
@@ -88,7 +79,7 @@ const EskomSiteConfiguration = () => {
     }
   };
 
-  const startEditing = (site: Site) => {
+  const startEditing = (site: EskomSite) => {
     setEditingId(site.id);
     setEditName(site.name);
     setEditType(site.type || "");
@@ -133,80 +124,27 @@ const EskomSiteConfiguration = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Site Name"
-              value={newSiteName}
-              onChange={(e) => setNewSiteName(e.target.value)}
-              className="flex-1"
-            />
-            <Input
-              placeholder="Site Type (optional)"
-              value={newSiteType}
-              onChange={(e) => setNewSiteType(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleAddSite} className="whitespace-nowrap">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Site
-            </Button>
-          </div>
+          <AddSiteForm 
+            newSiteName={newSiteName}
+            setNewSiteName={setNewSiteName}
+            newSiteType={newSiteType}
+            setNewSiteType={setNewSiteType}
+            handleAddSite={handleAddSite}
+          />
 
-          <div className="rounded-md border">
-            <div className="grid grid-cols-12 gap-4 p-4 font-medium border-b">
-              <div className="col-span-5">Site Name</div>
-              <div className="col-span-5">Site Type</div>
-              <div className="col-span-2">Actions</div>
-            </div>
-            
-            {loading ? (
-              <div className="p-4 text-center">Loading sites...</div>
-            ) : sites.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">No sites configured</div>
-            ) : (
-              sites.map((site) => (
-                <div key={site.id} className="grid grid-cols-12 gap-4 p-4 border-b last:border-0">
-                  {editingId === site.id ? (
-                    <>
-                      <div className="col-span-5">
-                        <Input
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                        />
-                      </div>
-                      <div className="col-span-5">
-                        <Input
-                          value={editType}
-                          onChange={(e) => setEditType(e.target.value)}
-                        />
-                      </div>
-                      <div className="col-span-2 flex space-x-1">
-                        <Button size="sm" variant="ghost" onClick={() => saveEdit(site.id)}>
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={cancelEditing}>
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="col-span-5">{site.name}</div>
-                      <div className="col-span-5">{site.type || "-"}</div>
-                      <div className="col-span-2 flex space-x-1">
-                        <Button size="sm" variant="ghost" onClick={() => startEditing(site)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteSite(site.id)}>
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+          <SitesList 
+            sites={sites}
+            loading={loading}
+            editingId={editingId}
+            editName={editName}
+            editType={editType}
+            setEditName={setEditName}
+            setEditType={setEditType}
+            startEditing={startEditing}
+            cancelEditing={cancelEditing}
+            saveEdit={saveEdit}
+            handleDeleteSite={handleDeleteSite}
+          />
         </div>
       </CardContent>
     </Card>
