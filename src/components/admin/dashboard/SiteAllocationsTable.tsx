@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
+import { MapPin, Loader } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface SiteAllocationsTableProps {
   engineerAllocations: any[];
@@ -17,6 +18,19 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
   isLoading,
   navigateToSiteAllocation
 }) => {
+  const [formattedAllocations, setFormattedAllocations] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Format and prepare allocation data
+    if (engineerAllocations && engineerAllocations.length > 0) {
+      setFormattedAllocations(engineerAllocations);
+      console.log("SiteAllocationsTable: Allocations loaded:", engineerAllocations.length);
+    } else {
+      console.log("SiteAllocationsTable: No allocations available");
+      setFormattedAllocations([]);
+    }
+  }, [engineerAllocations]);
+
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold mb-4 flex items-center justify-between text-akhanya">
@@ -34,7 +48,8 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
       <Card>
         <CardContent className="p-6">
           {isLoading ? (
-            <div className="py-4 text-center">
+            <div className="py-4 text-center flex items-center justify-center space-x-2">
+              <Loader className="h-5 w-5 animate-spin" />
               <p className="text-gray-500">Loading allocations...</p>
             </div>
           ) : (
@@ -50,8 +65,8 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {engineerAllocations.length > 0 ? (
-                  engineerAllocations.map((site) => (
+                {formattedAllocations.length > 0 ? (
+                  formattedAllocations.map((site) => (
                     <TableRow key={site.id}>
                       <TableCell className="font-medium">{site.site_name}</TableCell>
                       <TableCell>{site.region}</TableCell>
@@ -85,7 +100,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-4">
-                      No site allocations found
+                      No site allocations found. Please create some allocations in the Site Allocation page.
                     </TableCell>
                   </TableRow>
                 )}
