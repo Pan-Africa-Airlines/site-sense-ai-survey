@@ -47,11 +47,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
   ];
 
   return (
-    <Sidebar className="border-r">
+    <Sidebar className="border-r-0">
       <SidebarHeader className="space-y-2">
         <div className="p-4 flex flex-col items-center gap-3">
           {/* BCX Logo */}
-          <BCXLogo className="h-12 w-full" />
+          <BCXLogo className="h-12 w-full brightness-0 invert" />
           
           {/* Add Separator */}
           <SidebarSeparator />
@@ -61,7 +61,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
             <img 
               src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
               alt="Akhanya IT" 
-              className="h-8" 
+              className="h-8 brightness-0 invert" 
               onError={(e) => {
                 e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
               }}
@@ -97,7 +97,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
       <SidebarFooter>
         <div className="p-4">
           <div className="flex items-center gap-3 mb-4">
-            <Avatar className="h-10 w-10 border-2 border-gray-200">
+            <Avatar className="h-10 w-10 border-2 border-white/10">
               <AvatarFallback className="bg-red-600 text-white text-lg">
                 {adminUsername.substring(0, 2).toUpperCase()}
               </AvatarFallback>
