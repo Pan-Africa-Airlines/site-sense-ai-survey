@@ -7,7 +7,7 @@ import { Shield, Car } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getLatestVehicleCheck, saveVehicleCheck } from "@/utils/dbHelpers";
+import { getLatestVehicleCheck, saveVehicleCheck } from "@/utils/db";
 import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
 import AIVehicleInspection from "@/components/AIVehicleInspection";
 

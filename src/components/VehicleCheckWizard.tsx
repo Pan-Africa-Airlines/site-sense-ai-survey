@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import VoicePrompt from './VoicePrompt';
-import { saveVehicleCheck } from '@/utils/dbHelpers';
+import { saveVehicleCheck } from '@/utils/db';
 
 import { 
   Car, 
