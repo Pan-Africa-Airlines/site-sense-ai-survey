@@ -43,11 +43,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
     { path: "/admin/users", icon: Users, label: "Users" },
     { path: "/admin/map", icon: Map, label: "Map" },
     { path: "/admin/site-allocation", icon: MapPin, label: "Site Allocation" },
-    { path: "/configuration", icon: Cog, label: "Configuration" },
+    { path: "/admin/configuration", icon: Cog, label: "Configuration" },
   ];
 
   return (
-    <Sidebar>
+    <Sidebar className="border-r-0">
       <SidebarHeader className="space-y-2">
         <div className="p-4 flex flex-col items-center gap-3">
           {/* BCX Logo */}
@@ -70,7 +70,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
           
           {/* Admin Label */}
           <div className="flex items-center gap-2 mt-2 w-full justify-between">
-            <div className="text-sidebar-foreground font-bold text-lg">Admin Panel</div>
+            <div className="text-sidebar-foreground font-bold text-xl">Admin Panel</div>
             <div className="text-xs bg-red-600 text-white px-2 py-1 rounded">BACKOFFICE</div>
           </div>
         </div>
@@ -84,6 +84,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
                 onClick={() => navigate(item.path)}
                 isActive={isActive(item.path)}
                 tooltip={item.label}
+                className="text-base py-3"
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
@@ -96,14 +97,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
       <SidebarFooter>
         <div className="p-4">
           <div className="flex items-center gap-3 mb-4">
-            <Avatar className="h-9 w-9 border-2 border-white/10">
-              <AvatarFallback className="bg-red-600 text-white">
+            <Avatar className="h-10 w-10 border-2 border-white/10">
+              <AvatarFallback className="bg-red-600 text-white text-lg">
                 {adminUsername.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <div className="text-sm font-medium text-sidebar-foreground">{adminUsername}</div>
-              <div className="text-xs text-sidebar-foreground/70">Administrator</div>
+              <div className="text-base font-medium text-sidebar-foreground">{adminUsername}</div>
+              <div className="text-sm text-sidebar-foreground/70">Administrator</div>
             </div>
           </div>
           
@@ -111,9 +112,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
             variant="outline" 
             size="sm" 
             onClick={handleLogout}
-            className="w-full justify-start bg-sidebar-accent text-sidebar-foreground border-sidebar-border hover:bg-sidebar-accent/80"
+            className="w-full justify-start bg-sidebar-accent text-sidebar-foreground border-sidebar-border hover:bg-sidebar-accent/80 text-base py-5"
           >
-            <LogOut className="w-4 h-4 mr-2" /> Logout
+            <LogOut className="w-5 h-5 mr-2" /> Logout
           </Button>
         </div>
       </SidebarFooter>

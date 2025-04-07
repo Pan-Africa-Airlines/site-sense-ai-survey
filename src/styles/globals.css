@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -28,8 +27,8 @@
     --akhanya: 194 100% 42%;
     --akhanya-dark: 194 100% 38%;
     
-    /* Sidebar */
-    --sidebar: 0 0% 10%; /* Darker black */
+    /* Sidebar - Dark theme */
+    --sidebar: 0 0% 10%; /* Dark black background */
     --sidebar-foreground: 0 0% 98%; /* Off-white text */
     --sidebar-border: 0 0% 15%; /* Slightly lighter border */
     --sidebar-accent: 0 0% 18%; /* Hover state */
@@ -58,8 +57,8 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
     
-    /* Sidebar */
-    --sidebar: 0 0% 10%; /* Keep the same dark sidebar in dark mode */
+    /* Sidebar - Keep dark theme in dark mode too */
+    --sidebar: 0 0% 10%; /* Dark black background */
     --sidebar-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-accent: 217.2 32.6% 17.5%;
