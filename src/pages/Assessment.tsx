@@ -7,6 +7,7 @@ import SiteAssessmentForm from "@/components/SiteAssessmentForm";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { useAI } from "@/contexts/AIContext";
 import { Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Mock site data based on siteId
 const MOCK_SITE_DATA: Record<string, any> = {
@@ -35,6 +36,7 @@ const MOCK_SITE_DATA: Record<string, any> = {
 
 const Assessment = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
+  const [configSites, setConfigSites] = useState<any[]>([]);
   const { isProcessing } = useAI();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draftId');
@@ -42,6 +44,37 @@ const Assessment = () => {
   
   // Get the site data based on siteId
   const siteData = siteId ? MOCK_SITE_DATA[siteId] || {} : {};
+
+  useEffect(() => {
+    const fetchConfiguredSites = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("eskom_sites")
+          .select("*")
+          .order("name");
+
+        if (error) throw error;
+        setConfigSites(data || []);
+        
+        // Add configured sites to MOCK_SITE_DATA
+        if (data && data.length > 0) {
+          data.forEach((site, index) => {
+            const siteKey = (100 + index).toString();
+            MOCK_SITE_DATA[siteKey] = {
+              siteName: site.name,
+              siteType: site.type || "Not specified",
+              customerName: "Eskom Holdings",
+              region: "Gauteng" // Default region
+            };
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching configured sites:", error);
+      }
+    };
+
+    fetchConfiguredSites();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,7 +110,7 @@ const Assessment = () => {
         </div>
         <SiteAssessmentForm 
           showAIRecommendations={showAIRecommendations}
-          initialData={siteData}
+          initialData={{...siteData, configSites}}
         />
       </div>
     </div>

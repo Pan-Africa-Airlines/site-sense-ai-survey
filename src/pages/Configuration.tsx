@@ -9,6 +9,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import EskomSiteConfiguration from "@/components/EskomSiteConfiguration";
 
 const Configuration = () => {
   const navigate = useNavigate();
@@ -58,14 +59,19 @@ const Configuration = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6">
+          <TabsList className="grid grid-cols-4 mb-6">
             <TabsTrigger value="assessment">Field Configuration</TabsTrigger>
+            <TabsTrigger value="eskomSites">Eskom Sites</TabsTrigger>
             <TabsTrigger value="savedDrafts">Assessment Drafts</TabsTrigger>
             <TabsTrigger value="eskomDrafts">Eskom Drafts</TabsTrigger>
           </TabsList>
           
           <TabsContent value="assessment">
             <FormFieldsConfiguration />
+          </TabsContent>
+          
+          <TabsContent value="eskomSites">
+            <EskomSiteConfiguration />
           </TabsContent>
           
           <TabsContent value="savedDrafts">

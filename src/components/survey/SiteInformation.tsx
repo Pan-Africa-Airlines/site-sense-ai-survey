@@ -1,9 +1,12 @@
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ImageCapture from "@/components/ImageCapture";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SiteInformationProps {
   formData: any;
@@ -16,11 +19,60 @@ const SiteInformation: React.FC<SiteInformationProps> = ({
   onInputChange,
   showAIRecommendations = false
 }) => {
+  const [sites, setSites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // South African regions
+  const saRegions = [
+    "Gauteng",
+    "Western Cape",
+    "Eastern Cape",
+    "KwaZulu-Natal",
+    "Free State",
+    "North West",
+    "Mpumalanga",
+    "Limpopo",
+    "Northern Cape"
+  ];
+
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from("eskom_sites")
+          .select("*")
+          .order("name");
+
+        if (error) throw error;
+        setSites(data || []);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSites();
+  }, []);
+
+  const handleSiteChange = (siteName: string) => {
+    // Find the selected site
+    const selectedSite = sites.find(site => site.name === siteName);
+    
+    onInputChange("siteName", siteName);
+    
+    // If site has a type, update that too
+    if (selectedSite?.type) {
+      onInputChange("siteType", selectedSite.type);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-center mb-6">
         <img 
-          src="public/lovable-uploads/f4bbbf20-b8f5-4f87-8a68-bd14981cef3e.png" 
+          src="/lovable-uploads/f4bbbf20-b8f5-4f87-8a68-bd14981cef3e.png" 
           alt="BCX Logo" 
           className="h-20 object-contain" 
         />
@@ -37,11 +89,32 @@ const SiteInformation: React.FC<SiteInformationProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="siteName">Site Name</Label>
-              <Input
-                id="siteName"
-                value={formData.siteName}
-                onChange={(e) => onInputChange("siteName", e.target.value)}
-              />
+              {loading ? (
+                <Input value="Loading sites..." disabled />
+              ) : sites.length > 0 ? (
+                <Select 
+                  value={formData.siteName} 
+                  onValueChange={handleSiteChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a site" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sites.map((site) => (
+                      <SelectItem key={site.id} value={site.name}>
+                        {site.name} {site.type ? `(${site.type})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="siteName"
+                  value={formData.siteName}
+                  onChange={(e) => onInputChange("siteName", e.target.value)}
+                  placeholder="Enter site name or configure sites in admin"
+                />
+              )}
             </div>
             
             <div className="space-y-2">
@@ -64,11 +137,21 @@ const SiteInformation: React.FC<SiteInformationProps> = ({
             
             <div className="space-y-2">
               <Label htmlFor="region">Region</Label>
-              <Input
-                id="region"
-                value={formData.region}
-                onChange={(e) => onInputChange("region", e.target.value)}
-              />
+              <Select 
+                value={formData.region} 
+                onValueChange={(value) => onInputChange("region", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a region" />
+                </SelectTrigger>
+                <SelectContent>
+                  {saRegions.map((region) => (
+                    <SelectItem key={region} value={region}>
+                      {region}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
