@@ -165,7 +165,16 @@ export const useDashboardData = () => {
           
         const installationsCount = installations?.length || 32; // Fallback to mock data
         
-        // Get vehicle check count
+        // Get site assessment count from site_surveys table
+        const { data: siteAssessments, error: assessmentsError } = await supabase
+          .from('site_surveys')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        // Calculate total assessments count
+        const assessmentsCount = siteAssessments?.length || 0;
+        
+        // Get vehicle check count for fallback if needed
         const { data: vehicleChecks, error: vehicleChecksError } = await supabase
           .from('vehicle_checks')
           .select('*')
@@ -188,9 +197,9 @@ export const useDashboardData = () => {
           installations: processInstallationData([])
         });
         
-        // Set totals
+        // Set totals - use real assessments count with fallback
         setTotals({
-          assessments: vehicleChecks?.length || 39, // Mock fallback
+          assessments: assessmentsCount || vehicleChecks?.length || 39, // Use real data with fallback
           completedInstallations: installationsCount,
           satisfactionRate: satisfactionRate
         });
