@@ -3,19 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClipboardList, HardHat, Car, Clock } from "lucide-react";
 
-interface DashboardStatsCardsProps {
-  totalAssessments?: number;
-  totalInstallations?: number;
-  totalVehicleChecks?: number;
-  pendingApprovals?: number;
-}
-
-const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
-  totalAssessments = 32,
-  totalInstallations = 18,
-  totalVehicleChecks = 27,
-  pendingApprovals = 8
-}) => {
+const DashboardStatsCards = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <Card>
@@ -26,7 +14,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Assessments</p>
-              <h3 className="text-2xl font-bold">{totalAssessments}</h3>
+              <h3 className="text-2xl font-bold">32</h3>
             </div>
           </div>
         </CardContent>
@@ -40,7 +28,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Installations</p>
-              <h3 className="text-2xl font-bold">{totalInstallations}</h3>
+              <h3 className="text-2xl font-bold">18</h3>
             </div>
           </div>
         </CardContent>
@@ -54,7 +42,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Vehicle Checks</p>
-              <h3 className="text-2xl font-bold">{totalVehicleChecks}</h3>
+              <h3 className="text-2xl font-bold">27</h3>
             </div>
           </div>
         </CardContent>
@@ -68,7 +56,7 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Pending Approvals</p>
-              <h3 className="text-2xl font-bold">{pendingApprovals}</h3>
+              <h3 className="text-2xl font-bold">8</h3>
             </div>
           </div>
         </CardContent>
