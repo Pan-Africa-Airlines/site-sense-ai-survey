@@ -14,15 +14,15 @@ import {
 } from "@/components/ui/tooltip";
 
 interface SiteAllocationsTableProps {
-  engineerAllocations: any[];
-  isLoading: boolean;
-  navigateToSiteAllocation: () => void;
+  engineerAllocations?: any[];
+  isLoading?: boolean;
+  navigateToSiteAllocation?: () => void;
 }
 
 const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
-  engineerAllocations,
-  isLoading,
-  navigateToSiteAllocation
+  engineerAllocations = [],
+  isLoading = false,
+  navigateToSiteAllocation = () => {}
 }) => {
   return (
     <div className="mb-8">
