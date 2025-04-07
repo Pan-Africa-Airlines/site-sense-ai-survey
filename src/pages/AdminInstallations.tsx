@@ -1,114 +1,97 @@
 
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import AdminNavBar from "@/components/AdminNavBar";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, FileText, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-
-// Mock data for installations
-const MOCK_INSTALLATIONS = [
-  { 
-    id: 1, 
-    siteName: "Western Cape Sub-Station", 
-    date: "2025-03-15", 
-    engineer: "John Doe", 
-    status: "Completed",
-    equipmentInstalled: "Router, Switch, UPS",
-    region: "Western Cape"
-  },
-  { 
-    id: 2, 
-    siteName: "Gauteng Distribution Center", 
-    date: "2025-03-25", 
-    engineer: "Jane Smith", 
-    status: "In Progress",
-    equipmentInstalled: "Router, Firewall",
-    region: "Gauteng"
-  },
-  { 
-    id: 3, 
-    siteName: "KZN Main Station", 
-    date: "2025-04-02", 
-    engineer: "Steve Johnson", 
-    status: "Scheduled",
-    equipmentInstalled: "Pending",
-    region: "KwaZulu-Natal"
-  },
-  { 
-    id: 4, 
-    siteName: "Eastern Cape Sub-Station", 
-    date: "2025-03-10", 
-    engineer: "Mary Williams", 
-    status: "Completed",
-    equipmentInstalled: "Router, Switch, Security Gateway",
-    region: "Eastern Cape"
-  },
-  { 
-    id: 5, 
-    siteName: "Northern Cape Power Plant", 
-    date: "2025-04-10", 
-    engineer: "Unassigned", 
-    status: "Scheduled",
-    equipmentInstalled: "Pending",
-    region: "Northern Cape"
-  },
-];
+import { Search, Filter, Download, Eye, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const AdminInstallations = () => {
-  const [installations, setInstallations] = useState(MOCK_INSTALLATIONS);
+  const navigate = useNavigate();
   
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-            <CheckCircle2 className="h-3 w-3 mr-1" /> Completed
-          </Badge>
-        );
-      case "In Progress":
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-            <Clock className="h-3 w-3 mr-1" /> In Progress
-          </Badge>
-        );
-      case "Scheduled":
-        return (
-          <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">
-            <AlertTriangle className="h-3 w-3 mr-1" /> Scheduled
-          </Badge>
-        );
-      default:
-        return <Badge>{status}</Badge>;
+  useEffect(() => {
+    const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
+    if (!adminLoggedIn) {
+      navigate("/admin/login");
     }
-  };
-
+  }, [navigate]);
+  
+  // Mock data
+  const installations = [
+    { id: 1, siteName: "Eskom Substation A", engineer: "John Doe", installDate: "2025-04-10", status: "completed" },
+    { id: 2, siteName: "Power Station B", engineer: "Jane Smith", installDate: "2025-04-15", status: "scheduled" },
+    { id: 3, siteName: "Transmission Tower C", engineer: "Robert Johnson", installDate: "2025-04-20", status: "in-progress" },
+    { id: 4, siteName: "Distribution Center D", engineer: "Sarah Williams", installDate: "2025-03-28", status: "completed" },
+    { id: 5, siteName: "Renewable Plant E", engineer: "Michael Brown", installDate: "2025-03-25", status: "completed" },
+    { id: 6, siteName: "Substation F", engineer: "Emily Jones", installDate: "2025-05-05", status: "scheduled" },
+    { id: 7, siteName: "Power Station G", engineer: "David Wilson", installDate: "2025-05-10", status: "scheduled" },
+    { id: 8, siteName: "Control Room H", engineer: "Lisa Taylor", installDate: "2025-04-05", status: "delayed" },
+  ];
+  
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <AdminNavBar />
-      
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Installation Management</h1>
-          <Button className="bg-red-600 hover:bg-red-700">
-            <PlusCircle className="mr-2 h-4 w-4" /> Add New Installation
-          </Button>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6 text-akhanya">Installations</h1>
         
-        <Card>
-          <CardHeader className="bg-gray-50">
-            <CardTitle>Network Equipment Installations</CardTitle>
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle>Filters</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex items-center relative flex-1">
+                <Search className="absolute left-2 h-4 w-4 text-gray-500" />
+                <Input placeholder="Search installations..." className="pl-8" />
+              </div>
+              <div className="flex gap-4">
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="delayed">Delayed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Date Range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this-week">This Week</SelectItem>
+                    <SelectItem value="this-month">This Month</SelectItem>
+                    <SelectItem value="next-month">Next Month</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="icon">
+                  <Filter className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>ID</TableHead>
                   <TableHead>Site Name</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Region</TableHead>
                   <TableHead>Engineer</TableHead>
-                  <TableHead>Equipment</TableHead>
+                  <TableHead>Install Date</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -116,15 +99,29 @@ const AdminInstallations = () => {
               <TableBody>
                 {installations.map((installation) => (
                   <TableRow key={installation.id}>
-                    <TableCell className="font-medium">{installation.siteName}</TableCell>
-                    <TableCell>{installation.date}</TableCell>
-                    <TableCell>{installation.region}</TableCell>
+                    <TableCell className="font-medium">{installation.id}</TableCell>
+                    <TableCell>{installation.siteName}</TableCell>
                     <TableCell>{installation.engineer}</TableCell>
-                    <TableCell>{installation.equipmentInstalled}</TableCell>
-                    <TableCell>{getStatusBadge(installation.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" className="h-8 px-2">
-                        <FileText className="h-4 w-4 mr-1" /> View Details
+                    <TableCell>{installation.installDate}</TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        installation.status === 'completed' ? 'default' : 
+                        installation.status === 'in-progress' ? 'secondary' : 
+                        installation.status === 'scheduled' ? 'outline' : 
+                        'destructive'
+                      }>
+                        {installation.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button variant="ghost" size="icon">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>

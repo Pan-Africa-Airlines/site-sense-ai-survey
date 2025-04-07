@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import NavigationBar from "@/components/NavigationBar";
+import AdminNavBar from "@/components/AdminNavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavigationBar isCompact={true} />
+      <AdminNavBar />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-akhanya">Admin Dashboard</h1>
         
