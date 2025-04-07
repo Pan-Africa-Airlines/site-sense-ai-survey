@@ -27,7 +27,13 @@ const Configuration = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <AdminNavBar />
       <div className="container mx-auto px-4 py-8 flex-1">
-        <h1 className="text-3xl font-bold mb-6 text-akhanya">System Configuration</h1>
+        {/* Added prominent header section */}
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-100">
+          <h1 className="text-3xl font-bold text-akhanya mb-2">System Configuration</h1>
+          <p className="text-gray-500">
+            Manage Eskom sites, form fields, user roles, and system settings
+          </p>
+        </div>
         
         <Tabs defaultValue="sites" className="w-full">
           <TabsList className="grid w-full md:w-auto grid-cols-4 h-auto">
