@@ -26,6 +26,11 @@ const SiteAllocationsSection: React.FC<SiteAllocationsSectionProps> = ({
         <div className="py-8 text-center">
           <p className="text-gray-500">Loading site allocations...</p>
         </div>
+      ) : sites.length === 0 ? (
+        <div className="py-8 text-center bg-gray-50 rounded-md border border-gray-100">
+          <p className="text-gray-500">No site allocations found</p>
+          <p className="text-sm text-gray-400 mt-1">You'll see your allocated sites here when they're assigned</p>
+        </div>
       ) : (
         <EngineerSiteList 
           sites={sites.map(site => ({

@@ -1,15 +1,45 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Calendar, Map, User } from "lucide-react";
 import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
 import { EngineerProfile } from "@/types/dashboard";
+import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
+import { getLatestVehicleCheck } from "@/utils/dbHelpers/vehicleHelpers";
 
 interface EngineerProfileCardProps {
   engineerProfile: EngineerProfile;
 }
 
 const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfile }) => {
+  const [vehicleStatus, setVehicleStatus] = useState<{
+    status: "passed" | "fair" | "failed" | "unknown";
+    lastCheckDate: string | null;
+    vehicleName: string | null;
+  }>({
+    status: "unknown",
+    lastCheckDate: null,
+    vehicleName: null
+  });
+
+  useEffect(() => {
+    const fetchVehicleStatus = async () => {
+      if (engineerProfile && engineerProfile.id) {
+        const vehicleCheck = await getLatestVehicleCheck(engineerProfile.id);
+        
+        if (vehicleCheck) {
+          setVehicleStatus({
+            status: vehicleCheck.status || "unknown",
+            lastCheckDate: vehicleCheck.check_date || null,
+            vehicleName: vehicleCheck.vehicle_name || null
+          });
+        }
+      }
+    };
+    
+    fetchVehicleStatus();
+  }, [engineerProfile]);
+
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -79,6 +109,15 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
                   </BadgeWithAnimation>
                 ))}
               </div>
+            </div>
+            
+            {/* Vehicle Status Section */}
+            <div className="pt-3 border-t border-gray-100 mt-3">
+              <VehicleStatusIndicator 
+                status={vehicleStatus.status}
+                lastCheckDate={vehicleStatus.lastCheckDate}
+                vehicleName={vehicleStatus.vehicleName || undefined}
+              />
             </div>
           </div>
         </div>
