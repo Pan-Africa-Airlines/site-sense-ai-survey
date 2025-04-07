@@ -16,13 +16,13 @@ interface EngineerAllocationDialogProps {
     vehicle: string;
   };
   sites: Array<{
-    id: number;
+    id: number | string;
     name: string;
     priority: string;
     engineer: string | null;
   }>;
-  selectedSites: number[];
-  onToggleSite: (siteId: number) => void;
+  selectedSites: Array<number | string>;
+  onToggleSite: (siteId: number | string) => void;
   isProcessing: boolean;
 }
 
@@ -73,7 +73,7 @@ const EngineerAllocationDialog: React.FC<EngineerAllocationDialogProps> = ({
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
               {availableSites.map(site => (
                 <div 
-                  key={site.id}
+                  key={site.id.toString()}
                   className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                     selectedSites.includes(site.id) 
                       ? 'bg-blue-50 border-blue-200' 
