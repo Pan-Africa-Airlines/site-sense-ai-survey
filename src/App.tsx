@@ -44,6 +44,8 @@ const App: React.FC = () => {
             <Route path="/eskom-surveys" element={<EskomSurveys />} />
             {/* Add redirect for eskom-site-survey to eskom-survey/new */}
             <Route path="/eskom-site-survey" element={<Navigate to="/eskom-survey/new" replace />} />
+            {/* Add redirect for car-check to car-checkup */}
+            <Route path="/car-check" element={<Navigate to="/car-checkup" replace />} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
