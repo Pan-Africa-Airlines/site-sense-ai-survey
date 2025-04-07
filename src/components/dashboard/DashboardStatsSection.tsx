@@ -2,17 +2,10 @@
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import EngineerProfileCard from "./EngineerProfileCard";
+import { EngineerProfile } from "@/types/dashboard";
 
 interface DashboardStatsSectionProps {
-  engineerProfile: {
-    id: string;
-    name: string;
-    experience: string;
-    regions: string[];
-    rating: number;
-    totalReviews: number;
-    specializations: string[];
-  };
+  engineerProfile: EngineerProfile;
   totals: {
     assessments: number;
     completedInstallations: number;
