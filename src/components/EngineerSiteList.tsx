@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
-import { MapPin, Clock, AlertTriangle, CheckCircle, Star } from "lucide-react";
+import { MapPin, Clock, AlertTriangle, CheckCircle, Star, Navigation } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface Site {
@@ -116,7 +116,8 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({ sites }) => {
                   
                   {site.distance && (
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-500">Distance: {site.distance} km</span>
+                      <Navigation className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">Distance: {site.distance} km</span>
                     </div>
                   )}
                 </div>
@@ -125,7 +126,7 @@ const EngineerSiteList: React.FC<EngineerSiteListProps> = ({ sites }) => {
                   {site.status !== 'completed' && (
                     <Button 
                       onClick={() => handleSiteClick(site.id)}
-                      className="w-full sm:w-auto"
+                      className="w-full sm:w-auto bg-akhanya hover:bg-akhanya-dark"
                       size="sm"
                     >
                       View Details

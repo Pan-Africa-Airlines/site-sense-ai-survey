@@ -1,11 +1,13 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
+import { MapPin, Loader } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { createInitialAllocations } from "@/utils/dbHelpers";
 import { 
   Tooltip,
   TooltipContent,
@@ -14,16 +16,41 @@ import {
 } from "@/components/ui/tooltip";
 
 interface SiteAllocationsTableProps {
-  engineerAllocations: any[];
-  isLoading: boolean;
   navigateToSiteAllocation: () => void;
 }
 
 const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
-  engineerAllocations,
-  isLoading,
   navigateToSiteAllocation
 }) => {
+  const [engineerAllocations, setEngineerAllocations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAllocations = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Initialize demo data if needed
+        await createInitialAllocations();
+        
+        // Fetch allocations
+        const { data, error } = await supabase
+          .from('engineer_allocations')
+          .select('*');
+        
+        if (error) throw error;
+        
+        setEngineerAllocations(data || []);
+      } catch (error) {
+        console.error("Error fetching allocations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAllocations();
+  }, []);
+
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold mb-4 flex items-center justify-between text-akhanya">
@@ -42,6 +69,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
         <CardContent className="p-6">
           {isLoading ? (
             <div className="py-4 text-center">
+              <Loader className="h-6 w-6 animate-spin mx-auto mb-2" />
               <p className="text-gray-500">Loading allocations...</p>
             </div>
           ) : (

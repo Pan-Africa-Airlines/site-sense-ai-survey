@@ -1,7 +1,84 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import { EskomSite } from "@/types/site";
 
-// Generate dummy AI insights based on engineer performance
+export const getConfiguredSites = async (): Promise<EskomSite[]> => {
+  try {
+    const { data, error } = await supabase
+      .from("eskom_sites")
+      .select("*")
+      .order("name");
+
+    if (error) throw error;
+    return (data || []) as EskomSite[];
+  } catch (error) {
+    console.error("Error fetching sites:", error);
+    return [];
+  }
+};
+
+export const createInitialAllocations = async () => {
+  try {
+    // Check if allocations already exist
+    const { data: existingAllocations, error: checkError } = await supabase
+      .from("engineer_allocations")
+      .select("id")
+      .limit(1);
+
+    if (checkError) throw checkError;
+
+    // If allocations already exist, don't add demo data
+    if (existingAllocations && existingAllocations.length > 0) {
+      return;
+    }
+
+    // Demo allocations data
+    const demoAllocations = [
+      {
+        site_id: "SITE001",
+        site_name: "Eskom Substation Alpha",
+        region: "Gauteng",
+        address: "123 Main Road, Johannesburg",
+        priority: "high",
+        status: "pending",
+        scheduled_date: "2025-04-10",
+        distance: 15
+      },
+      {
+        site_id: "SITE002",
+        site_name: "Power Station Beta",
+        region: "Western Cape",
+        address: "45 Industrial Way, Pretoria",
+        priority: "medium",
+        status: "in-progress",
+        scheduled_date: "2025-04-12",
+        distance: 28
+      },
+      {
+        site_id: "SITE003",
+        site_name: "Transmission Tower Charlie",
+        region: "KwaZulu-Natal",
+        address: "78 Hill Street, Midrand",
+        priority: "low",
+        status: "pending",
+        scheduled_date: "2025-04-15",
+        distance: 7
+      }
+    ];
+
+    // Insert demo allocations
+    const { error: insertError } = await supabase
+      .from("engineer_allocations")
+      .insert(demoAllocations);
+
+    if (insertError) throw insertError;
+    
+    console.log("Demo allocations added successfully");
+    
+  } catch (error) {
+    console.error("Error creating initial allocations:", error);
+  }
+};
+
 export const generateAIInsights = async (engineerId: string) => {
   try {
     // Check if we already have insights for this engineer
@@ -57,7 +134,6 @@ export const generateAIInsights = async (engineerId: string) => {
   }
 };
 
-// Create or update engineer profile
 export const ensureEngineerProfile = async (
   id: string, 
   name: string, 
@@ -109,7 +185,6 @@ export const ensureEngineerProfile = async (
   }
 };
 
-// Get engineer allocations with fallback to mock data
 export const getEngineerAllocations = async () => {
   try {
     const { data, error } = await supabase
@@ -128,27 +203,6 @@ export const getEngineerAllocations = async () => {
   }
 };
 
-// Helper function to get all sites from configuration
-export const getConfiguredSites = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('eskom_sites')
-      .select('*')
-      .order('name');
-      
-    if (error) {
-      console.error("Error fetching sites:", error);
-      return [];
-    }
-    
-    return data || [];
-  } catch (error) {
-    console.error("Error in getConfiguredSites:", error);
-    return [];
-  }
-};
-
-// Save vehicle check results
 export const saveVehicleCheck = async (
   engineerId: string,
   status: "passed" | "fair" | "failed",
@@ -183,7 +237,6 @@ export const saveVehicleCheck = async (
   }
 };
 
-// Get the latest vehicle check for an engineer
 export const getLatestVehicleCheck = async (engineerId: string) => {
   try {
     const { data, error } = await supabase
@@ -206,7 +259,6 @@ export const getLatestVehicleCheck = async (engineerId: string) => {
   }
 };
 
-// Utility to convert DB date to display format
 export const formatDbDate = (dbDate: string | null): string => {
   if (!dbDate) return "Not scheduled";
   
