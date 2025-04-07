@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getConfiguredSites } from "@/utils/dbHelpers";
 import { EskomSite } from "@/types/site";
+import { Badge } from "@/components/ui/badge";
 
 export interface Engineer {
   id: string;
