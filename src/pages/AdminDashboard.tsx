@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { useNavigate } from "react-router-dom";
@@ -23,94 +24,92 @@ const AdminDashboard = () => {
     
     if (!adminLoggedIn) {
       navigate("/admin/login");
+    } else {
+      // Ensure we fetch data immediately if admin is already logged in
+      fetchDashboardData();
     }
   }, [navigate]);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Fetch allocations from the database
-        const allocations = await getEngineerAllocations();
-        setEngineerAllocations(allocations);
-        
-        // Get unique engineers from allocations
-        const uniqueEngineers = new Map();
-        allocations.forEach(allocation => {
-          if (allocation.engineer_id && allocation.engineer_name) {
-            if (!uniqueEngineers.has(allocation.engineer_id)) {
-              uniqueEngineers.set(allocation.engineer_id, {
-                id: allocation.engineer_id,
-                name: allocation.engineer_name,
-                status: "available",
-                vehicle: "Vehicle info not available"
-              });
-            }
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch allocations from the database
+      const allocations = await getEngineerAllocations();
+      setEngineerAllocations(allocations);
+      
+      // Get unique engineers from allocations
+      const uniqueEngineers = new Map();
+      allocations.forEach(allocation => {
+        if (allocation.engineer_id && allocation.engineer_name) {
+          if (!uniqueEngineers.has(allocation.engineer_id)) {
+            uniqueEngineers.set(allocation.engineer_id, {
+              id: allocation.engineer_id,
+              name: allocation.engineer_name,
+              status: "available",
+              vehicle: "Vehicle info not available"
+            });
           }
-        });
-        
-        // If no engineers found from allocations, use mock data
-        if (uniqueEngineers.size === 0) {
-          setEngineers([
-            { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
-            { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
-            { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
-          ]);
-        } else {
-          setEngineers(Array.from(uniqueEngineers.values()));
         }
-      } catch (err) {
-        console.error("Error fetching dashboard data:", err);
-        toast.error("Failed to load dashboard data");
-        
-        // Fallback to mock data
+      });
+      
+      // If no engineers found from allocations, use mock data
+      if (uniqueEngineers.size === 0) {
         setEngineers([
           { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
           { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
           { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
         ]);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setEngineers(Array.from(uniqueEngineers.values()));
       }
-    };
-    
-    if (isAdminAuthenticated) {
-      fetchDashboardData();
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      toast.error("Failed to load dashboard data");
+      
+      // Fallback to mock data
+      setEngineers([
+        { id: "1", name: "John Doe", status: "available", vehicle: "Toyota Hilux" },
+        { id: "2", name: "Jane Smith", status: "available", vehicle: "Ford Ranger" },
+        { id: "3", name: "Robert Johnson", status: "busy", vehicle: "Nissan Navara" },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [isAdminAuthenticated]);
+  };
 
   const navigateToSiteAllocation = () => {
     navigate("/admin/site-allocation");
   }
 
-  const dashboardContent = (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-akhanya">Admin Dashboard</h1>
-      
-      <DashboardStatsCards />
-      
-      <SiteAllocationsTable 
-        engineerAllocations={engineerAllocations}
-        isLoading={isLoading}
-        navigateToSiteAllocation={navigateToSiteAllocation}
-      />
-      
-      <EngineerAvailabilityTable
-        engineers={engineers}
-        engineerAllocations={engineerAllocations}
-        navigateToSiteAllocation={navigateToSiteAllocation}
-      />
-      
-      <DashboardCharts />
-      
-      <RecentActivitiesCards />
-    </div>
-  );
+  // Only render dashboard content when admin is authenticated
+  if (isAdminAuthenticated === false) {
+    return null;
+  }
 
   return (
     <AdminNavLayout>
-      {dashboardContent}
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6 text-akhanya">Admin Dashboard</h1>
+        
+        <DashboardStatsCards />
+        
+        <SiteAllocationsTable 
+          engineerAllocations={engineerAllocations}
+          isLoading={isLoading}
+          navigateToSiteAllocation={navigateToSiteAllocation}
+        />
+        
+        <EngineerAvailabilityTable
+          engineers={engineers}
+          engineerAllocations={engineerAllocations}
+          navigateToSiteAllocation={navigateToSiteAllocation}
+        />
+        
+        <DashboardCharts />
+        
+        <RecentActivitiesCards />
+      </div>
     </AdminNavLayout>
   );
 };
