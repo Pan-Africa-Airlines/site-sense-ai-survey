@@ -1,18 +1,16 @@
-
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader, Plus } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Plus } from "lucide-react";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { v4 as uuidv4 } from 'uuid';
+import UserFormFields from "./UserFormFields";
+import RegionSelector from "./RegionSelector";
+import FormActions from "./FormActions";
 
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -171,133 +169,24 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Full Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Email Address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Field Engineer">Field Engineer</SelectItem>
-                      <SelectItem value="Supervisor">Supervisor</SelectItem>
-                      <SelectItem value="Administrator">Administrator</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <UserFormFields control={form.control} />
             
             <FormField
               control={form.control}
               name="regions"
               render={() => (
-                <FormItem>
-                  <FormLabel>Regions</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {regions.map((region) => (
-                      <Badge 
-                        key={region}
-                        variant={selectedRegions.includes(region) ? "default" : "outline"}
-                        className="cursor-pointer"
-                        onClick={() => handleRegionChange(region)}
-                      >
-                        {region}
-                      </Badge>
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
+                <RegionSelector 
+                  selectedRegions={selectedRegions}
+                  onRegionChange={handleRegionChange}
+                  regions={regions}
+                />
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="experience"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Experience</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., 3 years" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <FormActions 
+              isSubmitting={isSubmitting} 
+              onCancel={handleCloseSheet} 
             />
-            
-            <SheetFooter className="mt-6">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleCloseSheet}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-akhanya hover:bg-akhanya-dark"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader className="h-4 w-4 animate-spin mr-2" />
-                    Creating...
-                  </>
-                ) : "Create User"}
-              </Button>
-            </SheetFooter>
           </form>
         </Form>
       </SheetContent>
