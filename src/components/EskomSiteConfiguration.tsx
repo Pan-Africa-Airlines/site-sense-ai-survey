@@ -27,15 +27,14 @@ const EskomSiteConfiguration = () => {
   const fetchSites = async () => {
     try {
       setLoading(true);
-      // Use 'from' with string literal type assertion
       const { data, error } = await supabase
-        .from("eskom_sites" as any)
+        .from("eskom_sites")
         .select("*")
         .order("name");
 
       if (error) throw error;
-      // Type assertion to ensure data matches our Site interface
-      setSites(data as Site[] || []);
+      // Use type assertion to ensure data matches our Site interface
+      setSites((data || []) as Site[]);
     } catch (error) {
       console.error("Error fetching sites:", error);
       toast.error("Failed to load sites");
@@ -56,13 +55,13 @@ const EskomSiteConfiguration = () => {
 
     try {
       const { data, error } = await supabase
-        .from("eskom_sites" as any)
+        .from("eskom_sites")
         .insert([{ name: newSiteName, type: newSiteType }])
         .select();
 
       if (error) throw error;
       
-      setSites([...sites, data[0] as Site]);
+      setSites([...sites, (data[0] as Site)]);
       setNewSiteName("");
       setNewSiteType("");
       toast.success("Site added successfully");
@@ -75,7 +74,7 @@ const EskomSiteConfiguration = () => {
   const handleDeleteSite = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("eskom_sites" as any)
+        .from("eskom_sites")
         .delete()
         .eq("id", id);
 
@@ -109,7 +108,7 @@ const EskomSiteConfiguration = () => {
 
     try {
       const { error } = await supabase
-        .from("eskom_sites" as any)
+        .from("eskom_sites")
         .update({ name: editName, type: editType })
         .eq("id", id);
 

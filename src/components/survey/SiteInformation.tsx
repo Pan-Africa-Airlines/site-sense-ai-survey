@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,12 +47,12 @@ const SiteInformation: React.FC<SiteInformationProps> = ({
       try {
         setLoading(true);
         const { data, error } = await supabase
-          .from("eskom_sites" as any)
+          .from("eskom_sites")
           .select("*")
           .order("name");
 
         if (error) throw error;
-        setSites(data as EskomSite[] || []);
+        setSites((data || []) as EskomSite[]);
       } catch (error) {
         console.error("Error fetching sites:", error);
       } finally {

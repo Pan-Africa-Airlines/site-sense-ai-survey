@@ -57,12 +57,12 @@ const Assessment = () => {
     const fetchConfiguredSites = async () => {
       try {
         const { data, error } = await supabase
-          .from("eskom_sites" as any)
+          .from("eskom_sites")
           .select("*")
           .order("name");
 
         if (error) throw error;
-        setConfigSites(data as EskomSite[] || []);
+        setConfigSites((data || []) as EskomSite[]);
         
         // Add configured sites to MOCK_SITE_DATA
         if (data && data.length > 0) {
