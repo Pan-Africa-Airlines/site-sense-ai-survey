@@ -1,24 +1,26 @@
 
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Brain, TrendingUp, AlertTriangle, Check, MapPin, Star, Calendar, User, Map } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Brain, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import EngineerSiteList from "@/components/EngineerSiteList";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EngineerRatingSurvey from "@/components/EngineerRatingSurvey";
+import EngineerProfileCard from "@/components/dashboard/EngineerProfileCard";
+import DashboardStatsCards from "@/components/dashboard/DashboardStatsCards";
+import AIInsightsSection from "@/components/dashboard/AIInsightsSection";
+import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import RecentActivitiesCard from "@/components/dashboard/RecentActivitiesCard";
+import SiteAllocationsSection from "@/components/dashboard/SiteAllocationsSection";
+import { EngineerProfile, AllocatedSite, AIInsight, ChartDataPoint, DashboardTotals, RecentActivity } from "@/types/dashboard";
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [allocatedSites, setAllocatedSites] = useState([]);
+  const [allocatedSites, setAllocatedSites] = useState<AllocatedSite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showSurvey, setShowSurvey] = useState(false);
-  const [selectedSite, setSelectedSite] = useState(null);
+  const [selectedSite, setSelectedSite] = useState<AllocatedSite | null>(null);
   const [engineerData, setEngineerData] = useState({
     assessments: [
       { month: 'Jan', completed: 0, pending: 0 },
@@ -27,7 +29,7 @@ const Dashboard: React.FC = () => {
       { month: 'Apr', completed: 0, pending: 0 },
       { month: 'May', completed: 0, pending: 0 },
       { month: 'Jun', completed: 0, pending: 0 },
-    ],
+    ] as ChartDataPoint[],
     installations: [
       { month: 'Jan', installations: 0 },
       { month: 'Feb', installations: 0 },
@@ -35,43 +37,28 @@ const Dashboard: React.FC = () => {
       { month: 'Apr', installations: 0 },
       { month: 'May', installations: 0 },
       { month: 'Jun', installations: 0 },
-    ],
+    ] as ChartDataPoint[],
     totals: {
       assessments: 0,
       completedInstallations: 0,
       satisfactionRate: 0
-    },
-    recentActivities: [],
-    aiInsights: []
+    } as DashboardTotals,
+    recentActivities: [] as RecentActivity[],
+    aiInsights: [] as AIInsight[]
   });
-  
-  const chartConfig = {
-    completed: {
-      label: "Completed",
-      color: "#E13B45"
-    },
-    pending: {
-      label: "Pending",
-      color: "#3C3C3C"
-    },
-    installations: {
-      label: "Installations",
-      color: "#E13B45"
-    }
-  };
 
   const userEmail = localStorage.getItem("userEmail") || "john.doe@example.com";
   const userName = userEmail.split('@')[0].split('.').map(name => 
     name.charAt(0).toUpperCase() + name.slice(1)
   ).join(' ');
 
-  const [engineerProfile, setEngineerProfile] = useState({
+  const [engineerProfile, setEngineerProfile] = useState<EngineerProfile>({
     id: "eng-001",
     name: userName,
     experience: "5 years",
     regions: ["Gauteng", "Western Cape", "Eastern Cape"],
-    rating: 4.8,
-    totalReviews: 124,
+    average_rating: 4.8,
+    total_reviews: 124,
     specializations: ["Power Infrastructure", "Transmission Equipment"]
   });
 
@@ -98,8 +85,8 @@ const Dashboard: React.FC = () => {
           name: mockProfileData.name || userName,
           experience: mockProfileData.experience || "5 years",
           regions: mockProfileData.regions || ["Gauteng", "Western Cape", "Eastern Cape"],
-          rating: mockProfileData.average_rating || 4.8,
-          totalReviews: mockProfileData.total_reviews || 124,
+          average_rating: mockProfileData.average_rating || 4.8,
+          total_reviews: mockProfileData.total_reviews || 124,
           specializations: mockProfileData.specializations || ["Power Infrastructure", "Transmission Equipment"]
         });
         
@@ -169,7 +156,7 @@ const Dashboard: React.FC = () => {
   }, [toast, userEmail]);
 
   // Process assessment data for chart display
-  const processAssessmentData = (data) => {
+  const processAssessmentData = (data: any[]): ChartDataPoint[] => {
     // This would normally parse dates and group by month
     // For now, using mock data if database data is empty
     if (!data || data.length === 0) {
@@ -195,7 +182,7 @@ const Dashboard: React.FC = () => {
   };
   
   // Process installation data for chart display
-  const processInstallationData = (data) => {
+  const processInstallationData = (data: any[]): ChartDataPoint[] => {
     // This would normally parse dates and group by month
     // For now, using mock data if database data is empty
     if (!data || data.length === 0) {
@@ -221,7 +208,7 @@ const Dashboard: React.FC = () => {
   };
   
   // Process activities data for recent activities display
-  const processActivitiesData = (data) => {
+  const processActivitiesData = (data: any[]): RecentActivity[] => {
     // This would normally parse dates and sort by most recent
     // For now, using mock data if database data is empty
     if (!data || data.length === 0) {
@@ -242,7 +229,7 @@ const Dashboard: React.FC = () => {
     ];
   };
   
-  const generateDefaultAIInsights = () => {
+  const generateDefaultAIInsights = (): AIInsight[] => {
     return [
       {
         type: "predictive",
@@ -269,7 +256,7 @@ const Dashboard: React.FC = () => {
     navigate("/car-check");
   };
 
-  const handleOpenSurvey = (site) => {
+  const handleOpenSurvey = (site: AllocatedSite) => {
     setSelectedSite(site);
     setShowSurvey(true);
   };
@@ -277,44 +264,6 @@ const Dashboard: React.FC = () => {
   const handleCloseSurvey = () => {
     setShowSurvey(false);
     setSelectedSite(null);
-  };
-
-  const renderIcon = (iconName) => {
-    switch (iconName) {
-      case "trend-up":
-        return <TrendingUp className="h-5 w-5 text-blue-500" />;
-      case "alert-triangle":
-        return <AlertTriangle className="h-5 w-5 text-amber-500" />;
-      case "check":
-        return <Check className="h-5 w-5 text-green-500" />;
-      default:
-        return <Brain className="h-5 w-5 text-akhanya" />;
-    }
-  };
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(<Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />);
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push(
-          <div key={i} className="relative">
-            <Star className="h-4 w-4 text-gray-300" />
-            <div className="absolute inset-0 overflow-hidden w-1/2">
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-            </div>
-          </div>
-        );
-      } else {
-        stars.push(<Star key={i} className="h-4 w-4 text-gray-300" />);
-      }
-    }
-    
-    return stars;
   };
 
   return (
@@ -327,226 +276,30 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-        <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full">
-          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-start">
-              <CardTitle className="text-lg">Engineer Profile</CardTitle>
-              <User className="h-5 w-5 text-akhanya" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="bg-akhanya text-white rounded-full w-20 h-20 flex items-center justify-center text-2xl font-bold">
-                  {engineerProfile.name.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg">{engineerProfile.name}</h3>
-                  <div className="flex items-center space-x-1">
-                    {renderStars(engineerProfile.rating)}
-                    <span className="text-xs text-gray-500 ml-1">({engineerProfile.totalReviews} reviews)</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-2 pt-2">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-akhanya" />
-                  <span className="text-sm">Experience: {engineerProfile.experience}</span>
-                </div>
-                
-                <div className="flex items-start space-x-2">
-                  <Map className="h-4 w-4 text-akhanya flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Service Regions: {engineerProfile.regions.join(', ')}</span>
-                </div>
-                
-                <div className="pt-2">
-                  <p className="text-xs font-medium text-gray-500 mb-1">Specializations:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {engineerProfile.specializations.map((spec, i) => (
-                      <BadgeWithAnimation key={i} variant="success" className="text-xs">
-                        {spec}
-                      </BadgeWithAnimation>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="card-dashboard overflow-hidden h-full">
-          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-akhanya">My Total Assessments</CardTitle>
-            <CardDescription>All time site assessments</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.assessments}</div>
-            <div className="text-sm text-green-600">+5% from last month</div>
-          </CardContent>
-        </Card>
+        <EngineerProfileCard engineerProfile={engineerProfile} />
         
-        <Card className="card-dashboard overflow-hidden h-full">
-          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-akhanya">My Installations Completed</CardTitle>
-            <CardDescription>Successfully completed installations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.completedInstallations}</div>
-            <div className="text-sm text-green-600">+3% from last month</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-dashboard overflow-hidden h-full">
-          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-akhanya">Your Achievements</CardTitle>
-            <CardDescription>Satisfaction rating</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold mb-4 text-akhanya">{engineerData.totals.satisfactionRate}%</div>
-            <div className="text-sm text-blue-600">satisfaction rate</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mb-10">
-        <div className="flex items-center gap-2 mb-4">
-          <Brain className="h-5 w-5 text-akhanya" />
-          <h2 className="text-xl font-semibold text-akhanya">AI Insights</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {engineerData.aiInsights.map((insight, index) => (
-            <Card key={index} className="border-l-4 border-l-akhanya">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-md">{insight.title}</CardTitle>
-                  {renderIcon(insight.icon)}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">{insight.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="md:col-span-3">
+          <DashboardStatsCards totals={engineerData.totals} />
         </div>
       </div>
 
-      <div className="mb-10">
-        <div className="flex items-center gap-2 mb-4">
-          <MapPin className="h-5 w-5 text-akhanya" />
-          <h2 className="text-xl font-semibold text-akhanya">My Site Allocations</h2>
-        </div>
-        
-        {isLoading ? (
-          <div className="py-8 text-center">
-            <p className="text-gray-500">Loading site allocations...</p>
-          </div>
-        ) : (
-          <EngineerSiteList 
-            sites={allocatedSites.map(site => ({
-              id: site.id,
-              name: site.site_name,
-              priority: site.priority,
-              address: site.address,
-              scheduledDate: site.scheduled_date,
-              status: site.status,
-              distance: site.distance,
-              onRateEngineer: site.status === 'completed' ? () => handleOpenSurvey(site) : undefined
-            }))} 
-          />
-        )}
-      </div>
+      <AIInsightsSection insights={engineerData.aiInsights} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-        <Card className="overflow-hidden">
-          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
-          <CardHeader>
-            <CardTitle className="text-akhanya">My Assessment Progress</CardTitle>
-            <CardDescription>Monthly site assessments status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ChartContainer
-                config={chartConfig}
-                className="w-full h-full"
-              >
-                <BarChart data={engineerData.assessments}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
-                  <Bar dataKey="completed" fill="#E13B45" name="Completed" />
-                  <Bar dataKey="pending" fill="#3C3C3C" name="Pending" />
-                </BarChart>
-              </ChartContainer>
-            </div>
-          </CardContent>
-        </Card>
+      <SiteAllocationsSection 
+        sites={allocatedSites} 
+        isLoading={isLoading} 
+        onOpenSurvey={handleOpenSurvey}
+      />
 
-        <Card className="overflow-hidden">
-          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
-          <CardHeader>
-            <CardTitle className="text-akhanya">My Installation Trend</CardTitle>
-            <CardDescription>Monthly installations completed</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ChartContainer
-                config={chartConfig}
-                className="w-full h-full"
-              >
-                <LineChart data={engineerData.installations}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="installations" 
-                    name="Installations"
-                    stroke="#E13B45" 
-                    strokeWidth={2}
-                    activeDot={{ r: 8 }} 
-                  />
-                </LineChart>
-              </ChartContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardCharts 
+        assessmentData={engineerData.assessments}
+        installationData={engineerData.installations}
+      />
 
-      <Card className="mb-20 overflow-hidden">
-        <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
-        <CardHeader>
-          <CardTitle className="text-akhanya">My Recent Activity</CardTitle>
-          <CardDescription>Latest activities</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-5">
-            {engineerData.recentActivities.map((activity, i) => (
-              <div key={i} className="flex items-start space-x-4 border-b border-gray-100 pb-4 last:border-0">
-                <div className="rounded-full bg-akhanya text-white p-2 font-bold w-10 h-10 flex items-center justify-center">
-                  {engineerProfile.name.split(' ').map(name => name[0]).join('').toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-medium">You <span className="text-gray-600 font-normal">- {activity.action}</span></p>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                    <span>{activity.time}</span>
-                    <span>•</span>
-                    <span className="location-badge">{activity.location}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <RecentActivitiesCard 
+        activities={engineerData.recentActivities}
+        engineerName={engineerProfile.name}
+      />
 
       <Dialog open={showSurvey} onOpenChange={setShowSurvey}>
         <DialogContent className="sm:max-w-md">

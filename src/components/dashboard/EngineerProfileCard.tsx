@@ -1,50 +1,15 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, Calendar, Map } from "lucide-react";
+import { Star, Calendar, Map, User } from "lucide-react";
 import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
-import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
-import { getLatestVehicleCheck } from "@/utils/dbHelpers";
+import { EngineerProfile } from "@/types/dashboard";
 
 interface EngineerProfileCardProps {
-  engineerProfile: {
-    id: string;
-    name: string;
-    experience: string;
-    regions: string[];
-    average_rating: number;
-    total_reviews: number;
-    specializations: string[];
-  };
+  engineerProfile: EngineerProfile;
 }
 
 const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfile }) => {
-  const [vehicleStatus, setVehicleStatus] = useState<"passed" | "fair" | "failed" | "unknown">("unknown");
-  const [lastCheckDate, setLastCheckDate] = useState<string | null>(null);
-  const [vehicleName, setVehicleName] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchVehicleCheckStatus = async () => {
-      try {
-        if (engineerProfile?.id) {
-          const latestCheck = await getLatestVehicleCheck(engineerProfile.id);
-          
-          if (latestCheck) {
-            setVehicleStatus(latestCheck.status as "passed" | "fair" | "failed");
-            setLastCheckDate(latestCheck.check_date);
-            setVehicleName(latestCheck.vehicle_name);
-          }
-        }
-      } catch (error) {
-        console.error("Error in fetching vehicle status:", error);
-      }
-    };
-    
-    if (engineerProfile?.id) {
-      fetchVehicleCheckStatus();
-    }
-  }, [engineerProfile?.id]);
-
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -76,20 +41,20 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg">Engineer Profile</CardTitle>
-          <div className="h-5 w-5 text-akhanya">{/* User icon removed */}</div>
+          <User className="h-5 w-5 text-akhanya" />
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-4">
           <div className="flex items-center space-x-3">
-            <div className="bg-akhanya text-white rounded-full w-24 h-24 flex items-center justify-center text-2xl font-bold">
+            <div className="bg-akhanya text-white rounded-full w-20 h-20 flex items-center justify-center text-2xl font-bold">
               {engineerProfile.name.split(' ').map(n => n[0]).join('')}
             </div>
             <div>
               <h3 className="font-bold text-lg">{engineerProfile.name}</h3>
               <div className="flex items-center space-x-1">
-                {renderStars(engineerProfile.average_rating)}
-                <span className="text-xs text-gray-500 ml-1">({engineerProfile.total_reviews} reviews)</span>
+                {renderStars(engineerProfile.average_rating || 0)}
+                <span className="text-xs text-gray-500 ml-1">({engineerProfile.total_reviews || 0} reviews)</span>
               </div>
             </div>
           </div>
@@ -103,15 +68,6 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
             <div className="flex items-start space-x-2">
               <Map className="h-4 w-4 text-akhanya flex-shrink-0 mt-0.5" />
               <span className="text-sm">Service Regions: {engineerProfile.regions.join(', ')}</span>
-            </div>
-            
-            {/* Vehicle Status Indicator */}
-            <div className="border-t border-gray-100 pt-3 mt-3">
-              <VehicleStatusIndicator 
-                status={vehicleStatus} 
-                lastCheckDate={lastCheckDate}
-                vehicleName={vehicleName}
-              />
             </div>
             
             <div className="pt-2">
