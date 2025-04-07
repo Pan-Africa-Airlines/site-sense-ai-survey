@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { AdminNavItems } from "@/components/admin/AdminNavItems";
+import BCXLogo from "@/components/ui/logo";
+import { Separator } from "@/components/ui/separator";
 
 interface MobileAdminNavProps {
   adminUsername: string;
@@ -35,46 +37,58 @@ const MobileAdminNav: React.FC<MobileAdminNavProps> = ({
   const navigate = useNavigate();
 
   return (
-    <header className="bg-gray-900 text-white sticky top-0 z-40">
+    <header className="bg-sidebar text-sidebar-foreground sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <img 
               src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
               alt="Akhanya IT" 
-              className="h-12 brightness-0 invert" 
+              className="h-8 mr-2 brightness-0 invert" 
               onError={(e) => {
                 e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
               }}
             />
-            <div className="ml-2 text-white font-bold text-xl">Admin</div>
+            <div className="text-white font-bold text-lg">Admin</div>
             <div className="text-sm bg-red-600 text-white px-2 py-1 rounded ml-2">BACKOFFICE</div>
           </div>
           
           <div className="flex items-center gap-3">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white">
+                <Button variant="ghost" size="icon" className="text-sidebar-foreground">
                   <Menu />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-gray-900 text-white p-0 w-[250px]">
+              <SheetContent side="left" className="bg-sidebar text-sidebar-foreground p-0 w-[280px]">
                 <div className="flex flex-col h-full">
-                  <div className="p-4 border-b border-gray-800">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback className="bg-red-600 text-white">
-                          {adminUsername.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{adminUsername}</div>
-                        <div className="text-xs text-gray-400">Administrator</div>
+                  <div className="p-4 border-b border-sidebar-border">
+                    <div className="flex flex-col space-y-4">
+                      <BCXLogo className="h-10 w-full brightness-0 invert" />
+                      <Separator className="bg-sidebar-border" />
+                      <img 
+                        src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
+                        alt="Akhanya IT" 
+                        className="h-6 brightness-0 invert" 
+                        onError={(e) => {
+                          e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
+                        }}
+                      />
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback className="bg-red-600 text-white">
+                            {adminUsername.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{adminUsername}</div>
+                          <div className="text-xs text-sidebar-foreground/70">Administrator</div>
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex-1 overflow-auto py-2">
+                  <div className="flex-1 overflow-auto py-4">
                     <div className="space-y-1 px-2">
                       <AdminNavItems 
                         navItems={navItems} 
@@ -84,12 +98,12 @@ const MobileAdminNav: React.FC<MobileAdminNavProps> = ({
                     </div>
                   </div>
                   
-                  <div className="p-4 border-t border-gray-800">
+                  <div className="p-4 border-t border-sidebar-border">
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="sm" 
                       onClick={handleLogout}
-                      className="w-full justify-start text-white"
+                      className="w-full justify-start bg-sidebar-accent text-sidebar-foreground border-sidebar-border"
                     >
                       <LogOut className="w-4 h-4 mr-2" /> Logout
                     </Button>

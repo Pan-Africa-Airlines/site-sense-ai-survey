@@ -8,7 +8,8 @@ import {
   SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton
+  SidebarMenuButton,
+  SidebarSeparator
 } from "@/components/ui/sidebar";
 import { 
   BarChart3, 
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import BCXLogo from "@/components/ui/logo";
 
 interface AdminSidebarProps {
   handleLogout: () => void;
@@ -46,18 +48,31 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
 
   return (
     <Sidebar>
-      <SidebarHeader>
-        <div className="p-4 flex items-center">
-          <img 
-            src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
-            alt="Akhanya IT" 
-            className="h-8 brightness-0 invert" 
-            onError={(e) => {
-              e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
-            }}
-          />
-          <div className="ml-2 text-sidebar-foreground font-bold text-lg">Admin</div>
-          <div className="ml-2 text-xs bg-red-600 text-white px-2 py-1 rounded">BACKOFFICE</div>
+      <SidebarHeader className="space-y-2">
+        <div className="p-4 flex flex-col items-center gap-3">
+          {/* BCX Logo */}
+          <BCXLogo className="h-12 w-full brightness-0 invert" />
+          
+          {/* Add Separator */}
+          <SidebarSeparator />
+          
+          {/* Akhanya Logo */}
+          <div className="flex items-center justify-center w-full">
+            <img 
+              src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
+              alt="Akhanya IT" 
+              className="h-8 brightness-0 invert" 
+              onError={(e) => {
+                e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
+              }}
+            />
+          </div>
+          
+          {/* Admin Label */}
+          <div className="flex items-center gap-2 mt-2 w-full justify-between">
+            <div className="text-sidebar-foreground font-bold text-lg">Admin Panel</div>
+            <div className="text-xs bg-red-600 text-white px-2 py-1 rounded">BACKOFFICE</div>
+          </div>
         </div>
       </SidebarHeader>
       
@@ -80,14 +95,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
       
       <SidebarFooter>
         <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-red-600 text-white">
-                  {adminUsername.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-sm font-medium">{adminUsername}</div>
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar className="h-9 w-9 border-2 border-white/10">
+              <AvatarFallback className="bg-red-600 text-white">
+                {adminUsername.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-sm font-medium text-sidebar-foreground">{adminUsername}</div>
+              <div className="text-xs text-sidebar-foreground/70">Administrator</div>
             </div>
           </div>
           
@@ -95,7 +111,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
             variant="outline" 
             size="sm" 
             onClick={handleLogout}
-            className="w-full justify-start"
+            className="w-full justify-start bg-sidebar-accent text-sidebar-foreground border-sidebar-border hover:bg-sidebar-accent/80"
           >
             <LogOut className="w-4 h-4 mr-2" /> Logout
           </Button>
