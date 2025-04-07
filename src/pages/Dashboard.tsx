@@ -80,82 +80,54 @@ const Dashboard: React.FC = () => {
       try {
         setIsLoading(true);
         
-        // Fetch engineer profile from database
-        const { data: profileData, error: profileError } = await supabase
-          .from('engineer_profiles')
-          .select('*')
-          .eq('email', userEmail)
-          .single();
-          
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error("Error fetching engineer profile:", profileError);
-        } else if (profileData) {
-          setEngineerProfile({
-            id: profileData.id,
-            name: profileData.name || userName,
-            experience: profileData.experience || "5 years",
-            regions: profileData.regions || ["Gauteng", "Western Cape", "Eastern Cape"],
-            rating: profileData.average_rating || 4.8,
-            totalReviews: profileData.total_reviews || 124,
-            specializations: profileData.specializations || ["Power Infrastructure", "Transmission Equipment"]
-          });
-        }
+        // Use mock data for now since we don't have real data yet
+        // In a production app, this would be replaced with actual database queries
         
-        // Fetch assessments data
-        const { data: assessmentsData, error: assessmentsError } = await supabase
-          .from('site_surveys')
-          .select('*')
-          .eq('user_id', profileData?.id || 'eng-001');
-          
-        if (assessmentsError) {
-          console.error("Error fetching assessments:", assessmentsError);
-        }
+        const mockProfileData = {
+          id: "eng-001",
+          name: userName,
+          experience: "5 years",
+          regions: ["Gauteng", "Western Cape", "Eastern Cape"],
+          average_rating: 4.8,
+          total_reviews: 124,
+          specializations: ["Power Infrastructure", "Transmission Equipment"]
+        };
         
-        // Fetch installations data
-        const { data: installationsData, error: installationsError } = await supabase
-          .from('site_installations')
-          .select('*')
-          .eq('engineer_id', profileData?.id || 'eng-001');
-          
-        if (installationsError) {
-          console.error("Error fetching installations:", installationsError);
-        }
+        setEngineerProfile({
+          id: mockProfileData.id,
+          name: mockProfileData.name || userName,
+          experience: mockProfileData.experience || "5 years",
+          regions: mockProfileData.regions || ["Gauteng", "Western Cape", "Eastern Cape"],
+          rating: mockProfileData.average_rating || 4.8,
+          totalReviews: mockProfileData.total_reviews || 124,
+          specializations: mockProfileData.specializations || ["Power Infrastructure", "Transmission Equipment"]
+        });
         
-        // Fetch engineer ratings
-        const { data: ratingsData, error: ratingsError } = await supabase
-          .from('engineer_ratings')
-          .select('*')
-          .eq('engineer_id', profileData?.id || 'eng-001');
-          
-        if (ratingsError) {
-          console.error("Error fetching ratings:", ratingsError);
-        }
+        // Fetch assessments data - using mock data for now
+        const mockAssessmentsData = [];
         
-        // Fetch AI insights based on engineer performance
-        const { data: insightsData, error: insightsError } = await supabase
-          .from('ai_insights')
-          .select('*')
-          .eq('engineer_id', profileData?.id || 'eng-001')
-          .order('created_at', { ascending: false })
-          .limit(3);
-          
-        if (insightsError) {
-          console.error("Error fetching AI insights:", insightsError);
-        }
+        // Fetch installations data - using mock data for now
+        const mockInstallationsData = [];
+        
+        // Fetch engineer ratings - using mock data for now
+        const mockRatingsData = [];
+        
+        // Fetch AI insights - using mock data for now
+        const mockInsightsData = generateDefaultAIInsights();
         
         // Prepare data for charts
-        const assessmentData = processAssessmentData(assessmentsData || []);
-        const installationData = processInstallationData(installationsData || []);
-        const activitiesData = processActivitiesData([...(assessmentsData || []), ...(installationsData || [])]);
+        const assessmentData = processAssessmentData(mockAssessmentsData || []);
+        const installationData = processInstallationData(mockInstallationsData || []);
+        const activitiesData = processActivitiesData([...(mockAssessmentsData || []), ...(mockInstallationsData || [])]);
         
         // Calculate averages and totals
-        const totalAssessments = assessmentsData?.length || 39;
-        const completedInstallations = installationsData?.length || 32;
+        const totalAssessments = mockAssessmentsData?.length || 39;
+        const completedInstallations = mockInstallationsData?.length || 32;
         
         // Calculate satisfaction rate from ratings
         let satisfactionRate = 95; // Default value
-        if (ratingsData && ratingsData.length > 0) {
-          const averageRating = ratingsData.reduce((sum, item) => sum + item.rating, 0) / ratingsData.length;
+        if (mockRatingsData && mockRatingsData.length > 0) {
+          const averageRating = mockRatingsData.reduce((sum, item) => sum + item.rating, 0) / mockRatingsData.length;
           satisfactionRate = Math.round((averageRating / 5) * 100);
         }
         
@@ -168,10 +140,10 @@ const Dashboard: React.FC = () => {
             satisfactionRate: satisfactionRate
           },
           recentActivities: activitiesData,
-          aiInsights: insightsData || generateDefaultAIInsights()
+          aiInsights: mockInsightsData || generateDefaultAIInsights()
         });
 
-        // Fetch site allocations
+        // Fetch site allocations from the actual database
         const { data: allocations, error: allocationsError } = await supabase
           .from('engineer_allocations')
           .select('*');

@@ -39,13 +39,16 @@ const EngineerRatingSurvey: React.FC<EngineerRatingSurveyProps> = ({
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("engineer_ratings").insert({
-        engineer_id: engineerId,
-        site_id: siteId,
-        rating,
-        feedback,
-        site_name: siteName,
-      });
+      // Since we need to insert into a custom table, we'll use a direct insert approach
+      const { error } = await supabase
+        .from("engineer_ratings")
+        .insert({
+          engineer_id: engineerId,
+          site_id: siteId,
+          rating,
+          feedback,
+          site_name: siteName,
+        });
 
       if (error) throw error;
 

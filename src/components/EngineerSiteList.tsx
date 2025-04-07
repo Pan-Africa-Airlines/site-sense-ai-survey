@@ -9,10 +9,10 @@ import { useNavigate } from "react-router-dom";
 interface Site {
   id: number | string;
   name: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: string;
   address: string;
   scheduledDate: string;
-  status: 'pending' | 'in-progress' | 'completed';
+  status: string;
   distance?: number;
   onRateEngineer?: () => void;
 }
