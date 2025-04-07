@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,11 +12,49 @@ import {
   Users,
 } from "lucide-react";
 
-export const AdminNavItems: React.FC = () => {
+interface AdminNavItemsProps {
+  navItems?: Array<{
+    path: string;
+    icon: React.ElementType;
+    label: string;
+  }>;
+  isActive?: (path: string) => boolean;
+  onClick?: (path: string) => void;
+}
+
+export const AdminNavItems: React.FC<AdminNavItemsProps> = ({ 
+  navItems,
+  isActive,
+  onClick
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  
+  // If props are provided, use them. Otherwise use the default behavior
+  const checkActive = isActive || ((path: string) => path === currentPath);
+  const handleClick = onClick || ((path: string) => navigate(path));
 
+  // If navItems are provided, use those instead of the hardcoded buttons
+  if (navItems) {
+    return (
+      <>
+        {navItems.map((item) => (
+          <Button
+            key={item.path}
+            variant={checkActive(item.path) ? "default" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => handleClick(item.path)}
+          >
+            {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+            {item.label}
+          </Button>
+        ))}
+      </>
+    );
+  }
+
+  // Default hardcoded navigation items if none are provided
   return (
     <>
       <Button

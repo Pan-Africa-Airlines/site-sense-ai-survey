@@ -19,7 +19,7 @@ interface EngineerAllocationDialogProps {
     id: number;
     name: string;
     priority: string;
-    engineer: number | null;
+    engineer: string | null;
   }>;
   selectedSites: number[];
   onToggleSite: (siteId: number) => void;
@@ -38,7 +38,7 @@ const EngineerAllocationDialog: React.FC<EngineerAllocationDialogProps> = ({
 }) => {
   // Filter sites that don't have an engineer or are assigned to the current engineer
   const availableSites = sites.filter(site => 
-    site.engineer === null || site.engineer === engineer.id
+    site.engineer === null || site.engineer === engineer.id.toString()
   );
 
   return (
