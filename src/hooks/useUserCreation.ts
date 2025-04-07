@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface UserFormData {
+export interface UserFormData {
   name: string;
   email: string;
   password: string;

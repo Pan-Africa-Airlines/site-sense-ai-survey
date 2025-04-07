@@ -4,14 +4,14 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
-import { Form, FormField } from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import UserFormFields from "./UserFormFields";
 import RegionSelector from "./RegionSelector";
 import FormActions from "./FormActions";
-import { useUserCreation } from "@/hooks/useUserCreation";
+import { useUserCreation, UserFormData } from "@/hooks/useUserCreation";
 
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -62,7 +62,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
 
   const onSubmit = async (data: UserFormValues) => {
     try {
-      const newUser = await createUser(data);
+      const newUser = await createUser(data as UserFormData);
       onUserCreated(newUser);
       form.reset();
       setSelectedRegions([]);
@@ -111,16 +111,11 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <UserFormFields control={form.control} />
             
-            <FormField
+            <RegionSelector 
+              selectedRegions={selectedRegions}
+              onRegionChange={handleRegionChange}
+              regions={regions}
               control={form.control}
-              name="regions"
-              render={() => (
-                <RegionSelector 
-                  selectedRegions={selectedRegions}
-                  onRegionChange={handleRegionChange}
-                  regions={regions}
-                />
-              )}
             />
             
             <FormActions 
