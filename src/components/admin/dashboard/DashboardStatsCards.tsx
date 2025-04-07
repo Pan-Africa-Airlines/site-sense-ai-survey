@@ -7,11 +7,12 @@ import VehicleChecksStatsCard from "./stats/VehicleChecksStatsCard";
 import ApprovedAssessmentsStatsCard from "./stats/ApprovedAssessmentsStatsCard";
 
 const DashboardStatsCards = () => {
+  // Initialize with fallback data immediately
   const [stats, setStats] = useState({
-    completedAssessments: 0,
-    installations: 0,
-    vehicleChecks: 0,
-    pendingApprovals: 0
+    completedAssessments: 5,
+    installations: 3,
+    vehicleChecks: 7,
+    pendingApprovals: 2
   });
   const [loading, setLoading] = useState(true);
 
@@ -22,33 +23,20 @@ const DashboardStatsCards = () => {
       try {
         const dashboardStats = await getDashboardStats();
         console.log("Dashboard stats loaded:", dashboardStats);
-        setStats(dashboardStats);
+        if (dashboardStats) {
+          setStats(dashboardStats);
+        } else {
+          console.warn("No dashboard stats returned, keeping fallback data");
+        }
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
-        // Set fallback data if API fails
-        setStats({
-          completedAssessments: 5,
-          installations: 3,
-          vehicleChecks: 7,
-          pendingApprovals: 2
-        });
+        // We're already initialized with fallback data so no need to set it again
       } finally {
         setLoading(false);
       }
     };
 
     fetchStats();
-
-    // For debugging, also set a timeout to fetch stats again after 2 seconds
-    // in case the initial fetch fails
-    const timeoutId = setTimeout(() => {
-      if (loading) {
-        console.log("Stats are still loading after timeout, trying again...");
-        fetchStats();
-      }
-    }, 2000);
-
-    return () => clearTimeout(timeoutId);
   }, []);
 
   console.log("Rendering stats cards with data:", stats, "loading:", loading);
