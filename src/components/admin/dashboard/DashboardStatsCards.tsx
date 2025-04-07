@@ -3,7 +3,19 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClipboardList, HardHat, Car, Clock } from "lucide-react";
 
-const DashboardStatsCards = () => {
+interface DashboardStatsCardsProps {
+  assessmentCount?: number;
+  installationCount?: number;
+  vehicleCheckCount?: number;
+  pendingApprovalCount?: number;
+}
+
+const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({
+  assessmentCount = 32,
+  installationCount = 18,
+  vehicleCheckCount = 27,
+  pendingApprovalCount = 8
+}) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <Card>
@@ -14,7 +26,7 @@ const DashboardStatsCards = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Assessments</p>
-              <h3 className="text-2xl font-bold">32</h3>
+              <h3 className="text-2xl font-bold">{assessmentCount}</h3>
             </div>
           </div>
         </CardContent>
@@ -28,7 +40,7 @@ const DashboardStatsCards = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Installations</p>
-              <h3 className="text-2xl font-bold">18</h3>
+              <h3 className="text-2xl font-bold">{installationCount}</h3>
             </div>
           </div>
         </CardContent>
@@ -42,7 +54,7 @@ const DashboardStatsCards = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Vehicle Checks</p>
-              <h3 className="text-2xl font-bold">27</h3>
+              <h3 className="text-2xl font-bold">{vehicleCheckCount}</h3>
             </div>
           </div>
         </CardContent>
@@ -56,7 +68,7 @@ const DashboardStatsCards = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Pending Approvals</p>
-              <h3 className="text-2xl font-bold">8</h3>
+              <h3 className="text-2xl font-bold">{pendingApprovalCount}</h3>
             </div>
           </div>
         </CardContent>
