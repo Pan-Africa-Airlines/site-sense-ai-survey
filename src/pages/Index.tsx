@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import NavigationBar from "@/components/NavigationBar";
+import NavigationBar from "@/components/navigation/NavigationBar";
 import Dashboard from "./Dashboard";
 import { useNavigate } from "react-router-dom";
 

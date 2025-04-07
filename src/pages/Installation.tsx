@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import NavigationBar from "@/components/NavigationBar";
+import NavigationBar from "@/components/navigation/NavigationBar";
 import SiteInstallationForm from "@/components/SiteInstallationForm";
 import NetworkingBanner from "@/components/NetworkingBanner";
 import { Button } from "@/components/ui/button";
