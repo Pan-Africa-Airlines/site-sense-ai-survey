@@ -1,17 +1,10 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface SiteAllocationsTableProps {
   engineerAllocations: any[];
@@ -72,7 +65,7 @@ const SiteAllocationsTable: React.FC<SiteAllocationsTableProps> = ({
                       </TableCell>
                       <TableCell>
                         <Badge variant={
-                          site.status === 'allocated' ? 'success' :
+                          site.status === 'allocated' ? 'default' :
                           site.status === 'completed' ? 'secondary' : 
                           site.status === 'in-progress' ? 'secondary' : 'outline'
                         }>
