@@ -6,9 +6,10 @@ import { BadgeWithAnimation } from "@/components/ui/badge-with-animation";
 import { EngineerProfile } from "@/types/dashboard";
 import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
 import { getLatestVehicleCheck } from "@/utils/dbHelpers/vehicleHelpers";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EngineerProfileCardProps {
-  engineerProfile: EngineerProfile;
+  engineerProfile: EngineerProfile | null;
 }
 
 const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfile }) => {
@@ -65,6 +66,56 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
     return stars;
   };
 
+  // Show loading state if engineerProfile is null
+  if (!engineerProfile) {
+    return (
+      <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full">
+        <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-lg">Engineer Profile</CardTitle>
+            <User className="h-5 w-5 text-akhanya" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center space-x-3">
+              <Skeleton className="rounded-full w-20 h-20" />
+              <div>
+                <Skeleton className="h-5 w-32 mb-2" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+            
+            <div className="space-y-2 pt-2">
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+              
+              <div className="pt-2">
+                <p className="text-xs font-medium text-gray-500 mb-1">Specializations:</p>
+                <div className="flex flex-wrap gap-1">
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-6 w-16" />
+                </div>
+              </div>
+              
+              <div className="pt-3 border-t border-gray-100 mt-3">
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Default initials if name is not available
+  const getInitials = () => {
+    const name = engineerProfile?.name || 'Unknown Engineer';
+    return name.split(' ').map(n => n[0]).join('');
+  };
+
   return (
     <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full">
       <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
@@ -78,10 +129,10 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
         <div className="flex flex-col space-y-4">
           <div className="flex items-center space-x-3">
             <div className="bg-akhanya text-white rounded-full w-20 h-20 flex items-center justify-center text-2xl font-bold">
-              {engineerProfile.name.split(' ').map(n => n[0]).join('')}
+              {getInitials()}
             </div>
             <div>
-              <h3 className="font-bold text-lg">{engineerProfile.name}</h3>
+              <h3 className="font-bold text-lg">{engineerProfile.name || 'Unknown Engineer'}</h3>
               <div className="flex items-center space-x-1">
                 {renderStars(engineerProfile.average_rating || 0)}
                 <span className="text-xs text-gray-500 ml-1">({engineerProfile.total_reviews || 0} reviews)</span>
@@ -92,22 +143,25 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
           <div className="space-y-2 pt-2">
             <div className="flex items-center space-x-2">
               <Calendar className="h-4 w-4 text-akhanya" />
-              <span className="text-sm">Experience: {engineerProfile.experience}</span>
+              <span className="text-sm">Experience: {engineerProfile.experience || 'Unknown'}</span>
             </div>
             
             <div className="flex items-start space-x-2">
               <Map className="h-4 w-4 text-akhanya flex-shrink-0 mt-0.5" />
-              <span className="text-sm">Service Regions: {engineerProfile.regions.join(', ')}</span>
+              <span className="text-sm">Service Regions: {(engineerProfile.regions || []).join(', ') || 'No regions assigned'}</span>
             </div>
             
             <div className="pt-2">
               <p className="text-xs font-medium text-gray-500 mb-1">Specializations:</p>
               <div className="flex flex-wrap gap-1">
-                {engineerProfile.specializations.map((spec, i) => (
-                  <BadgeWithAnimation key={i} variant="success" className="text-xs">
-                    {spec}
-                  </BadgeWithAnimation>
-                ))}
+                {(engineerProfile.specializations || []).length > 0 ? 
+                  (engineerProfile.specializations || []).map((spec, i) => (
+                    <BadgeWithAnimation key={i} variant="success" className="text-xs">
+                      {spec}
+                    </BadgeWithAnimation>
+                  )) : 
+                  <span className="text-xs text-gray-500">No specializations assigned</span>
+                }
               </div>
             </div>
             
