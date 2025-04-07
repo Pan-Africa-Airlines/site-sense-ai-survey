@@ -47,7 +47,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
   ];
 
   return (
-    <Sidebar className="border-r border-gray-300 shadow-md bg-black">
+    <Sidebar className="border-r border-gray-300 shadow-md bg-gradient-to-b from-gray-900 to-black">
       <SidebarHeader className="space-y-2">
         <div className="p-5 flex flex-col items-center gap-4">
           {/* BCX Logo */}
@@ -84,7 +84,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
                 onClick={() => navigate(item.path)}
                 isActive={isActive(item.path)}
                 tooltip={item.label}
-                className={`text-base py-3 ${isActive(item.path) ? 'bg-akhanya text-white font-medium' : 'text-gray-300 hover:text-white'}`}
+                className={`text-base py-3 ${isActive(item.path) ? 'bg-gray-800 text-white font-medium' : 'text-gray-300 hover:text-white'}`}
               >
                 <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-white' : 'text-gray-400'}`} />
                 <span>{item.label}</span>
@@ -96,9 +96,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
       
       <SidebarFooter>
         <div className="p-4">
-          <div className="flex items-center gap-3 mb-4 bg-gray-900 p-3 rounded-lg">
-            <Avatar className="h-10 w-10 border-2 border-gray-700 shadow-sm">
-              <AvatarFallback className="bg-akhanya text-white text-lg">
+          <div className="flex items-center gap-3 mb-4 bg-gray-800 p-3 rounded-lg">
+            <Avatar className="h-10 w-10 border-2 border-gray-700 shadow-sm bg-red-600">
+              <AvatarFallback className="text-white text-lg">
                 {adminUsername.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -112,7 +112,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
             variant="outline" 
             size="sm" 
             onClick={handleLogout}
-            className="w-full justify-start border-gray-700 text-gray-300 hover:bg-red-900/40 hover:text-red-300 hover:border-red-900 text-base py-5 transition-colors"
+            className="w-full justify-start border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-gray-600 text-base py-5 transition-colors"
           >
             <LogOut className="w-5 h-5 mr-2" /> Logout
           </Button>
