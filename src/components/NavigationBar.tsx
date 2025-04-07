@@ -1,9 +1,8 @@
-
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Car, ClipboardList, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert, Badge, FileSpreadsheet } from "lucide-react";
+import { Home, Car, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert, Badge, FileSpreadsheet } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -54,16 +53,17 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   const getPageTitle = () => {
     switch(location.pathname) {
       case "/": return "Dashboard";
-      case "/car-check": return "Vehicle Check";
-      case "/eskom-site-survey": return "Eskom Site Survey";
-      case "/eskom-survey": return "Eskom Site Survey";
+      case "/car-checkup": return "Vehicle Check";
+      case "/eskom-survey/new": return "Eskom Site Survey";
       case "/installation": return "Installation";
       case "/eskom-surveys": return "Eskom Surveys";
-      default: return "";
+      case "/my-allocations": return "My Allocations";
+      default: 
+        if (location.pathname.startsWith("/eskom-survey/")) return "Eskom Site Survey";
+        return "";
     }
   };
 
-  // Fixed heights with important flag to prevent overrides
   const headerHeight = isCompact ? 'h-24!' : 'h-28!';
   const logoHeight = isCompact ? 'h-16' : 'h-20';
   const eskLogo = isCompact ? 'h-11' : 'h-14';
@@ -71,7 +71,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   const iconSize = isCompact ? 'w-4 h-4' : 'w-5 h-5';
   const avatarSize = isCompact ? 'h-10 w-10' : 'h-12 w-12';
   
-  // Pre-calculate breadcrumb height to prevent layout shifts
   const breadcrumbHeight = 'h-12';
 
   return (
@@ -118,20 +117,20 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
                 <Home className={`mr-1 ${iconSize}`} /> Dashboard
               </Button>
               <Button
-                variant={isActive("/car-check") ? "default" : "ghost"}
+                variant={isActive("/car-checkup") ? "default" : "ghost"}
                 size="sm"
-                onClick={() => navigate("/car-check")}
-                className={`!transition-none !duration-0 ${isActive("/car-check") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
+                onClick={() => navigate("/car-checkup")}
+                className={`!transition-none !duration-0 ${isActive("/car-checkup") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
               >
                 <Car className={`mr-1 ${iconSize}`} /> Vehicle Check
               </Button>
               <Button
-                variant={isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "default" : "ghost"}
+                variant={location.pathname.startsWith("/eskom-survey") ? "default" : "ghost"}
                 size="sm"
-                onClick={() => navigate("/eskom-site-survey")}
-                className={`!transition-none !duration-0 ${isActive("/eskom-site-survey") || isActive("/eskom-survey") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
+                onClick={() => navigate("/eskom-survey/new")}
+                className={`!transition-none !duration-0 ${location.pathname.startsWith("/eskom-survey") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
               >
-                <FileSpreadsheet className={`mr-1 ${iconSize}`} /> Eskom Site Survey
+                <FileSpreadsheet className={`mr-1 ${iconSize}`} /> Eskom Survey
               </Button>
               <Button
                 variant={isActive("/installation") ? "default" : "ghost"}

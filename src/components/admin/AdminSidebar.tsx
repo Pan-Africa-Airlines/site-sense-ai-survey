@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -50,13 +49,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
     <Sidebar>
       <SidebarHeader className="space-y-2">
         <div className="p-4 flex flex-col items-center gap-3">
-          {/* BCX Logo */}
           <BCXLogo className="h-12 w-full brightness-0 invert" />
-          
-          {/* Add Separator */}
           <SidebarSeparator />
-          
-          {/* Akhanya Logo */}
           <div className="flex items-center justify-center w-full">
             <img 
               src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
@@ -67,8 +61,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
               }}
             />
           </div>
-          
-          {/* Admin Label */}
           <div className="flex items-center gap-2 mt-2 w-full justify-between">
             <div className="text-sidebar-foreground font-bold text-lg">Admin Panel</div>
             <div className="text-xs bg-red-600 text-white px-2 py-1 rounded">BACKOFFICE</div>

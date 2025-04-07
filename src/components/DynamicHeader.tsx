@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { 
-  Home, MapPin, Clipboard, Network, FileSpreadsheet, ListChecks, Car, Moon, Sun, Menu, X 
+  Home, MapPin, FileSpreadsheet, Network, ListChecks, Car, Moon, Sun, Menu
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,7 +47,6 @@ const DynamicHeader: React.FC = () => {
     }
   };
 
-  // Navigation items for both mobile and desktop
   const navigationItems = [
     {
       title: "Dashboard",
@@ -63,9 +61,9 @@ const DynamicHeader: React.FC = () => {
       icon: <MapPin className="h-4 w-4" />,
     },
     {
-      title: "Eskom Site Survey",
-      href: "/eskom-survey",
-      description: "View and manage Eskom site surveys",
+      title: "Eskom Survey",
+      href: "/eskom-survey/new",
+      description: "Create a new Eskom site survey",
       icon: <FileSpreadsheet className="h-4 w-4" />,
     },
     {
@@ -75,12 +73,6 @@ const DynamicHeader: React.FC = () => {
       icon: <Network className="h-4 w-4" />,
     },
     {
-      title: "Create New Survey",
-      href: "/eskom-survey/new",
-      description: "Create a new Eskom site survey",
-      icon: <FileSpreadsheet className="h-4 w-4" />,
-    },
-    {
       title: "Survey History",
       href: "/eskom-surveys",
       description: "View completed Eskom surveys",
@@ -88,16 +80,14 @@ const DynamicHeader: React.FC = () => {
     },
     {
       title: "Vehicle Check",
-      href: "/car-check",
+      href: "/car-checkup",
       description: "Complete a vehicle safety check",
       icon: <Car className="h-4 w-4" />,
     }
   ];
 
-  // Exact fixed heights to prevent twitching
   const headerHeight = "h-14";
   
-  // Mobile navigation component
   const MobileNavigation = () => (
     <Sheet>
       <SheetTrigger asChild>

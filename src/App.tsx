@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import Assessment from './pages/Assessment';
 import Installation from './pages/Installation';
 import MyAllocations from './pages/MyAllocations';
 import CarCheckup from './pages/CarCheckup';
@@ -32,19 +31,19 @@ const App: React.FC = () => {
       <div className="App">
         <Router>
           <Routes>
+            {/* Client routes */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/assessment" element={<Assessment />} />
             <Route path="/installation" element={<Installation />} />
             <Route path="/my-allocations" element={<MyAllocations />} />
             <Route path="/car-checkup" element={<CarCheckup />} />
             <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
             <Route path="/eskom-survey/new" element={<EskomSurvey />} />
             <Route path="/eskom-surveys" element={<EskomSurveys />} />
-            {/* Add redirect for eskom-site-survey to eskom-survey/new */}
+            
+            {/* Redirects for backward compatibility */}
             <Route path="/eskom-site-survey" element={<Navigate to="/eskom-survey/new" replace />} />
-            {/* Add redirect for car-check to car-checkup */}
             <Route path="/car-check" element={<Navigate to="/car-checkup" replace />} />
             
             {/* Admin routes */}
