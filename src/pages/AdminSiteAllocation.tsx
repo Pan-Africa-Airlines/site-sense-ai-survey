@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { useNavigate } from "react-router-dom";
@@ -143,8 +144,8 @@ const AdminSiteAllocation = () => {
     return sites.map(site => ({
       id: site.id,
       name: site.name,
-      priority: "medium", // Default priority
-      engineer: null // No engineer assigned by default
+      priority: site.priority || "medium", // Set a default priority if it's missing
+      engineer: site.engineer || null
     }));
   };
   
@@ -176,11 +177,13 @@ const AdminSiteAllocation = () => {
                     <SelectValue placeholder="All Regions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Regions</SelectItem>
+                    <SelectItem value="all-regions">All Regions</SelectItem>
                     {regions.map(region => (
-                      <SelectItem key={region} value={region}>
-                        {region}
-                      </SelectItem>
+                      region ? (
+                        <SelectItem key={region} value={region}>
+                          {region}
+                        </SelectItem>
+                      ) : null
                     ))}
                   </SelectContent>
                 </Select>

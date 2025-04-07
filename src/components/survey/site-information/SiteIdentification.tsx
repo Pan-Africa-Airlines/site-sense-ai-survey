@@ -58,7 +58,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
               <Input value="Loading sites..." disabled />
             ) : sites.length > 0 ? (
               <Select 
-                value={formData.siteName} 
+                value={formData.siteName || ""} 
                 onValueChange={handleSiteChange}
               >
                 <SelectTrigger className="w-full">
@@ -66,7 +66,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {sites.map((site) => (
-                    <SelectItem key={site.id} value={site.name}>
+                    <SelectItem key={site.id} value={site.name || `site-${site.id}`}>
                       {site.name} {site.type ? `(${site.type})` : ''}
                     </SelectItem>
                   ))}
@@ -75,7 +75,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
             ) : (
               <Input
                 id="siteName"
-                value={formData.siteName}
+                value={formData.siteName || ""}
                 onChange={(e) => onInputChange("siteName", e.target.value)}
                 placeholder="Enter site name or configure sites in admin"
               />
@@ -86,7 +86,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
             <Label htmlFor="siteId">Site ID (WorkPlace ID)</Label>
             <Input
               id="siteId"
-              value={formData.siteId}
+              value={formData.siteId || ""}
               onChange={(e) => onInputChange("siteId", e.target.value)}
             />
           </div>
@@ -95,7 +95,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
             <Label htmlFor="siteType">Site Type (Sub-TX, RS, PS-Coal)</Label>
             <Input
               id="siteType"
-              value={formData.siteType}
+              value={formData.siteType || ""}
               onChange={(e) => onInputChange("siteType", e.target.value)}
             />
           </div>
@@ -103,7 +103,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
           <div className="space-y-2">
             <Label htmlFor="region">Region</Label>
             <Select 
-              value={formData.region} 
+              value={formData.region || ""} 
               onValueChange={(value) => onInputChange("region", value)}
             >
               <SelectTrigger className="w-full">
@@ -124,7 +124,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
             <Input
               id="date"
               type="date"
-              value={formData.date}
+              value={formData.date || ""}
               onChange={(e) => onInputChange("date", e.target.value)}
             />
           </div>
@@ -133,7 +133,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
             <Label htmlFor="address">Address/Location Description</Label>
             <Textarea
               id="address"
-              value={formData.address}
+              value={formData.address || ""}
               onChange={(e) => onInputChange("address", e.target.value)}
               rows={3}
             />
@@ -143,7 +143,7 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
             <Label htmlFor="gpsCoordinates">GPS coordinates WGS84 (Lat/Long)</Label>
             <Input
               id="gpsCoordinates"
-              value={formData.gpsCoordinates}
+              value={formData.gpsCoordinates || ""}
               onChange={(e) => onInputChange("gpsCoordinates", e.target.value)}
             />
           </div>

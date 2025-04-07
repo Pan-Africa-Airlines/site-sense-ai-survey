@@ -54,11 +54,12 @@ const AddSiteForm: React.FC<AddSiteFormProps> = ({
       
       <div>
         <Label htmlFor="site-type">Site Type</Label>
-        <Select value={newSiteType} onValueChange={setNewSiteType}>
+        <Select value={newSiteType || "none"} onValueChange={setNewSiteType}>
           <SelectTrigger>
             <SelectValue placeholder="Select site type" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">Select Type</SelectItem>
             {siteTypes.map((type) => (
               <SelectItem key={type} value={type}>
                 {type}
@@ -70,11 +71,12 @@ const AddSiteForm: React.FC<AddSiteFormProps> = ({
       
       <div>
         <Label htmlFor="region">Region</Label>
-        <Select value={newRegion} onValueChange={setNewRegion}>
+        <Select value={newRegion || "none"} onValueChange={setNewRegion}>
           <SelectTrigger>
             <SelectValue placeholder="Select region" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">Select Region</SelectItem>
             {regions.map((region) => (
               <SelectItem key={region} value={region}>
                 {region}

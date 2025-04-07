@@ -92,11 +92,12 @@ const SitesList: React.FC<SitesListProps> = ({
                       />
                     </TableCell>
                     <TableCell>
-                      <Select value={editType} onValueChange={setEditType}>
+                      <Select value={editType || "none"} onValueChange={setEditType}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
                           {siteTypes.map((type) => (
                             <SelectItem key={type} value={type}>
                               {type}
@@ -106,11 +107,12 @@ const SitesList: React.FC<SitesListProps> = ({
                       </Select>
                     </TableCell>
                     <TableCell>
-                      <Select value={editRegion} onValueChange={setEditRegion}>
+                      <Select value={editRegion || "none"} onValueChange={setEditRegion}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select region" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
                           {regions.map((region) => (
                             <SelectItem key={region} value={region}>
                               {region}
