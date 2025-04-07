@@ -9,6 +9,7 @@ import { getEngineerProfiles } from "@/utils/dbHelpers";
 import UsersList from "@/components/admin/users/UsersList";
 import UsersFilter from "@/components/admin/users/UsersFilter";
 import CreateUserForm from "@/components/admin/users/CreateUserForm";
+import { v4 as uuidv4 } from 'uuid'; // Using uuid instead of crypto
 
 interface User {
   id: string | number;

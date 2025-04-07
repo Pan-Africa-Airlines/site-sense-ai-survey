@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -171,9 +172,15 @@ export const useDashboardData = () => {
           .eq('engineer_id', engId);
           
         // Use profile data for ratings if available, otherwise use mock
-        let satisfactionRate = profile.average_rating 
-          ? Math.round((profile.average_rating / 5) * 100) 
-          : 95;
+        let satisfactionRate = 0;
+        if (profile.average_rating) {
+          // Convert average_rating to number to ensure it's a number
+          const avgRating = parseFloat(profile.average_rating.toString());
+          // Calculate satisfaction rate as a percentage of 5
+          satisfactionRate = Math.round((avgRating / 5) * 100);
+        } else {
+          satisfactionRate = 95; // Mock fallback
+        }
         
         // Set chart data
         setChartData({
