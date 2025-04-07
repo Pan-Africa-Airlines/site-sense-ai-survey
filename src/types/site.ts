@@ -1,4 +1,3 @@
-
 export interface EskomSite {
   id: string;
   name: string;
@@ -8,6 +7,8 @@ export interface EskomSite {
   contact_name?: string | null;
   contact_phone?: string | null;
   contact_email?: string | null;
+  priority?: string;
+  engineer?: string | null;
 }
 
 export interface ContactDetail {
