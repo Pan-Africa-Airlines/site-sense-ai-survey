@@ -28,7 +28,7 @@
     --akhanya: 194 100% 42%;
     --akhanya-dark: 194 100% 38%;
     
-    /* Sidebar - Dark theme */
+    /* Sidebar - Dark theme styling (always dark regardless of document mode) */
     --sidebar: 0 0% 10%; /* Dark black background */
     --sidebar-foreground: 0 0% 98%; /* Off-white text */
     --sidebar-border: 0 0% 15%; /* Slightly lighter border */
