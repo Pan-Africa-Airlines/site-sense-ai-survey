@@ -14,12 +14,15 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean | null>(null);
   
   useEffect(() => {
-    // We're not adding dark mode to the entire document anymore
-    // Only the sidebar will have dark styling
+    // Set dark mode for admin screens
+    document.documentElement.classList.add('dark');
     
-    // Clean up function
+    // Clean up function to remove dark mode when navigating away
     return () => {
-      // No need to remove dark mode class from document
+      // Check if the next route is not an admin route
+      if (!window.location.pathname.startsWith('/admin')) {
+        document.documentElement.classList.remove('dark');
+      }
     };
   }, []);
   
@@ -35,7 +38,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const handleLogout = () => {
     localStorage.removeItem("adminLoggedIn");
     localStorage.removeItem("adminUsername");
-    // No need to remove dark mode when logging out
+    // Remove dark mode when logging out
+    document.documentElement.classList.remove('dark');
     toast({
       title: "Logged out",
       description: "You have been logged out of the admin panel."
@@ -47,7 +51,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   if (isMobile) {
     return (
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen dark">
         <MobileAdminNav
           adminUsername={adminUsername}
           handleLogout={handleLogout}
@@ -62,7 +66,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             { path: "/admin/configuration", icon: () => <></>, label: "Configuration" },
           ]}
         />
-        <div className="flex-1 overflow-auto bg-white">
+        <div className="flex-1 overflow-auto bg-background">
           {children}
         </div>
       </div>
@@ -71,12 +75,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full dark">
         <AdminSidebar 
           adminUsername={adminUsername}
           handleLogout={handleLogout}
         />
-        <div className="flex-1 overflow-auto bg-white">
+        <div className="flex-1 overflow-auto bg-background">
           {children}
         </div>
       </div>
