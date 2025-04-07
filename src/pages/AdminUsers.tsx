@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +16,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
+import { crypto } from "crypto";
 
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -65,7 +65,6 @@ const AdminUsers = () => {
       const profiles = await getEngineerProfiles();
       
       if (profiles && profiles.length > 0) {
-        // Transform profiles to match the user fields
         const engineerUsers = profiles.map(profile => ({
           id: profile.id,
           name: profile.name || "Unnamed Engineer",
@@ -78,7 +77,6 @@ const AdminUsers = () => {
         
         setEngineers(engineerUsers);
       } else {
-        // Fallback to mock data if no profiles found
         setEngineers([
           { id: 1, name: "John Doe", email: "john.doe@example.com", role: "Field Engineer", status: "active", regions: ["Gauteng"], experience: "3 years" },
           { id: 2, name: "Jane Smith", email: "jane.smith@example.com", role: "Field Engineer", status: "active", regions: ["Western Cape"], experience: "5 years" },
@@ -91,7 +89,6 @@ const AdminUsers = () => {
       console.error("Error fetching engineer profiles:", error);
       toast.error("Failed to load engineer profiles");
       
-      // Fallback to mock data
       setEngineers([
         { id: 1, name: "John Doe", email: "john.doe@example.com", role: "Field Engineer", status: "active", regions: ["Gauteng"], experience: "3 years" },
         { id: 2, name: "Jane Smith", email: "jane.smith@example.com", role: "Field Engineer", status: "active", regions: ["Western Cape"], experience: "5 years" },
@@ -104,16 +101,12 @@ const AdminUsers = () => {
     }
   };
   
-  // Filter users based on search query and filters
   const filteredUsers = engineers.filter(user => {
-    // Search by name or email
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           user.email.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Filter by role
     const matchesRole = roleFilter === "all" || user.role.toLowerCase() === roleFilter.toLowerCase();
     
-    // Filter by status
     const matchesStatus = statusFilter === "all" || user.status === statusFilter;
     
     return matchesSearch && matchesRole && matchesStatus;
@@ -135,7 +128,6 @@ const AdminUsers = () => {
   };
   
   useEffect(() => {
-    // Update form values when selectedRegions changes
     form.setValue("regions", selectedRegions);
   }, [selectedRegions, form]);
   
@@ -143,25 +135,29 @@ const AdminUsers = () => {
     setIsSubmitting(true);
     
     try {
-      // Create a new engineer profile in the database
+      console.log("Creating new user with data:", data);
+      
+      const newUserId = crypto.randomUUID();
+      
       const { data: newEngineer, error } = await supabase
         .from("engineer_profiles")
-        .insert([
-          {
-            name: data.name,
-            email: data.email,
-            specializations: [data.role],
-            regions: data.regions,
-            experience: data.experience || "New",
-            average_rating: 0,
-            total_reviews: 0,
-          }
-        ])
+        .insert({
+          id: newUserId,
+          name: data.name,
+          email: data.email,
+          specializations: [data.role],
+          regions: data.regions,
+          experience: data.experience || "New",
+          average_rating: 0,
+          total_reviews: 0,
+        })
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating user:", error);
+        throw error;
+      }
       
-      // Add the new engineer to the local state
       if (newEngineer && newEngineer.length > 0) {
         setEngineers((prev) => [
           ...prev,
