@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 interface Site {
   id: number | string;
   name: string;
-  priority: string;  // Changed from union type to string to match DB
+  priority: string;  // Using string to match DB schema
   address: string;
   scheduledDate: string;
   status: string;

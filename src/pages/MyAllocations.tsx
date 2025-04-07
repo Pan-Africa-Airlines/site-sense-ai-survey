@@ -46,7 +46,7 @@ const MyAllocations = () => {
           address: site.address || "No address available",
           scheduledDate: site.scheduled_date || "No date available",
           status: site.status,
-          distance: site.distance
+          distance: site.distance || undefined
         });
         
         setPendingSites(pendingData.map(formatSite));

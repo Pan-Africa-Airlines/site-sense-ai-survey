@@ -163,8 +163,10 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         name.charAt(0).toUpperCase() + name.slice(1)
       ).join(' ');
       
+      // Generate unique ID based on email - in production use auth.user.id
+      const dummyEngId = userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      
       // Ensure engineer profile exists
-      const dummyEngId = "eng-001"; // In a real app, this would come from auth
       const profile = await ensureEngineerProfile(dummyEngId, userName, userEmail);
       
       if (profile) {
@@ -190,21 +192,13 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           setAllocatedSites(allocations || []);
         }
         
-        // Get installation count
-        const { data: installations, error: installationsError } = await supabase
-          .from('site_installations')
-          .select('*')
-          .eq('engineer_id', dummyEngId);
-          
-        const installationsCount = installations?.length || 32;
+        // Get installation count - use mock data
+        const installationsCount = 32; // Mock data
         
-        // Calculate satisfaction rate from ratings
-        const { data: ratings, error: ratingsError } = await supabase
-          .from('engineer_ratings')
-          .select('rating')
-          .eq('engineer_id', dummyEngId);
-          
-        let satisfactionRate = profile.average_rating ? Math.round((profile.average_rating / 5) * 100) : 95;
+        // Use profile data for ratings if available, otherwise use mock
+        let satisfactionRate = profile.average_rating 
+          ? Math.round((profile.average_rating / 5) * 100) 
+          : 95;
         
         // Set chart data
         setChartData({
