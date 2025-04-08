@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 
->>>>>>> bf288f660887b7b919c729c72da5a4d83813a915
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
