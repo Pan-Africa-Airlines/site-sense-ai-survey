@@ -62,11 +62,33 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
       
       // Update password if provided
       if (formData.password && formData.password.trim() !== "") {
-        await updateUserPassword({
-          userId: user.id,
-          email: formData.email,
-          password: formData.password
-        });
+        try {
+          const passwordResult = await updateUserPassword({
+            userId: user.id,
+            email: formData.email,
+            password: formData.password
+          });
+          
+          if (passwordResult?.passwordReset) {
+            toast({
+              title: "Password reset email sent",
+              description: "A password reset email has been sent to the user's email address.",
+              variant: "default"
+            });
+          } else if (passwordResult?.updated) {
+            toast({
+              title: "Password updated",
+              description: "User password has been successfully updated.",
+              variant: "default"
+            });
+          }
+        } catch (error) {
+          toast({
+            title: "Error updating password",
+            description: "Failed to update password",
+            variant: "destructive"
+          });
+        }
       }
       
       // Log the action

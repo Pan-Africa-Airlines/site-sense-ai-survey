@@ -1,7 +1,6 @@
 
-import React from "react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserPasswordUpdateProps {
   userId: string | number;
@@ -10,8 +9,9 @@ interface UserPasswordUpdateProps {
 }
 
 export const updateUserPassword = async ({ userId, email, password }: UserPasswordUpdateProps) => {
-  const { toast } = useToast();
-  
+  // Don't try to use hooks outside of React components
+  // Create toast objects where this function is called
+
   if (!password || password.trim() === "") {
     return;
   }
@@ -31,32 +31,17 @@ export const updateUserPassword = async ({ userId, email, password }: UserPasswo
       
       if (resetError) {
         console.error("Error sending password reset:", resetError);
-        toast({
-          title: "Warning",
-          description: "Could not directly update password. A password reset email has been sent to the user instead.",
-          variant: "default"
-        });
-      } else {
-        toast({
-          title: "Password reset email sent",
-          description: "A password reset email has been sent to the user's email address.",
-          variant: "default"
-        });
+        throw new Error("Could not update password or send password reset email");
       }
-    } else {
-      toast({
-        title: "Password updated",
-        description: "User password has been successfully updated.",
-        variant: "default"
-      });
+      
+      // Return information about what happened
+      return { passwordReset: true, message: "Password reset email sent" };
     }
+    
+    // Return success information
+    return { updated: true, message: "Password updated successfully" };
   } catch (error) {
     console.error("Error updating password:", error);
-    toast({
-      title: "Error updating password",
-      description: "Failed to update password",
-      variant: "destructive"
-    });
     throw error;
   }
 };
