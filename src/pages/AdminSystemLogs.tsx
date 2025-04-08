@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Container } from "@/components/ui/container";
@@ -31,7 +30,6 @@ const AdminSystemLogs = () => {
   const fetchLogs = async () => {
     setIsLoading(true);
     try {
-      // Try to fetch from Supabase if available
       let { data, error } = await supabase
         .from("system_logs")
         .select("*")
@@ -40,7 +38,6 @@ const AdminSystemLogs = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        // Map Supabase data to our SystemLog interface
         const mappedLogs: SystemLog[] = data.map(log => ({
           id: log.id,
           user_id: log.user_id,
@@ -51,12 +48,10 @@ const AdminSystemLogs = () => {
         }));
         setLogs(mappedLogs);
       } else {
-        // Fallback to mock data if no data in Supabase
         setLogs(getMockSystemLogs());
       }
     } catch (error) {
       console.error("Error fetching logs:", error);
-      // Fallback to mock data on error
       setLogs(getMockSystemLogs());
     } finally {
       setIsLoading(false);
@@ -66,7 +61,6 @@ const AdminSystemLogs = () => {
   const filterLogs = () => {
     let filtered = [...logs];
 
-    // Filter by search text (user name or details)
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(
@@ -76,12 +70,10 @@ const AdminSystemLogs = () => {
       );
     }
 
-    // Filter by action type
     if (filters.action) {
       filtered = filtered.filter(log => log.action === filters.action);
     }
 
-    // Filter by date range
     if (filters.dateFrom) {
       const fromDate = new Date(filters.dateFrom);
       fromDate.setHours(0, 0, 0, 0);
@@ -128,7 +120,6 @@ const AdminSystemLogs = () => {
 
 export default AdminSystemLogs;
 
-// Mock data function for fallback when Supabase fails
 function getMockSystemLogs(): SystemLog[] {
   return [
     {
