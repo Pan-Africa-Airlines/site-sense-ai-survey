@@ -8,13 +8,18 @@ interface FormActionsProps {
   isSubmitting: boolean;
   onCancel: () => void;
   submitLabel?: string;
+  submitText?: string; // Added for backward compatibility
 }
 
 const FormActions: React.FC<FormActionsProps> = ({ 
   isSubmitting, 
   onCancel, 
-  submitLabel = "Create User" 
+  submitLabel,
+  submitText
 }) => {
+  // Use submitText or submitLabel or fall back to default
+  const buttonText = submitText || submitLabel || "Create User";
+  
   return (
     <SheetFooter className="mt-6">
       <Button 
@@ -35,7 +40,7 @@ const FormActions: React.FC<FormActionsProps> = ({
             <Loader className="h-4 w-4 animate-spin mr-2" />
             Creating...
           </>
-        ) : submitLabel}
+        ) : buttonText}
       </Button>
     </SheetFooter>
   );
