@@ -6,16 +6,26 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const generateAIInsights = async (engineerId: string) => {
   try {
+    console.log("Generating AI insights for engineer:", engineerId);
+    
     // Check if we already have insights for this engineer
-    const { data: existingInsights } = await supabase
+    const { data: existingInsights, error: fetchError } = await supabase
       .from('ai_insights')
       .select('*')
-      .eq('engineer_id', engineerId) as { data: any[] | null };
+      .eq('engineer_id', engineerId);
       
-    // If there are already insights, don't generate new ones
+    if (fetchError) {
+      console.error("Error fetching existing insights:", fetchError);
+      return [];
+    }
+      
+    // If there are already insights, return them
     if (existingInsights && existingInsights.length > 0) {
+      console.log("Found existing insights:", existingInsights.length);
       return existingInsights;
     }
+    
+    console.log("No existing insights found, generating new ones");
     
     // Generate sample insights
     const insights = [
@@ -43,15 +53,16 @@ export const generateAIInsights = async (engineerId: string) => {
     ];
     
     // Insert the insights
-    const { error } = await supabase
+    const { error: insertError } = await supabase
       .from('ai_insights')
-      .insert(insights) as { error: any };
+      .insert(insights);
       
-    if (error) {
-      console.error("Error inserting AI insights:", error);
+    if (insertError) {
+      console.error("Error inserting AI insights:", insertError);
       return [];
     }
     
+    console.log("Successfully generated and inserted new insights");
     return insights;
   } catch (error) {
     console.error("Error generating AI insights:", error);
@@ -68,12 +79,14 @@ export const ensureEngineerProfile = async (
   email: string
 ) => {
   try {
+    console.log("Ensuring engineer profile exists for:", id);
+    
     // Check if profile exists
     const { data, error } = await supabase
       .from('engineer_profiles')
       .select('*')
       .eq('id', id)
-      .maybeSingle() as { data: any; error: any };
+      .maybeSingle();
       
     if (error) {
       console.error("Error checking engineer profile:", error);
@@ -82,31 +95,37 @@ export const ensureEngineerProfile = async (
     
     // If profile exists, return it
     if (data) {
+      console.log("Found existing profile:", data);
       return data;
     }
+    
+    console.log("No existing profile found, creating new one");
     
     // Create new profile with default values
     const newProfile = {
       id,
       name,
       email,
-      experience: "0 years",
+      experience: "Member since 2024",
       regions: ["Gauteng"],
       average_rating: 0,
       total_reviews: 0,
       specializations: ["Field Engineer"]
     };
     
-    const { error: insertError } = await supabase
+    const { error: insertError, data: insertedProfile } = await supabase
       .from('engineer_profiles')
-      .insert(newProfile) as { error: any };
+      .insert(newProfile)
+      .select()
+      .single();
       
     if (insertError) {
       console.error("Error creating engineer profile:", insertError);
       return null;
     }
     
-    return newProfile;
+    console.log("Successfully created new profile:", insertedProfile);
+    return insertedProfile || newProfile;
   } catch (error) {
     console.error("Error in ensureEngineerProfile:", error);
     return null;

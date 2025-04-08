@@ -113,7 +113,7 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
   // Default initials if name is not available
   const getInitials = () => {
     const name = engineerProfile?.name || 'Unknown Engineer';
-    return name.split(' ').map(n => n[0]).join('');
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
   return (

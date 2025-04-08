@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { ensureEngineerProfile, generateAIInsights } from '@/utils/dbHelpers';
+import { ensureEngineerProfile, generateAIInsights } from '@/utils/dbHelpers/engineerHelpers';
 import { formatTimeAgo } from './dateUtils';
 import { processAssessmentData, processInstallationData, processActivitiesData } from './chartDataUtils';
 
@@ -15,12 +15,70 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       console.log("No authenticated session found");
-      return null;
+      // Use fallback data for development
+      const mockEngId = "fallback-user-id";
+      const mockUserName = "Test Engineer";
+      const mockEmail = "test.engineer@example.com";
+      
+      // Create a fallback profile
+      const fallbackProfile = {
+        id: mockEngId,
+        name: mockUserName,
+        email: mockEmail,
+        experience: "5+ years",
+        regions: ["Gauteng", "Western Cape"],
+        average_rating: 4.8,
+        total_reviews: 24,
+        specializations: ["Network Installation", "Fiber Optics"]
+      };
+      
+      // Generate mock insights
+      const mockInsights = [
+        {
+          engineer_id: mockEngId,
+          type: "predictive",
+          title: "Predictive Analysis",
+          description: "Equipment at site B12 showing early signs of performance degradation. Maintenance recommended within 14 days.",
+          icon: "trend-up"
+        },
+        {
+          engineer_id: mockEngId,
+          type: "alert",
+          title: "Network Anomaly Detected",
+          description: "Unusual traffic pattern detected in Sandton branch. Possible security concern.",
+          icon: "alert-triangle"
+        },
+        {
+          engineer_id: mockEngId,
+          type: "optimization",
+          title: "Resource Optimization",
+          description: "Your deployment efficiency increased by 12% this month. Review best practices for continued improvement.",
+          icon: "check"
+        }
+      ];
+      
+      const mockTotals = {
+        assessments: 24,
+        completedInstallations: 18,
+        satisfactionRate: 96
+      };
+      
+      return {
+        engineerProfile: fallbackProfile,
+        allocatedSites: [],
+        aiInsights: mockInsights,
+        chartData: {
+          assessments: processAssessmentData([]),
+          installations: processInstallationData([])
+        },
+        totals: mockTotals,
+        recentActivities: processActivitiesData([])
+      };
     }
     
     // Get user info from auth
     const user = session.user;
-    console.log("Authenticated user:", user);
+    console.log("Authenticated user:", user.id);
     
     // Get metadata
     const metadata = user.user_metadata || {};
@@ -29,18 +87,26 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       name.charAt(0).toUpperCase() + name.slice(1)
     ).join(' ');
     
-    // Generate unique ID based on email - in production use auth.user.id
-    const engId = user.id || userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    // Use auth.user.id as the engineer ID
+    const engId = user.id;
     
     // Ensure engineer profile exists
     const profile = await ensureEngineerProfile(engId, userName, userEmail);
     
     if (!profile) {
+      console.error("Failed to create or retrieve engineer profile");
+      toast({
+        title: "Error loading profile",
+        description: "Could not load your profile data. Please try again later."
+      });
       return null;
     }
     
-    // Generate AI insights if needed
+    console.log("Working with profile:", profile);
+    
+    // Generate AI insights
     const insights = await generateAIInsights(engId);
+    console.log("Generated insights:", insights.length);
     
     // Fetch engineer allocations for the specific engineer
     const { data: allocations, error: allocationsError } = await supabase
@@ -52,10 +118,8 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       console.error("Error fetching allocations:", allocationsError);
       toast({
         title: "Error fetching site allocations",
-        description: allocationsError.message,
-        variant: "destructive"
+        description: allocationsError.message
       });
-      return null;
     }
     
     // Get installation count - specifically for this engineer
@@ -85,7 +149,7 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       .select('*')
       .eq('engineer_id', engId);
       
-    // Use profile data for ratings if available, otherwise use mock
+    // Use profile data for ratings if available, otherwise use fallback
     let satisfactionRate = 0;
     if (profile.average_rating) {
       // Convert average_rating to number to ensure it's a number
@@ -93,7 +157,7 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       // Calculate satisfaction rate as a percentage of 5
       satisfactionRate = Math.round((avgRating / 5) * 100);
     } else {
-      satisfactionRate = 95; // Mock fallback
+      satisfactionRate = 95; // Fallback
     }
     
     // Set chart data based on the real assessments and installations
@@ -147,8 +211,7 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     console.error("Error fetching dashboard data:", error);
     toast({
       title: "Error loading dashboard",
-      description: "There was a problem loading your dashboard data.",
-      variant: "destructive"
+      description: "There was a problem loading your dashboard data."
     });
     return null;
   } finally {

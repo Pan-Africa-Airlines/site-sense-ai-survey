@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { getEngineerProfileById } from "@/utils/dbHelpers/engineerProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -36,11 +37,33 @@ const Profile = () => {
           setUserName(formattedName);
           
           // Generate unique ID based on email - using user.id from auth
-          const engId = user.id || userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-');
+          const engId = user.id;
+          console.log("Fetching engineer profile for ID:", engId);
           
           // Fetch engineer profile
           const profile = await getEngineerProfileById(engId);
-          setEngineerProfile(profile);
+          console.log("Retrieved profile:", profile);
+          
+          if (profile) {
+            setEngineerProfile(profile);
+          } else {
+            // Create a default profile if none exists
+            const defaultProfile = {
+              id: engId,
+              name: formattedName,
+              email: userEmail,
+              specializations: ["Field Engineer"],
+              regions: ["Gauteng"],
+              experience: "Member since 2024",
+              assessments_count: 0,
+              installations_count: 0,
+              average_rating: 0
+            };
+            setEngineerProfile(defaultProfile);
+            
+            // Notify user that we're using default data
+            toast("Using default profile data. Profile will be updated with real data as you use the app.");
+          }
         } else {
           // Fallback to localStorage for backward compatibility
           const email = localStorage.getItem("userEmail") || "User";
@@ -54,10 +77,16 @@ const Profile = () => {
           // Try to fetch profile using email-based ID as fallback
           const emailBasedId = email.toLowerCase().replace(/[^a-z0-9]/g, '-');
           const profile = await getEngineerProfileById(emailBasedId);
-          setEngineerProfile(profile);
+          setEngineerProfile(profile || {
+            name: formattedName,
+            specializations: ["Field Engineer"],
+            regions: ["Gauteng"],
+            experience: "Member since 2024"
+          });
         }
       } catch (error) {
         console.error("Error fetching engineer profile:", error);
+        toast("Could not load profile data. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -210,13 +239,13 @@ const Profile = () => {
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-gray-500 text-sm">Assessments</p>
                       <p className="text-2xl font-bold text-akhanya">
-                        {engineerProfile?.assessments_count || "24"}
+                        {engineerProfile?.assessments_count || "0"}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-gray-500 text-sm">Installations</p>
                       <p className="text-2xl font-bold text-akhanya">
-                        {engineerProfile?.installations_count || "18"}
+                        {engineerProfile?.installations_count || "0"}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
@@ -224,7 +253,7 @@ const Profile = () => {
                       <p className="text-2xl font-bold text-akhanya">
                         {engineerProfile?.average_rating 
                           ? `${Math.round((engineerProfile.average_rating / 5) * 100)}%` 
-                          : "96%"}
+                          : "0%"}
                       </p>
                     </div>
                   </div>
