@@ -1,137 +1,126 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SystemLogsFilter from "@/components/admin/logs/SystemLogsFilter";
 import SystemLogsList from "@/components/admin/logs/SystemLogsList";
 import { fetchSystemLogs, fetchUsers, SystemLog } from "@/utils/systemLogsData";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const AdminSystemLogs = () => {
+const AdminSystemLogs: React.FC = () => {
   const { toast } = useToast();
   const [logs, setLogs] = useState<SystemLog[]>([]);
-  const [users, setUsers] = useState<Array<{ id: string, name: string | null }>>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [userFilter, setUserFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalLogs, setTotalLogs] = useState(0);
-  const pageSize = 20;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUser, setSelectedUser] = useState("all");
+  const [users, setUsers] = useState<Array<{ id: string; name: string | null }>>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
 
   useEffect(() => {
-    // Load users for filtering
-    const loadUsers = async () => {
-      const { users, error } = await fetchUsers();
-      if (error) {
-        toast({
-          title: "Error fetching users",
-          description: "There was a problem loading users for filtering."
-        });
-      } else {
-        setUsers(users);
-      }
-    };
-    
-    loadUsers();
-  }, []);
-
-  useEffect(() => {
-    const loadLogs = async () => {
-      setIsLoading(true);
+    const fetchData = async () => {
       try {
-        const filterUser = userFilter !== "all" ? userFilter : undefined;
-        const { logs, count, error } = await fetchSystemLogs(currentPage, pageSize, filterUser);
+        setLoading(true);
+        const userId = selectedUser !== "all" ? selectedUser : undefined;
+        const result = await fetchSystemLogs(page, pageSize, userId);
         
-        if (error) {
+        if (result.error) {
+          setError(result.error);
           toast({
-            title: "Error fetching logs",
-            description: "There was a problem loading system logs."
+            title: "Error loading logs",
+            description: result.error.message || "Failed to load system logs",
+            variant: "destructive"
           });
         } else {
-          // If we have a search query, filter logs on the client side
-          let filteredLogs = logs;
-          if (searchQuery.trim() !== "") {
-            const searchTerm = searchQuery.toLowerCase();
-            filteredLogs = logs.filter(log => 
-              (log.user_name && log.user_name.toLowerCase().includes(searchTerm)) ||
-              log.user_id.toLowerCase().includes(searchTerm) ||
-              log.action.toLowerCase().includes(searchTerm) ||
-              JSON.stringify(log.details).toLowerCase().includes(searchTerm)
-            );
-          }
-          
-          setLogs(filteredLogs);
-          setTotalLogs(count);
+          setLogs(result.logs);
+          setTotalLogs(result.count);
+          setError(null);
         }
+      } catch (err) {
+        console.error("Error fetching logs:", err);
+        setError(err);
+        toast({
+          title: "Error",
+          description: "Failed to load system logs",
+          variant: "destructive"
+        });
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
+
+    fetchData();
+  }, [page, pageSize, selectedUser, toast]);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setUsersLoading(true);
+        const { users: fetchedUsers, error } = await fetchUsers();
+        
+        if (error) {
+          console.error("Error fetching users:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load users for filtering",
+            variant: "destructive"
+          });
+        } else {
+          setUsers(fetchedUsers);
+        }
+      } catch (err) {
+        console.error("Exception fetching users:", err);
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, [toast]);
+
+  const filteredLogs = logs.filter(log => {
+    if (!searchQuery) return true;
     
-    loadLogs();
-  }, [currentPage, userFilter, searchQuery]);
-
-  const handleUserFilterChange = (value: string) => {
-    setUserFilter(value);
-    setCurrentPage(1); // Reset to first page when filter changes
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page when search changes
-  };
-
-  const totalPages = Math.ceil(totalLogs / pageSize);
+    const query = searchQuery.toLowerCase();
+    return (
+      log.action.toLowerCase().includes(query) ||
+      (log.user_name && log.user_name.toLowerCase().includes(query)) ||
+      log.user_id.toLowerCase().includes(query) ||
+      (typeof log.details === 'object' && JSON.stringify(log.details).toLowerCase().includes(query))
+    );
+  });
 
   return (
     <AdminNavLayout>
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-akhanya">System Logs</h1>
-          <div className="text-sm text-gray-500">
-            Tracking all user actions in the system
-          </div>
-        </div>
-        
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>System Logs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              View all system activities and actions performed by users.
+            </p>
+          </CardContent>
+        </Card>
+
         <SystemLogsFilter
           searchQuery={searchQuery}
-          userFilter={userFilter}
-          onSearchChange={handleSearchChange}
-          onUserFilterChange={handleUserFilterChange}
+          onSearchChange={setSearchQuery}
+          selectedUser={selectedUser}
+          onUserSelect={setSelectedUser}
           users={users}
-          isLoading={isLoading}
+          loading={usersLoading}
         />
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
-          <SystemLogsList logs={logs} isLoading={isLoading} />
-          
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between p-4 border-t">
-              <div className="text-sm text-gray-500">
-                Showing {Math.min((currentPage - 1) * pageSize + 1, totalLogs)} - {Math.min(currentPage * pageSize, totalLogs)} of {totalLogs} logs
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={currentPage === 1 || isLoading}
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-1" /> Previous
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={currentPage >= totalPages || isLoading}
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                >
-                  Next <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+
+        <SystemLogsList
+          logs={filteredLogs}
+          loading={loading}
+          error={error}
+        />
       </div>
     </AdminNavLayout>
   );
