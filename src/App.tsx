@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   BrowserRouter as Router,
@@ -27,6 +26,7 @@ import AdminSystemLogs from "./pages/AdminSystemLogs";
 import NotFound from "./pages/NotFound";
 import Assessment from "./pages/Assessment";
 import EskomSurveys from "./pages/EskomSurveys";
+import CarCheckup from "./pages/CarCheckup";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
