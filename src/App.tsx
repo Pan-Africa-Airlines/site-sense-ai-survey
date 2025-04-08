@@ -27,6 +27,7 @@ import MyAllocations from "./pages/MyAllocations";
 import AdminSystemLogs from "./pages/AdminSystemLogs";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { User, UserRole } from "./types/user";
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -38,11 +39,9 @@ const queryClient = new QueryClient({
   },
 });
 
-type UserRole = "admin" | "engineer" | null;
-
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<UserRole>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
 
   // Check auth status on load and listen for changes
   useEffect(() => {
@@ -56,18 +55,22 @@ function App() {
           localStorage.setItem("loggedIn", "true");
           localStorage.setItem("userEmail", session.user.email || "");
           
-          // Fetch user role from our users table
+          // Fetch user role from engineer_profiles table
           try {
-            const { data: userData, error: userError } = await supabase
-              .from('users')
-              .select('role')
+            const { data: profileData, error: profileError } = await supabase
+              .from('engineer_profiles')
+              .select('specializations')
               .eq('id', session.user.id)
               .single();
               
-            if (!userError && userData) {
-              setUserRole(userData.role as UserRole);
+            if (!profileError && profileData) {
+              // Check if user has admin role in specializations
+              const isAdmin = profileData.specializations && 
+                              profileData.specializations.includes('Administrator');
               
-              if (userData.role === 'admin') {
+              setUserRole(isAdmin ? 'admin' : 'engineer');
+              
+              if (isAdmin) {
                 localStorage.setItem("adminLoggedIn", "true");
                 localStorage.setItem("adminUsername", session.user.email || "");
               }
@@ -94,18 +97,22 @@ function App() {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("userEmail", session.user.email || "");
         
-        // Fetch user role from our users table
+        // Fetch user role from engineer_profiles table
         try {
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('role')
+          const { data: profileData, error: profileError } = await supabase
+            .from('engineer_profiles')
+            .select('specializations')
             .eq('id', session.user.id)
             .single();
             
-          if (!userError && userData) {
-            setUserRole(userData.role as UserRole);
+          if (!profileError && profileData) {
+            // Check if user has admin role in specializations
+            const isAdmin = profileData.specializations && 
+                            profileData.specializations.includes('Administrator');
             
-            if (userData.role === 'admin') {
+            setUserRole(isAdmin ? 'admin' : 'engineer');
+            
+            if (isAdmin) {
               localStorage.setItem("adminLoggedIn", "true");
               localStorage.setItem("adminUsername", session.user.email || "");
             }

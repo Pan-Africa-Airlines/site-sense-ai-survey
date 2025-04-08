@@ -19,20 +19,20 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           return;
         }
         
-        // Check user role in users table
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('role')
+        // Check user role in engineer_profiles table
+        const { data: profileData, error: profileError } = await supabase
+          .from('engineer_profiles')
+          .select('specializations')
           .eq('id', session.user.id)
           .single();
           
-        if (userError) {
-          console.error("Error fetching user role:", userError);
+        if (profileError) {
+          console.error("Error fetching user role:", profileError);
           setIsAdminAuthenticated(false);
           return;
         }
         
-        if (userData.role === 'admin') {
+        if (profileData && profileData.specializations && profileData.specializations.includes('Administrator')) {
           console.log("User has admin role");
           setIsAdminAuthenticated(true);
           // Update localStorage for backward compatibility

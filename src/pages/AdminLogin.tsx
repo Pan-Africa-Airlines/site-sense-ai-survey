@@ -43,15 +43,15 @@ const AdminLogin = () => {
         return;
       }
       
-      // Verify that the user has the admin role in our users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('role')
+      // Verify that the user has the admin role through engineer_profiles specializations
+      const { data: profileData, error: profileError } = await supabase
+        .from('engineer_profiles')
+        .select('specializations')
         .eq('id', authData.user.id)
         .single();
         
-      if (userError) {
-        console.error("Error fetching user role:", userError);
+      if (profileError) {
+        console.error("Error fetching user role:", profileError);
         // Sign out the user as they don't have proper admin rights
         await supabase.auth.signOut();
         toast.error("You don't have admin privileges");
@@ -59,7 +59,10 @@ const AdminLogin = () => {
         return;
       }
       
-      if (userData.role !== 'admin') {
+      const isAdmin = profileData.specializations && 
+                      profileData.specializations.includes('Administrator');
+                      
+      if (!isAdmin) {
         console.error("User does not have admin role");
         // Sign out the user as they don't have proper admin rights
         await supabase.auth.signOut();

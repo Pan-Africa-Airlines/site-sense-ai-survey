@@ -10,8 +10,7 @@ import { Lock } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-
-type UserRole = "engineer" | "admin";
+import { UserRole } from "@/types/user";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -61,26 +60,28 @@ const Login = () => {
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("userEmail", email);
       
-      // Check the user's role from the users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('role')
+      // Check the user's role from engineer_profiles specializations
+      const { data: profileData, error: profileError } = await supabase
+        .from('engineer_profiles')
+        .select('specializations')
         .eq('id', authData.user.id)
         .single();
         
-      if (userError) {
-        console.error("Error fetching user role:", userError);
+      if (profileError) {
+        console.error("Error fetching user role:", profileError);
         toast.error("Could not verify user role. Please try again.");
         setIsLoading(false);
         return;
       }
       
-      const userRole = userData?.role;
-      console.log("User role from database:", userRole);
+      const isAdmin = profileData?.specializations && 
+                     profileData.specializations.includes('Administrator');
+                     
+      console.log("User role from database:", isAdmin ? "admin" : "engineer");
       
       if (role === "admin") {
         // Check if user has admin role
-        if (userRole !== 'admin') {
+        if (!isAdmin) {
           toast.error("You don't have admin privileges");
           await supabase.auth.signOut();
           localStorage.removeItem("loggedIn");

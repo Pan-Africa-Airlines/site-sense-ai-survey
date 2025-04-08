@@ -52,25 +52,15 @@ export const useUserCreation = (): UseUserCreationReturn => {
         throw new Error("Failed to get user ID from auth response");
       }
       
-      // Update the role in the users table - our trigger created the record, but we need to update the role
-      const { error: roleError } = await supabase
-        .from("users")
-        .update({ role: data.role === "Administrator" ? "admin" : "engineer" })
-        .eq("id", userId);
-        
-      if (roleError) {
-        console.error("Error updating user role:", roleError);
-        throw roleError;
-      }
-      
-      // Then create the engineer profile
+      // Create the engineer profile with the role in specializations
+      // The role will be stored in the specializations array
       const { data: newEngineer, error } = await supabase
         .from("engineer_profiles")
         .insert({
           id: userId,
           name: data.name,
           email: data.email,
-          specializations: [data.role],
+          specializations: [data.role], // Store role as a specialization
           regions: data.regions,
           experience: data.experience || "New",
           average_rating: 0,
