@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -10,7 +11,7 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
-// Admin credentials for demo/fallback
+// Admin credentials for demo/fallback - not used in primary authentication flow now
 const ADMIN_CREDENTIALS = [
   { username: "admin@akhanya.co.za", password: "admin123" },
   { username: "supervisor@akhanya.co.za", password: "super123" }
@@ -41,16 +42,15 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Admin login flow
-      if (role === "admin") {
-        // First try Supabase auth for admins
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
+      // First try Supabase auth for all users (both admin and engineers)
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-        // If Supabase auth fails or user doesn't exist, try fallback admin credentials
-        if (authError || !authData.user) {
+      if (authError || !authData.user) {
+        // If Supabase auth fails, try fallback admin credentials only for admin role
+        if (role === "admin") {
           console.log("Supabase auth failed, trying fallback admin credentials");
           
           const isAdmin = ADMIN_CREDENTIALS.some(
@@ -69,60 +69,41 @@ const Login = () => {
               description: `Welcome, ${email}!`,
             });
             navigate("/admin/dashboard");
-          } else {
-            toast({
-              title: "Admin login failed",
-              description: "Invalid admin credentials. Please try again.",
-              variant: "destructive",
-            });
+            return;
           }
-        } else {
-          // Successful Supabase admin auth
+        }
+        
+        // If we reach here, both Supabase auth and admin fallback (for admin role) have failed
+        toast({
+          title: "Login failed",
+          description: authError?.message || "Invalid credentials. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        // Successful Supabase auth - now check user role and redirect accordingly
+        // First, check if this user exists in engineer_profiles table
+        const { data: profileData } = await supabase
+          .from('engineer_profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
+
+        // Set up common auth data in localStorage
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("userEmail", email);
+        
+        if (role === "admin") {
+          // If role selected is admin and the login was successful, treat as admin
           localStorage.setItem("adminLoggedIn", "true");
           localStorage.setItem("adminUsername", email);
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("userEmail", email);
           
           toast({
             title: "Admin login successful",
             description: `Welcome, ${authData.user.email || email}!`,
           });
           navigate("/admin/dashboard");
-        }
-      } 
-      // Engineer login flow
-      else {
-        // Try Supabase auth for engineers
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        // For demo purposes, allow any credentials to work for engineers
-        if (authError || !authData.user) {
-          console.log("Auth failed but allowing login for demo purposes");
-          if (email && password) {
-            localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("userEmail", email);
-            localStorage.setItem("adminLoggedIn", "false");
-            localStorage.removeItem("adminUsername");
-            
-            toast({
-              title: "Engineer login successful",
-              description: `Welcome, ${email}!`,
-            });
-            navigate("/dashboard");
-          } else {
-            toast({
-              title: "Login failed",
-              description: "Please enter both email and password.",
-              variant: "destructive",
-            });
-          }
         } else {
-          // Successful Supabase engineer auth
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("userEmail", authData.user.email || email);
+          // Engineer role
           localStorage.setItem("adminLoggedIn", "false");
           localStorage.removeItem("adminUsername");
           

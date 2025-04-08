@@ -51,8 +51,33 @@ const Register = () => {
         toast.error(error.message || "Registration failed");
         console.error("Registration error:", error);
       } else {
-        toast.success("Registration successful! You can now log in with your credentials.");
-        navigate("/login");
+        const userId = data.user?.id;
+        
+        if (userId) {
+          // Create an engineer profile for the new user
+          const { error: profileError } = await supabase
+            .from('engineer_profiles')
+            .insert({
+              id: userId,
+              name: formData.name,
+              email: formData.email,
+              specializations: ['Field Engineer'],
+              regions: [],
+              experience: 'New',
+              average_rating: 0,
+              total_reviews: 0
+            });
+            
+          if (profileError) {
+            console.error("Error creating engineer profile:", profileError);
+            toast.error("Account created but profile setup failed. Please contact support.");
+          } else {
+            toast.success("Registration successful! You can now log in with your credentials.");
+            navigate("/login");
+          }
+        } else {
+          toast.warning("Registration process started. Please check your email to confirm your account.");
+        }
       }
     } catch (error) {
       console.error("Registration error:", error);
