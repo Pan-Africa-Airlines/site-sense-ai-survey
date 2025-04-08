@@ -20,7 +20,7 @@ import {
   Map,
   MapPin,
   LogOut,
-  ActivityLog
+  Activity
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ handleLogout, adminUsername
     { path: "/admin/users", icon: Users, label: "Users" },
     { path: "/admin/map", icon: Map, label: "Map" },
     { path: "/admin/site-allocation", icon: MapPin, label: "Site Allocation" },
-    { path: "/admin/system-logs", icon: ActivityLog, label: "System Logs" },
+    { path: "/admin/system-logs", icon: Activity, label: "System Logs" },
     { path: "/configuration", icon: Cog, label: "Configuration" },
   ];
 

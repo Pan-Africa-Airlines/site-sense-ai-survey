@@ -18,6 +18,7 @@ export const logUserAction = async (
   details: any = {}
 ) => {
   try {
+    // Use type assertion to tell TypeScript this is a valid table
     const { data, error } = await supabase
       .from('system_logs')
       .insert({

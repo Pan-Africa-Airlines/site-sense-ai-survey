@@ -17,6 +17,8 @@ export const fetchSystemLogs = async (
 ) => {
   try {
     console.log("Fetching system logs, page:", page, "pageSize:", pageSize);
+    
+    // Use type assertion to tell TypeScript that this is a valid table
     let query = supabase
       .from('system_logs')
       .select('*', { count: 'exact' })
@@ -59,10 +61,14 @@ export const fetchUsers = async () => {
     }
     
     // Convert to a map and then back to an array to remove duplicates
-    const userMap = new Map();
+    const userMap = new Map<string, { id: string, name: string | null }>();
+    
     data?.forEach(item => {
-      if (!userMap.has(item.user_id)) {
-        userMap.set(item.user_id, { id: item.user_id, name: item.user_name });
+      const userId = item.user_id as string;
+      const userName = item.user_name as string | null;
+      
+      if (!userMap.has(userId)) {
+        userMap.set(userId, { id: userId, name: userName });
       }
     });
     
