@@ -30,7 +30,15 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => {
+      try {
+        const storedTheme = localStorage.getItem(storageKey) as Theme;
+        return storedTheme || defaultTheme;
+      } catch (e) {
+        // Handle localStorage not being available
+        return defaultTheme;
+      }
+    }
   )
 
   React.useEffect(() => {
@@ -51,13 +59,20 @@ export function ThemeProvider({
     root.classList.add(theme)
   }, [theme])
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
-    },
-  }
+  const value = React.useMemo(
+    () => ({
+      theme,
+      setTheme: (theme: Theme) => {
+        try {
+          localStorage.setItem(storageKey, theme)
+        } catch (e) {
+          // Handle localStorage not being available
+        }
+        setTheme(theme)
+      },
+    }),
+    [theme, storageKey]
+  )
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
