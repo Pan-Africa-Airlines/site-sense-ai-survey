@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isUserAdmin } from "@/utils/userRoles";
 
 const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean | null>(null);
@@ -19,20 +20,10 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           return;
         }
         
-        // Check user role in engineer_profiles table
-        const { data: profileData, error: profileError } = await supabase
-          .from('engineer_profiles')
-          .select('specializations')
-          .eq('id', session.user.id)
-          .single();
-          
-        if (profileError) {
-          console.error("Error fetching user role:", profileError);
-          setIsAdminAuthenticated(false);
-          return;
-        }
+        // Check if user has admin role via specializations
+        const isAdmin = await isUserAdmin(session.user.id);
         
-        if (profileData && profileData.specializations && profileData.specializations.includes('Administrator')) {
+        if (isAdmin) {
           console.log("User has admin role");
           setIsAdminAuthenticated(true);
           // Update localStorage for backward compatibility

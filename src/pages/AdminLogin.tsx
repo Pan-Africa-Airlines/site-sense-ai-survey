@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,23 +9,32 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Lock, ShieldAlert } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { supabase } from "@/integrations/supabase/client";
+import { isUserAdmin } from "@/utils/userRoles";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Pre-fill credentials for easy login in development
+    if (process.env.NODE_ENV === 'development') {
+      setEmail("admin@akhanya.co.za");
+      setPassword("admin123");
+    }
+  }, []);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      console.log("Attempting admin login with:", username);
+      console.log("Attempting admin login with:", email);
       
       // First try Supabase authentication
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: username,
+        email,
         password
       });
       
@@ -43,24 +52,8 @@ const AdminLogin = () => {
         return;
       }
       
-      // Verify that the user has the admin role through engineer_profiles specializations
-      const { data: profileData, error: profileError } = await supabase
-        .from('engineer_profiles')
-        .select('specializations')
-        .eq('id', authData.user.id)
-        .single();
-        
-      if (profileError) {
-        console.error("Error fetching user role:", profileError);
-        // Sign out the user as they don't have proper admin rights
-        await supabase.auth.signOut();
-        toast.error("You don't have admin privileges");
-        setIsLoading(false);
-        return;
-      }
-      
-      const isAdmin = profileData.specializations && 
-                      profileData.specializations.includes('Administrator');
+      // Verify that the user has the admin role
+      const isAdmin = await isUserAdmin(authData.user.id);
                       
       if (!isAdmin) {
         console.error("User does not have admin role");
@@ -73,11 +66,11 @@ const AdminLogin = () => {
       
       // User is authenticated and has admin role
       localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("userEmail", username);
+      localStorage.setItem("userEmail", email);
       localStorage.setItem("adminLoggedIn", "true");
-      localStorage.setItem("adminUsername", username);
+      localStorage.setItem("adminUsername", email);
       
-      toast.success(`Welcome, ${authData.user.email || username}!`);
+      toast.success(`Welcome, ${authData.user.email || email}!`);
       navigate("/admin/dashboard");
     } catch (error) {
       console.error("Admin login error:", error);
@@ -106,11 +99,11 @@ const AdminLogin = () => {
         <CardContent>
           <form onSubmit={handleAdminLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-700 dark:text-gray-300">Email</Label>
+              <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
               <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@example.com"
                 required
                 className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"

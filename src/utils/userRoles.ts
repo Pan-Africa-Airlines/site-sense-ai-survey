@@ -30,7 +30,7 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
 
 /**
  * Checks if a user has admin role by checking email pattern
- * This is a temporary solution until the database is updated with proper roles
+ * This is a backup solution if the database check fails
  * @param email The email to check
  * @returns Boolean indicating if the email looks like an admin email
  */
