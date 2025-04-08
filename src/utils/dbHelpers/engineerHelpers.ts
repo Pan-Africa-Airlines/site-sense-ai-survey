@@ -80,6 +80,7 @@ export const ensureEngineerProfile = async (
 ) => {
   try {
     console.log("Ensuring engineer profile exists for:", id);
+    console.log("Using name:", name);
     
     // Check if profile exists
     const { data, error } = await supabase
@@ -93,15 +94,35 @@ export const ensureEngineerProfile = async (
       return null;
     }
     
-    // If profile exists, return it
+    // If profile exists and has a default name, update it
     if (data) {
       console.log("Found existing profile:", data);
+      
+      // Update name if it's a default value
+      if (data.name === "Test Engineer" || !data.name || data.name.includes("Unknown")) {
+        console.log("Updating profile with real name:", name);
+        const { data: updatedProfile, error: updateError } = await supabase
+          .from('engineer_profiles')
+          .update({ name })
+          .eq('id', id)
+          .select()
+          .single();
+          
+        if (updateError) {
+          console.error("Error updating profile name:", updateError);
+          return data;
+        }
+        
+        console.log("Profile updated with real name:", updatedProfile);
+        return updatedProfile;
+      }
+      
       return data;
     }
     
-    console.log("No existing profile found, creating new one");
+    console.log("No existing profile found, creating new one with name:", name);
     
-    // Create new profile with default values
+    // Create new profile with provided values
     const newProfile = {
       id,
       name,
@@ -156,6 +177,8 @@ export const getCurrentEngineerProfile = async () => {
       name.charAt(0).toUpperCase() + name.slice(1)
     ).join(' ');
     
+    console.log("Using authenticated user name:", userName);
+    
     // Check if profile exists
     const { data, error } = await supabase
       .from('engineer_profiles')
@@ -168,9 +191,29 @@ export const getCurrentEngineerProfile = async () => {
       return null;
     }
     
-    // If profile exists, return it
+    // If profile exists, return it (possibly after updating name)
     if (data) {
       console.log("Found existing engineer profile:", data);
+      
+      // Update name if it's a default value
+      if (data.name === "Test Engineer" || !data.name || data.name.includes("Unknown")) {
+        console.log("Updating profile with real name:", userName);
+        const { data: updatedProfile, error: updateError } = await supabase
+          .from('engineer_profiles')
+          .update({ name: userName })
+          .eq('id', user.id)
+          .select()
+          .single();
+          
+        if (updateError) {
+          console.error("Error updating profile name:", updateError);
+          return data;
+        }
+        
+        console.log("Profile updated with real name:", updatedProfile);
+        return updatedProfile;
+      }
+      
       return data;
     }
     

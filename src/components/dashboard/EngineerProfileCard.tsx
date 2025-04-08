@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Calendar, Map, User } from "lucide-react";
@@ -33,11 +32,29 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
       if (data.session) {
         console.log("Session user ID:", data.session.user.id);
         setSessionUser(data.session.user);
+        
+        // If profile has "Test Engineer" or similar placeholder, update it with auth user name
+        if (engineerProfile && 
+            (engineerProfile.name === "Test Engineer" || 
+             !engineerProfile.name || 
+             engineerProfile.name.includes("Unknown"))) {
+          
+          // Get formatted name from auth user
+          const metadata = data.session.user.user_metadata || {};
+          const userEmail = data.session.user.email || "";
+          const formattedName = metadata.name || userEmail.split('@')[0].split('.').map(name => 
+            name.charAt(0).toUpperCase() + name.slice(1)
+          ).join(' ');
+          
+          console.log("Will update engineer profile with auth user name:", formattedName);
+          
+          // Note: The actual update happens in useEngineerProfile hook and engineerHelpers
+        }
       }
     };
     
     checkAuthUser();
-  }, []);
+  }, [engineerProfile]);
 
   useEffect(() => {
     const fetchVehicleStatus = async () => {

@@ -31,18 +31,39 @@ export const useEngineerProfile = () => {
           ).join(' ');
           setUserName(formattedName);
           
+          console.log("Fetching engineer profile for authenticated user:", user.id);
+          console.log("Using formatted name:", formattedName);
+          
           // Use getCurrentEngineerProfile which handles auth user
-          console.log("Fetching engineer profile for authenticated user");
           const profile = await getCurrentEngineerProfile();
           console.log("Retrieved profile:", profile);
           
           if (profile) {
-            setEngineerProfile(profile);
+            // Update engineer profile with current user name if it's using default
+            if (profile.name === "Test Engineer" || !profile.name || profile.name.includes("Unknown")) {
+              console.log("Updating profile with real user name:", formattedName);
+              const { data: updatedProfile, error } = await supabase
+                .from('engineer_profiles')
+                .update({ name: formattedName })
+                .eq('id', user.id)
+                .select()
+                .single();
+                
+              if (error) {
+                console.error("Error updating profile name:", error);
+                setEngineerProfile(profile);
+              } else {
+                console.log("Profile updated with real name:", updatedProfile);
+                setEngineerProfile(updatedProfile);
+              }
+            } else {
+              setEngineerProfile(profile);
+            }
           } else {
             // Create a default profile if none exists
             const defaultProfile = {
               id: user.id,
-              name: formattedName,
+              name: formattedName, // Use the formatted name, not "Test Engineer"
               email: userEmail,
               specializations: ["Field Engineer"],
               regions: ["Gauteng"],
@@ -51,7 +72,23 @@ export const useEngineerProfile = () => {
               installations_count: 0,
               average_rating: 0
             };
-            setEngineerProfile(defaultProfile);
+            
+            console.log("Creating default profile with name:", formattedName);
+            
+            // Actually insert this profile into the database
+            const { data: insertedProfile, error } = await supabase
+              .from('engineer_profiles')
+              .insert(defaultProfile)
+              .select()
+              .single();
+              
+            if (error) {
+              console.error("Error creating engineer profile:", error);
+              setEngineerProfile(defaultProfile);
+            } else {
+              console.log("Created new profile:", insertedProfile);
+              setEngineerProfile(insertedProfile);
+            }
             
             // Notify user that we're using default data
             toast("Using default profile data. Profile will be updated with real data as you use the app.");
@@ -68,7 +105,7 @@ export const useEngineerProfile = () => {
           
           // Set a default profile when no auth session
           setEngineerProfile({
-            name: formattedName,
+            name: formattedName, // Use formatted name
             specializations: ["Field Engineer"],
             regions: ["Gauteng"],
             experience: "Member since 2024"
