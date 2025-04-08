@@ -15,7 +15,7 @@ const LandingPage = () => {
               alt="Akhanya IT" 
               className="h-8 brightness-0 invert" 
               onError={(e) => {
-                const target = e.currentTarget as HTMLImageElement;
+                const target = e.target as HTMLImageElement;
                 target.src = "https://via.placeholder.com/120x45?text=Akhanya";
               }}
             />

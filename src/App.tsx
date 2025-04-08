@@ -33,7 +33,7 @@ function App() {
       <Router>
         <Routes>
           {/* Redirect root to landing page */}
-          <Route path="/" element={<Navigate to="/landing" replace />} />
+          <Route path="/" element={<LandingPage />} />
           
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
