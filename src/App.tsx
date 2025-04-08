@@ -76,7 +76,7 @@ function App() {
           />
           
           {/* Admin routes */}
-          <Route path="/admin" element={<AdminProtectedRoute />}>
+          <Route path="/admin" element={<AdminProtectedRoute><Outlet /></AdminProtectedRoute>}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="assessments" element={<AdminAssessments />} />
             <Route path="installations" element={<AdminInstallations />} />
