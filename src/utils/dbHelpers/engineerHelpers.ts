@@ -131,3 +131,54 @@ export const ensureEngineerProfile = async (
     return null;
   }
 };
+
+/**
+ * Get current user's engineer profile - added to directly link to auth state
+ */
+export const getCurrentEngineerProfile = async () => {
+  try {
+    // Get the current session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      console.log("No authenticated session found");
+      return null;
+    }
+    
+    // Get user info from auth
+    const user = session.user;
+    console.log("Fetching engineer profile for authenticated user:", user.id);
+    
+    // Get metadata for display name
+    const metadata = user.user_metadata || {};
+    const userEmail = user.email || "";
+    const userName = metadata.name || userEmail.split('@')[0].split('.').map(name => 
+      name.charAt(0).toUpperCase() + name.slice(1)
+    ).join(' ');
+    
+    // Check if profile exists
+    const { data, error } = await supabase
+      .from('engineer_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+      
+    if (error) {
+      console.error("Error fetching engineer profile:", error);
+      return null;
+    }
+    
+    // If profile exists, return it
+    if (data) {
+      console.log("Found existing engineer profile:", data);
+      return data;
+    }
+    
+    // If no profile exists, create one
+    console.log("No existing profile found, creating one for:", userName);
+    return await ensureEngineerProfile(user.id, userName, userEmail);
+  } catch (error) {
+    console.error("Error getting current engineer profile:", error);
+    return null;
+  }
+};

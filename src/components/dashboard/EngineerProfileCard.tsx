@@ -7,6 +7,7 @@ import { EngineerProfile } from "@/types/dashboard";
 import VehicleStatusIndicator from "@/components/VehicleStatusIndicator";
 import { getLatestVehicleCheck } from "@/utils/dbHelpers/vehicleHelpers";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EngineerProfileCardProps {
   engineerProfile: EngineerProfile | null;
@@ -22,10 +23,26 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
     lastCheckDate: null,
     vehicleName: null
   });
+  
+  const [sessionUser, setSessionUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Get the current authenticated user for debugging
+    const checkAuthUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        console.log("Session user ID:", data.session.user.id);
+        setSessionUser(data.session.user);
+      }
+    };
+    
+    checkAuthUser();
+  }, []);
 
   useEffect(() => {
     const fetchVehicleStatus = async () => {
       if (engineerProfile && engineerProfile.id) {
+        console.log("Fetching vehicle status for engineer:", engineerProfile.id);
         const vehicleCheck = await getLatestVehicleCheck(engineerProfile.id);
         
         if (vehicleCheck) {
@@ -40,6 +57,19 @@ const EngineerProfileCard: React.FC<EngineerProfileCardProps> = ({ engineerProfi
     
     fetchVehicleStatus();
   }, [engineerProfile]);
+
+  useEffect(() => {
+    // Debug log to see what profile data we're receiving
+    if (engineerProfile) {
+      console.log("Engineer profile in card:", engineerProfile);
+    } else {
+      console.log("No engineer profile data received in card");
+    }
+    
+    if (sessionUser) {
+      console.log("Comparing with session user:", sessionUser.id);
+    }
+  }, [engineerProfile, sessionUser]);
 
   const renderStars = (rating: number) => {
     const stars = [];
