@@ -16,7 +16,8 @@ const AdminSystemLogs = () => {
 
           <Card className="p-6">
             <div className="text-center py-8">
-              <p>System logs functionality is coming soon.</p>
+              <p>System logs functionality is currently under development.</p>
+              <p className="mt-2 text-muted-foreground">Check back soon for updates.</p>
             </div>
           </Card>
         </div>
