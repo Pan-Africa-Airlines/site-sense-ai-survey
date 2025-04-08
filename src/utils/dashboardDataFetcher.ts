@@ -9,6 +9,36 @@ import { fetchEngineerInstallations, fetchEngineerAllocations, calculateSatisfac
 import { fetchRecentActivities } from './dashboardActivitiesData';
 
 /**
+ * Logs an action performed by a user to the system_logs table
+ */
+export const logUserAction = async (
+  userId: string, 
+  userName: string, 
+  action: string, 
+  details: any = {}
+) => {
+  try {
+    const { data, error } = await supabase
+      .from('system_logs')
+      .insert({
+        user_id: userId,
+        user_name: userName,
+        action,
+        details
+      });
+      
+    if (error) {
+      console.error("Error logging user action:", error);
+    }
+    
+    return { success: !error, error };
+  } catch (err) {
+    console.error("Exception logging user action:", err);
+    return { success: false, error: err };
+  }
+};
+
+/**
  * Fetches all dashboard data for an engineer
  */
 export const fetchDashboardData = async (setIsLoading: (loading: boolean) => void, toast: any) => {

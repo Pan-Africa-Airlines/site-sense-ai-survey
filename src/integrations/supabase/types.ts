@@ -270,6 +270,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_logs: {
+        Row: {
+          action: string
+          details: Json | null
+          id: string
+          timestamp: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          action: string
+          details?: Json | null
+          id?: string
+          timestamp?: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          action?: string
+          details?: Json | null
+          id?: string
+          timestamp?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       vehicle_checks: {
         Row: {
           check_date: string

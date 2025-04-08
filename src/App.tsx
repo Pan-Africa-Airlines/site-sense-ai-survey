@@ -1,73 +1,72 @@
+import React, { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import { ThemeProvider } from "@/components/theme-provider"
+import { useTheme } from "@/components/hooks/use-theme"
+import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminAssessments from "./pages/AdminAssessments";
+import AdminInstallations from "./pages/AdminInstallations";
+import AdminUsers from "./pages/AdminUsers";
+import AdminMap from "./pages/AdminMap";
+import AdminSiteAllocation from "./pages/AdminSiteAllocation";
+import Configuration from "./pages/Configuration";
+import AdminProtectedRoute from "@/components/AdminProtectedRoute";
+import EskomSurvey from "./pages/EskomSurvey";
+import Installation from "./pages/Installation";
+import MyAllocations from "./pages/MyAllocations";
+import AdminSystemLogs from "./pages/AdminSystemLogs";
 
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Index from './pages/Index';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Installation from './pages/Installation';
-import MyAllocations from './pages/MyAllocations';
-import CarCheckup from './pages/CarCheckup';
-import EskomSurvey from './pages/EskomSurvey';
-import EskomSurveys from './pages/EskomSurveys';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminAssessments from './pages/AdminAssessments';
-import AdminInstallations from './pages/AdminInstallations';
-import AdminMap from './pages/AdminMap';
-import AdminUsers from './pages/AdminUsers';
-import Configuration from './pages/Configuration';
-import Settings from './pages/Settings';
-import Profile from './pages/Profile';
-import NotFound from './pages/NotFound';
-import Footer from './components/Footer';
-import { Toaster } from "sonner";
-import AdminSiteAllocation from './pages/AdminSiteAllocation';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+function App() {
+  const { theme } = useTheme();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-// Create a client
-const queryClient = new QueryClient();
-
-const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="App">
-        <Router>
-          <Routes>
-            {/* Client routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/installation" element={<Installation />} />
-            <Route path="/my-allocations" element={<MyAllocations />} />
-            <Route path="/car-checkup" element={<CarCheckup />} />
-            <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
-            <Route path="/eskom-survey/new" element={<EskomSurvey />} />
-            <Route path="/eskom-surveys" element={<EskomSurveys />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/profile" element={<Profile />} />
-            
-            {/* Redirects for backward compatibility */}
-            <Route path="/eskom-site-survey" element={<Navigate to="/eskom-survey/new" replace />} />
-            <Route path="/car-check" element={<Navigate to="/car-checkup" replace />} />
-            
-            {/* Admin routes */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/assessments" element={<AdminAssessments />} />
-            <Route path="/admin/installations" element={<AdminInstallations />} />
-            <Route path="/admin/map" element={<AdminMap />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/site-allocation" element={<AdminSiteAllocation />} />
-            <Route path="/configuration" element={<Configuration />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Footer />
-          <Toaster />
-        </Router>
-      </div>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="vite-react-theme">
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/eskom-survey/new" element={<EskomSurvey />} />
+          <Route path="/installation" element={<Installation />} />
+          <Route path="/my-allocations" element={<MyAllocations />} />
+
+          {/* Engineer Protected Route */}
+          <Route path="/dashboard" element={
+            isAuthenticated ? (
+              <Dashboard />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } />
+
+          {/* Admin Protected Routes */}
+          <Route path="/admin" element={<AdminProtectedRoute><Outlet /></AdminProtectedRoute>}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="assessments" element={<AdminAssessments />} />
+            <Route path="installations" element={<AdminInstallations />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="map" element={<AdminMap />} />
+            <Route path="site-allocation" element={<AdminSiteAllocation />} />
+            <Route path="system-logs" element={<AdminSystemLogs />} />
+          </Route>
+
+          <Route path="/configuration" element={<Configuration />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
-};
+}
 
 export default App;

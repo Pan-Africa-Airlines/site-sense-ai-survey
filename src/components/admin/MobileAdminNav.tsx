@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, Menu, Settings } from "lucide-react";
+import { LogOut, Menu, Settings, ActivityLog } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
   DropdownMenu, 
@@ -27,11 +27,20 @@ interface MobileAdminNavProps {
   }[];
 }
 
-const MobileAdminNav: React.FC<MobileAdminNavProps> = ({
+const MobileAdminNav = ({
   adminUsername,
   handleLogout,
   isActive,
-  navItems
+  navItems = [
+    { path: "/admin/dashboard", icon: () => <></>, label: "Dashboard" },
+    { path: "/admin/assessments", icon: () => <></>, label: "Assessments" },
+    { path: "/admin/installations", icon: () => <></>, label: "Installations" },
+    { path: "/admin/users", icon: () => <></>, label: "Users" },
+    { path: "/admin/map", icon: () => <></>, label: "Map" },
+    { path: "/admin/site-allocation", icon: () => <></>, label: "Site Allocation" },
+    { path: "/admin/system-logs", icon: () => <></>, label: "System Logs" },
+    { path: "/configuration", icon: () => <></>, label: "Configuration" },
+  ]
 }) => {
   const navigate = useNavigate();
 
