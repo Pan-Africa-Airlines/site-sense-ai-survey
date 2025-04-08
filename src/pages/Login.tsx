@@ -48,6 +48,33 @@ const Login = () => {
     try {
       console.log("Attempting login with:", email, "as", role);
       
+      // For development purposes, allow backdoor login with hardcoded credentials
+      if (process.env.NODE_ENV === 'development') {
+        if (email === "admin@akhanya.co.za" && password === "admin123" && role === "admin") {
+          console.log("Using development backdoor login for admin");
+          localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("userEmail", email);
+          localStorage.setItem("adminLoggedIn", "true");
+          localStorage.setItem("adminUsername", email);
+          
+          toast.success(`Development mode: Welcome, Admin!`);
+          navigate("/admin/dashboard");
+          setIsLoading(false);
+          return;
+        } else if (email === "siyanda@akhanya.co.za" && password === "password123" && role === "engineer") {
+          console.log("Using development backdoor login for engineer");
+          localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("userEmail", email);
+          localStorage.setItem("adminLoggedIn", "false");
+          localStorage.removeItem("adminUsername");
+          
+          toast.success(`Development mode: Welcome, Siyanda!`);
+          navigate("/dashboard");
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       // Authenticate with Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,

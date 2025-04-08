@@ -8,6 +8,15 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export async function isUserAdmin(userId: string): Promise<boolean> {
   try {
+    // For development: allow known admin emails without DB check
+    if (process.env.NODE_ENV === 'development') {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && isAdminEmail(user.email || '')) {
+        console.log("Development mode: Bypassing DB check for admin");
+        return true;
+      }
+    }
+    
     const { data, error } = await supabase
       .from('engineer_profiles')
       .select('specializations')
