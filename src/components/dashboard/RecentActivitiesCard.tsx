@@ -10,13 +10,13 @@ interface RecentActivitiesCardProps {
 
 const RecentActivitiesCard: React.FC<RecentActivitiesCardProps> = ({ activities, engineerName }) => {
   return (
-    <Card className="mb-20 overflow-hidden">
+    <Card className="mb-20 overflow-hidden h-full flex flex-col">
       <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
       <CardHeader>
         <CardTitle className="text-akhanya">My Recent Activity</CardTitle>
         <CardDescription>Latest activities</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <div className="space-y-5">
           {activities.map((activity, i) => (
             <div key={i} className="flex items-start space-x-4 border-b border-gray-100 pb-4 last:border-0">

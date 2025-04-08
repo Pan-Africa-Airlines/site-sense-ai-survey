@@ -53,7 +53,7 @@ const VehicleStatusCard: React.FC<VehicleStatusCardProps> = ({ engineerId, isLoa
   // Show loading state
   if (isLoading) {
     return (
-      <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full">
+      <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full flex flex-col">
         <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
@@ -61,7 +61,7 @@ const VehicleStatusCard: React.FC<VehicleStatusCardProps> = ({ engineerId, isLoa
             <Car className="h-5 w-5 text-akhanya" />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-grow flex flex-col justify-between">
           <div className="flex flex-col space-y-4">
             <Skeleton className="h-16 w-full mb-2" />
             <Skeleton className="h-10 w-full" />
@@ -72,7 +72,7 @@ const VehicleStatusCard: React.FC<VehicleStatusCardProps> = ({ engineerId, isLoa
   }
 
   return (
-    <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full">
+    <Card className="md:col-span-1 border-l-4 border-l-akhanya shadow-md overflow-hidden h-full flex flex-col">
       <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
@@ -80,7 +80,7 @@ const VehicleStatusCard: React.FC<VehicleStatusCardProps> = ({ engineerId, isLoa
           <Car className="h-5 w-5 text-akhanya" />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow flex flex-col justify-between">
         <div className="flex flex-col space-y-6">
           <div className="scale-110 origin-left">
             <VehicleStatusIndicator 
@@ -110,7 +110,7 @@ const VehicleStatusCard: React.FC<VehicleStatusCardProps> = ({ engineerId, isLoa
           
           <Button 
             onClick={handleCheckVehicle} 
-            className="w-full bg-akhanya hover:bg-akhanya/90"
+            className="w-full bg-akhanya hover:bg-akhanya/90 mt-auto"
           >
             <Car className="mr-2 h-4 w-4" />
             {vehicleStatus.status === "unknown" ? "Perform First Check" : "Update Vehicle Check"}

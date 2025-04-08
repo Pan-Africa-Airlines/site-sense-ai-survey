@@ -30,14 +30,14 @@ const AIInsightsSection: React.FC<AIInsightsSectionProps> = ({ insights }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {insights.map((insight, index) => (
-          <Card key={index} className="border-l-4 border-l-akhanya">
+          <Card key={index} className="border-l-4 border-l-akhanya h-full flex flex-col">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-md">{insight.title}</CardTitle>
                 {renderIcon(insight.icon)}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
               <p className="text-sm text-gray-600">{insight.description}</p>
             </CardContent>
           </Card>
