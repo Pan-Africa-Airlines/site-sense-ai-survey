@@ -60,7 +60,8 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       const mockTotals = {
         assessments: 24,
         completedInstallations: 18,
-        satisfactionRate: 96
+        satisfactionRate: 96,
+        assessmentStatus: "In Progress"
       };
       
       return {
@@ -130,11 +131,12 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
       
     const installationsCount = installations?.length || 0;
     
-    // Get site assessment count from site_surveys table
+    // Get site assessment count from site_surveys table for this specific engineer
     const { data: siteAssessments, error: assessmentsError } = await supabase
       .from('site_surveys')
       .select('*')
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
     
     if (assessmentsError) {
       console.error("Error fetching site assessments:", assessmentsError);
@@ -142,6 +144,32 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     
     // Calculate total assessments count
     const assessmentsCount = siteAssessments?.length || 0;
+    
+    // Determine the latest assessment status
+    let assessmentStatus = "None";
+    if (siteAssessments && siteAssessments.length > 0) {
+      const latestAssessment = siteAssessments[0];
+      // Map database status to UI-friendly status
+      switch(latestAssessment.status.toLowerCase()) {
+        case 'draft':
+          assessmentStatus = "Started";
+          break;
+        case 'in_progress':
+        case 'pending':
+          assessmentStatus = "In Progress";
+          break;
+        case 'completed':
+        case 'approved':
+          assessmentStatus = "Completed";
+          break;
+        case 'expired':
+        case 'rejected':
+          assessmentStatus = "Expired";
+          break;
+        default:
+          assessmentStatus = latestAssessment.status;
+      }
+    }
     
     // Get vehicle check count for fallback if needed
     const { data: vehicleChecks, error: vehicleChecksError } = await supabase
@@ -172,9 +200,10 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     
     // Set totals - use real data with fallbacks only if needed
     const totals = {
-      assessments: assessmentsCount || vehicleChecks?.length || 0,
+      assessments: assessmentsCount,
       completedInstallations: installationsCount || 0,
-      satisfactionRate: satisfactionRate || 0
+      satisfactionRate: satisfactionRate || 0,
+      assessmentStatus: assessmentStatus
     };
     
     // Fetch recent activities
