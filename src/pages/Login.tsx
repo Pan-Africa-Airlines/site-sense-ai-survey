@@ -61,31 +61,48 @@ const Login = () => {
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("userEmail", email);
       
-      // Check if user is an engineer (exists in engineer_profiles)
-      const { data: profileData, error: profileError } = await supabase
-        .from('engineer_profiles')
-        .select('*')
+      // Check the user's role from the users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
         .eq('id', authData.user.id)
         .single();
-      
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error("Error fetching profile:", profileError);
+        
+      if (userError) {
+        console.error("Error fetching user role:", userError);
+        toast.error("Could not verify user role. Please try again.");
+        setIsLoading(false);
+        return;
       }
-
+      
+      const userRole = userData?.role;
+      console.log("User role from database:", userRole);
+      
       if (role === "admin") {
-        // If role selected is admin and the login was successful, treat as admin
+        // Check if user has admin role
+        if (userRole !== 'admin') {
+          toast.error("You don't have admin privileges");
+          await supabase.auth.signOut();
+          localStorage.removeItem("loggedIn");
+          localStorage.removeItem("userEmail");
+          setIsLoading(false);
+          return;
+        }
+        
         localStorage.setItem("adminLoggedIn", "true");
         localStorage.setItem("adminUsername", email);
         
         toast.success(`Welcome, ${authData.user.email || email}!`);
         navigate("/admin/dashboard");
       } else {
-        // Engineer role
-        localStorage.setItem("adminLoggedIn", "false");
-        localStorage.removeItem("adminUsername");
-        
-        // If profile doesn't exist, create one
-        if (!profileData) {
+        // Engineer role - ensure they have an engineer profile
+        const { data: profileData, error: profileError } = await supabase
+          .from('engineer_profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+          
+        if (!profileData && !profileError) {
           console.log("Creating new engineer profile for user:", authData.user.id);
           const userData = authData.user.user_metadata;
           const userName = userData?.name || email.split('@')[0].split('.').map(part => 
@@ -109,6 +126,9 @@ const Login = () => {
             console.error("Error creating engineer profile:", createError);
           }
         }
+        
+        localStorage.setItem("adminLoggedIn", "false");
+        localStorage.removeItem("adminUsername");
         
         toast.success(`Welcome, ${authData.user.email || email}!`);
         navigate("/dashboard");

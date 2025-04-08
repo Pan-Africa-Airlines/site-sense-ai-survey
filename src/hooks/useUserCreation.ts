@@ -29,7 +29,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
     try {
       console.log("Creating new user with data:", data);
       
-      // Use signUp instead of admin.createUser
+      // Use signUp to create the user in auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -50,6 +50,17 @@ export const useUserCreation = (): UseUserCreationReturn => {
       
       if (!userId) {
         throw new Error("Failed to get user ID from auth response");
+      }
+      
+      // Update the role in the users table - our trigger created the record, but we need to update the role
+      const { error: roleError } = await supabase
+        .from("users")
+        .update({ role: data.role === "Administrator" ? "admin" : "engineer" })
+        .eq("id", userId);
+        
+      if (roleError) {
+        console.error("Error updating user role:", roleError);
+        throw roleError;
       }
       
       // Then create the engineer profile
@@ -77,7 +88,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
           id: newEngineer[0].id,
           name: newEngineer[0].name,
           email: newEngineer[0].email,
-          role: newEngineer[0].specializations[0],
+          role: data.role,
           status: "active",
           experience: newEngineer[0].experience,
           regions: newEngineer[0].regions,

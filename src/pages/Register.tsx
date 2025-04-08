@@ -58,6 +58,8 @@ const Register = () => {
         if (userId) {
           console.log("User registered successfully with ID:", userId);
           
+          // The trigger we created will automatically add this user to the users table with engineer role
+          
           // Create an engineer profile for the new user
           const { error: profileError } = await supabase
             .from('engineer_profiles')

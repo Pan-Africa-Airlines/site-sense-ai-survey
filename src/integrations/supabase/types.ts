@@ -121,7 +121,15 @@ export type Database = {
           specializations?: string[] | null
           total_reviews?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "engineer_profiles_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       engineer_ratings: {
         Row: {
@@ -297,6 +305,30 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vehicle_checks: {
         Row: {
           check_date: string
@@ -371,7 +403,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "engineer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -486,6 +518,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "engineer"],
+    },
   },
 } as const

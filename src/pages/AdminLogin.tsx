@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -8,12 +9,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Lock, ShieldAlert } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { supabase } from "@/integrations/supabase/client";
-
-// Admin credentials are now managed in Supabase, but we keep these as fallback
-const ADMIN_CREDENTIALS = [
-  { username: "admin@akhanya.co.za", password: "admin123" },
-  { username: "supervisor@akhanya.co.za", password: "super123" }
-];
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -34,40 +29,53 @@ const AdminLogin = () => {
         password
       });
       
-      if (!authError && authData.user) {
-        console.log("Admin authenticated successfully with Supabase");
-        
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("userEmail", username);
-        localStorage.setItem("adminLoggedIn", "true");
-        localStorage.setItem("adminUsername", username);
-        
-        toast.success(`Welcome, ${authData.user.email || username}!`);
-        navigate("/admin/dashboard");
+      if (authError) {
+        console.error("Authentication error:", authError);
+        toast.error("Invalid credentials. Please try again.");
+        setIsLoading(false);
         return;
       }
       
-      // If Supabase auth fails, try fallback admin credentials
-      console.log("Supabase auth failed, trying fallback admin credentials");
-      
-      const isValidAdmin = ADMIN_CREDENTIALS.some(
-        admin => admin.username === username && admin.password === password
-      );
-
-      if (isValidAdmin) {
-        console.log("Admin authenticated with fallback credentials");
-        
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("userEmail", username);
-        localStorage.setItem("adminLoggedIn", "true");
-        localStorage.setItem("adminUsername", username);
-        
-        toast.success(`Welcome, ${username}!`);
-        navigate("/admin/dashboard");
-      } else {
-        console.error("Admin login failed: invalid credentials");
-        toast.error("Invalid admin credentials. Please try again.");
+      if (!authData.user) {
+        console.error("No user returned after authentication");
+        toast.error("Login failed. Please try again.");
+        setIsLoading(false);
+        return;
       }
+      
+      // Verify that the user has the admin role in our users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single();
+        
+      if (userError) {
+        console.error("Error fetching user role:", userError);
+        // Sign out the user as they don't have proper admin rights
+        await supabase.auth.signOut();
+        toast.error("You don't have admin privileges");
+        setIsLoading(false);
+        return;
+      }
+      
+      if (userData.role !== 'admin') {
+        console.error("User does not have admin role");
+        // Sign out the user as they don't have proper admin rights
+        await supabase.auth.signOut();
+        toast.error("You don't have admin privileges");
+        setIsLoading(false);
+        return;
+      }
+      
+      // User is authenticated and has admin role
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail", username);
+      localStorage.setItem("adminLoggedIn", "true");
+      localStorage.setItem("adminUsername", username);
+      
+      toast.success(`Welcome, ${authData.user.email || username}!`);
+      navigate("/admin/dashboard");
     } catch (error) {
       console.error("Admin login error:", error);
       toast.error("An unexpected error occurred. Please try again.");

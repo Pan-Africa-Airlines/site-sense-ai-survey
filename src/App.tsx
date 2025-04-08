@@ -38,39 +38,81 @@ const queryClient = new QueryClient({
   },
 });
 
+type UserRole = "admin" | "engineer" | null;
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>(null);
 
   // Check auth status on load and listen for changes
   useEffect(() => {
-    // Check if user is logged in from local storage first for quick UI response
-    const loggedIn = localStorage.getItem("loggedIn") === "true";
-    setIsAuthenticated(loggedIn);
-
     // Set up Supabase auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         const hasSession = !!session;
         setIsAuthenticated(hasSession);
+        
         if (hasSession) {
           localStorage.setItem("loggedIn", "true");
           localStorage.setItem("userEmail", session.user.email || "");
+          
+          // Fetch user role from our users table
+          try {
+            const { data: userData, error: userError } = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (!userError && userData) {
+              setUserRole(userData.role as UserRole);
+              
+              if (userData.role === 'admin') {
+                localStorage.setItem("adminLoggedIn", "true");
+                localStorage.setItem("adminUsername", session.user.email || "");
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching user role:", error);
+          }
         } else if (event === 'SIGNED_OUT') {
           localStorage.removeItem("loggedIn");
           localStorage.removeItem("userEmail");
           localStorage.removeItem("adminLoggedIn");
           localStorage.removeItem("adminUsername");
+          setUserRole(null);
         }
       }
     );
 
     // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       const hasSession = !!session;
       setIsAuthenticated(hasSession);
+      
       if (hasSession) {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("userEmail", session.user.email || "");
+        
+        // Fetch user role from our users table
+        try {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (!userError && userData) {
+            setUserRole(userData.role as UserRole);
+            
+            if (userData.role === 'admin') {
+              localStorage.setItem("adminLoggedIn", "true");
+              localStorage.setItem("adminUsername", session.user.email || "");
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
       }
     });
 
