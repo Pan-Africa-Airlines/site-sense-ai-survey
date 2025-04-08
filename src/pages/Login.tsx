@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,12 +10,6 @@ import { Lock } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-
-// Admin credentials for demo/fallback - not used in primary authentication flow now
-const ADMIN_CREDENTIALS = [
-  { username: "admin@akhanya.co.za", password: "admin123" },
-  { username: "supervisor@akhanya.co.za", password: "super123" }
-];
 
 type UserRole = "engineer" | "admin";
 
@@ -25,7 +20,6 @@ const Login = () => {
   const [role, setRole] = useState<UserRole>("engineer");
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
 
   // Check for role preselection from URL params
   useEffect(() => {
@@ -41,85 +35,87 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // First try Supabase auth for all users (both admin and engineers)
+      console.log("Logging in with email:", email);
+      
+      // Authenticate with Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (authError || !authData.user) {
-        // If Supabase auth fails, try fallback admin credentials only for admin role
-        if (role === "admin") {
-          console.log("Supabase auth failed, trying fallback admin credentials");
-          
-          const isAdmin = ADMIN_CREDENTIALS.some(
-            admin => admin.username === email && admin.password === password
-          );
+      if (authError) {
+        console.error("Authentication error:", authError);
+        toast.error(authError.message || "Invalid credentials. Please try again.");
+        setIsLoading(false);
+        return;
+      }
 
-          if (isAdmin) {
-            // Using local storage for demo purposes
-            localStorage.setItem("adminLoggedIn", "true");
-            localStorage.setItem("adminUsername", email);
-            localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("userEmail", email);
-            
-            toast({
-              title: "Admin login successful",
-              description: `Welcome, ${email}!`,
+      if (!authData.user) {
+        console.error("No user returned after authentication");
+        toast.error("Login failed. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Set up common auth data in localStorage
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail", email);
+      
+      // Check if user is an engineer (exists in engineer_profiles)
+      const { data: profileData, error: profileError } = await supabase
+        .from('engineer_profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+      
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error("Error fetching profile:", profileError);
+      }
+
+      if (role === "admin") {
+        // If role selected is admin and the login was successful, treat as admin
+        localStorage.setItem("adminLoggedIn", "true");
+        localStorage.setItem("adminUsername", email);
+        
+        toast.success(`Welcome, ${authData.user.email || email}!`);
+        navigate("/admin/dashboard");
+      } else {
+        // Engineer role
+        localStorage.setItem("adminLoggedIn", "false");
+        localStorage.removeItem("adminUsername");
+        
+        // If profile doesn't exist, create one
+        if (!profileData) {
+          console.log("Creating new engineer profile for user:", authData.user.id);
+          const userData = authData.user.user_metadata;
+          const userName = userData?.name || email.split('@')[0].split('.').map(part => 
+            part.charAt(0).toUpperCase() + part.slice(1)
+          ).join(' ');
+          
+          const { error: createError } = await supabase
+            .from('engineer_profiles')
+            .insert({
+              id: authData.user.id,
+              name: userName,
+              email: email,
+              specializations: ['Field Engineer'],
+              regions: [],
+              experience: 'New',
+              average_rating: 0,
+              total_reviews: 0
             });
-            navigate("/admin/dashboard");
-            return;
+            
+          if (createError) {
+            console.error("Error creating engineer profile:", createError);
           }
         }
         
-        // If we reach here, both Supabase auth and admin fallback (for admin role) have failed
-        toast({
-          title: "Login failed",
-          description: authError?.message || "Invalid credentials. Please try again.",
-          variant: "destructive",
-        });
-      } else {
-        // Successful Supabase auth - now check user role and redirect accordingly
-        // First, check if this user exists in engineer_profiles table
-        const { data: profileData } = await supabase
-          .from('engineer_profiles')
-          .select('*')
-          .eq('id', authData.user.id)
-          .single();
-
-        // Set up common auth data in localStorage
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("userEmail", email);
-        
-        if (role === "admin") {
-          // If role selected is admin and the login was successful, treat as admin
-          localStorage.setItem("adminLoggedIn", "true");
-          localStorage.setItem("adminUsername", email);
-          
-          toast({
-            title: "Admin login successful",
-            description: `Welcome, ${authData.user.email || email}!`,
-          });
-          navigate("/admin/dashboard");
-        } else {
-          // Engineer role
-          localStorage.setItem("adminLoggedIn", "false");
-          localStorage.removeItem("adminUsername");
-          
-          toast({
-            title: "Engineer login successful",
-            description: `Welcome, ${authData.user.email || email}!`,
-          });
-          navigate("/dashboard");
-        }
+        toast.success(`Welcome, ${authData.user.email || email}!`);
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast({
-        title: "Login failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }

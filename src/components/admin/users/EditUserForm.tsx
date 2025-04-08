@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useUserCreation, UserFormData } from "@/hooks/useUserCreation";
 import RegionSelector from "./RegionSelector";
 import UserFormFields from "./UserFormFields";
@@ -24,7 +24,6 @@ interface EditUserFormProps {
 }
 
 const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<UserFormData>({
@@ -50,6 +49,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
     
     try {
       setIsSubmitting(true);
+      console.log("Updating user:", user.id, "with data:", formData);
       
       // Update engineer profile
       const { data: updatedEngineer, error } = await supabase
@@ -61,33 +61,36 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
           regions: formData.regions,
           experience: formData.experience || user.experience
         })
-        .eq("id", user.id.toString())  // Convert id to string if it's a number
+        .eq("id", user.id.toString())
         .select();
       
       if (error) {
         console.error("Error updating engineer profile:", error);
-        toast({
-          title: "Error updating user",
-          description: error.message,
-          variant: "destructive"
-        });
+        toast.error("Error updating user: " + error.message);
         return;
       }
       
       // Update password if provided
       if (formData.password && formData.password.trim() !== "") {
-        // Note: This might not work as expected as auth.admin APIs usually require server-side access
-        // You might need to implement this differently based on your auth setup
+        console.log("Updating password for user:", user.id);
+        
         try {
-          // This is a placeholder - actual implementation will depend on your auth setup
-          console.log("Password update would go here in a real implementation");
+          // Update user password in Supabase auth
+          const { error: updateError } = await supabase.auth.admin.updateUserById(
+            user.id.toString(),
+            { password: formData.password }
+          );
+          
+          if (updateError) {
+            console.error("Error updating password:", updateError);
+            toast.error("Failed to update password: " + updateError.message);
+          } else {
+            console.log("Password updated successfully");
+            toast.success("Password updated successfully");
+          }
         } catch (passwordError) {
           console.error("Error updating password:", passwordError);
-          toast({
-            title: "Error updating password",
-            description: "Failed to update password",
-            variant: "destructive"
-          });
+          toast.error("Failed to update password");
         }
       }
       
@@ -95,7 +98,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
       await supabase
         .from("system_logs")
         .insert({
-          user_id: user.id.toString(), // Convert id to string if it's a number
+          user_id: user.id.toString(),
           user_name: formData.name,
           action: "user_updated",
           details: { 
@@ -118,19 +121,11 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
       
       onUserUpdated(updatedUser);
       
-      toast({
-        title: "User updated",
-        description: `User ${formData.name} has been updated successfully.`
-      });
-      
+      toast.success(`User ${formData.name} has been updated successfully.`);
       setOpen(false);
     } catch (error) {
       console.error("Error in edit user form:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update user.",
-        variant: "destructive"
-      });
+      toast.error("Failed to update user.");
     } finally {
       setIsSubmitting(false);
     }
