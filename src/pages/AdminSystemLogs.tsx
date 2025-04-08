@@ -46,7 +46,7 @@ const AdminSystemLogs = () => {
           user_name: log.user_name,
           action: log.action,
           details: log.details,
-          timestamp: log.created_at || log.timestamp
+          timestamp: log.timestamp
         }));
         setLogs(mappedLogs);
       } else {
@@ -136,7 +136,7 @@ function getMockSystemLogs(): SystemLog[] {
       user_name: "John Smith",
       action: "login",
       details: { ip: "192.168.1.1", device: "Chrome/Windows" },
-      timestamp: new Date(2023, 5, 15, 9, 30)
+      timestamp: new Date(2023, 5, 15, 9, 30).toISOString()
     },
     {
       id: "2",
@@ -144,7 +144,7 @@ function getMockSystemLogs(): SystemLog[] {
       user_name: "Jane Doe",
       action: "user_created",
       details: { email: "jane.doe@example.com", role: "engineer" },
-      timestamp: new Date(2023, 5, 14, 15, 45)
+      timestamp: new Date(2023, 5, 14, 15, 45).toISOString()
     },
     {
       id: "3",
@@ -152,7 +152,7 @@ function getMockSystemLogs(): SystemLog[] {
       user_name: "Admin User",
       action: "site_allocated",
       details: { site_id: "site-001", engineer_id: "user-456" },
-      timestamp: new Date(2023, 5, 14, 10, 15)
+      timestamp: new Date(2023, 5, 14, 10, 15).toISOString()
     },
     {
       id: "4",
@@ -160,7 +160,7 @@ function getMockSystemLogs(): SystemLog[] {
       user_name: "John Smith",
       action: "logout",
       details: { time_spent: "2h 15m" },
-      timestamp: new Date(2023, 5, 15, 11, 45)
+      timestamp: new Date(2023, 5, 15, 11, 45).toISOString()
     },
     {
       id: "5",
@@ -168,7 +168,7 @@ function getMockSystemLogs(): SystemLog[] {
       user_name: "Admin User",
       action: "user_updated",
       details: { id: "user-456", field: "region", old: "Western Cape", new: "Gauteng" },
-      timestamp: new Date(2023, 5, 13, 14, 20)
+      timestamp: new Date(2023, 5, 13, 14, 20).toISOString()
     },
   ];
 }
