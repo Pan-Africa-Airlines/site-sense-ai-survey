@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -5,10 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock } from "lucide-react";
+import { Lock, AlertCircle } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 // Admin credentials for demo/fallback
 const ADMIN_CREDENTIALS = [
@@ -16,68 +25,81 @@ const ADMIN_CREDENTIALS = [
   { username: "supervisor@akhanya.co.za", password: "super123" }
 ];
 
-type UserRole = "engineer" | "admin";
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [role, setRole] = useState<UserRole>("engineer");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
-  // Check for role preselection from URL params
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const roleParam = params.get('role');
-    if (roleParam === 'admin') {
-      setRole('admin');
-    }
-  }, [location]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
-      // Admin login flow
-      if (role === "admin") {
-        // First try Supabase auth for admins
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
+      // Try Supabase auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-        // If Supabase auth fails or user doesn't exist, try fallback admin credentials
-        if (authError || !authData.user) {
-          console.log("Supabase auth failed, trying fallback admin credentials");
+      // Check for Supabase auth success
+      if (!authError && authData.user) {
+        // Get user role from metadata or profiles
+        const { data: profileData, error: profileError } = await supabase
+          .from("engineer_profiles")
+          .select("*")
+          .eq("id", authData.user.id)
+          .single();
           
-          const isAdmin = ADMIN_CREDENTIALS.some(
-            admin => admin.username === email && admin.password === password
+        let isAdmin = false;
+        
+        // Check if user has admin role in specializations
+        if (!profileError && profileData && profileData.specializations) {
+          isAdmin = profileData.specializations.some(
+            (role: string) => role.toLowerCase().includes('admin') || role.toLowerCase().includes('supervisor')
           );
-
-          if (isAdmin) {
-            // Using local storage for demo purposes
-            localStorage.setItem("adminLoggedIn", "true");
-            localStorage.setItem("adminUsername", email);
-            localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("userEmail", email);
-            
-            toast({
-              title: "Admin login successful",
-              description: `Welcome, ${email}!`,
-            });
-            navigate("/admin/dashboard");
-          } else {
-            toast({
-              title: "Admin login failed",
-              description: "Invalid admin credentials. Please try again.",
-              variant: "destructive",
-            });
-          }
+        }
+        
+        // Set login info in local storage
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("userEmail", email);
+        
+        if (isAdmin) {
+          localStorage.setItem("adminLoggedIn", "true");
+          localStorage.setItem("adminUsername", email);
+          
+          toast({
+            title: "Admin login successful",
+            description: `Welcome, ${email}!`,
+          });
+          navigate("/admin/dashboard");
         } else {
-          // Successful Supabase admin auth
+          localStorage.setItem("adminLoggedIn", "false");
+          localStorage.removeItem("adminUsername");
+          
+          toast({
+            title: "Engineer login successful",
+            description: `Welcome, ${email}!`,
+          });
+          navigate("/dashboard");
+        }
+      } 
+      // If Supabase auth fails, try fallback admin credentials
+      else if (authError) {
+        console.log("Supabase auth failed, trying fallback admin credentials");
+        
+        const isAdmin = ADMIN_CREDENTIALS.some(
+          admin => admin.username === email && admin.password === password
+        );
+
+        if (isAdmin) {
           localStorage.setItem("adminLoggedIn", "true");
           localStorage.setItem("adminUsername", email);
           localStorage.setItem("loggedIn", "true");
@@ -85,22 +107,11 @@ const Login = () => {
           
           toast({
             title: "Admin login successful",
-            description: `Welcome, ${authData.user.email || email}!`,
+            description: `Welcome, ${email}!`,
           });
           navigate("/admin/dashboard");
-        }
-      } 
-      // Engineer login flow
-      else {
-        // Try Supabase auth for engineers
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        // For demo purposes, allow any credentials to work for engineers
-        if (authError || !authData.user) {
-          console.log("Auth failed but allowing login for demo purposes");
+        } else {
+          // For demo, allow any users to login as engineers with any credentials
           if (email && password) {
             localStorage.setItem("loggedIn", "true");
             localStorage.setItem("userEmail", email);
@@ -113,31 +124,41 @@ const Login = () => {
             });
             navigate("/dashboard");
           } else {
-            toast({
-              title: "Login failed",
-              description: "Please enter both email and password.",
-              variant: "destructive",
-            });
+            setErrorMessage("Please enter both email and password.");
           }
-        } else {
-          // Successful Supabase engineer auth
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("userEmail", authData.user.email || email);
-          localStorage.setItem("adminLoggedIn", "false");
-          localStorage.removeItem("adminUsername");
-          
-          toast({
-            title: "Engineer login successful",
-            description: `Welcome, ${authData.user.email || email}!`,
-          });
-          navigate("/dashboard");
         }
       }
     } catch (error) {
       console.error("Login error:", error);
+      setErrorMessage("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setResetSent(true);
       toast({
-        title: "Login failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Password reset email sent",
+        description: "Check your email for a password reset link",
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send password reset email. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -201,28 +222,22 @@ const Login = () => {
                   </div>
                 </div>
                 <div className="text-center space-y-1.5">
-                  <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100">Sign in to your account</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100">Sign in to EskomSiteIQ</CardTitle>
                   <CardDescription className="text-gray-500 dark:text-gray-400">
                     Enter your credentials to access the platform
                   </CardDescription>
                 </div>
+                
+                {errorMessage && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {errorMessage}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <form onSubmit={handleLogin} className="space-y-4 mt-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="role" className="text-gray-700 dark:text-gray-300">Login as</Label>
-                    <Select
-                      defaultValue={role}
-                      value={role}
-                      onValueChange={(value: string) => setRole(value as UserRole)}
-                    >
-                      <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="engineer">Engineer</SelectItem>
-                        <SelectItem value="admin">Administrator</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
                     <Input
@@ -238,7 +253,12 @@ const Login = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">Password</Label>
-                      <Button variant="link" className="text-xs text-akhanya p-0 h-auto">
+                      <Button 
+                        variant="link" 
+                        className="text-xs text-akhanya p-0 h-auto"
+                        type="button"
+                        onClick={() => setForgotPasswordOpen(true)}
+                      >
                         Forgot password?
                       </Button>
                     </div>
@@ -270,6 +290,70 @@ const Login = () => {
           </Card>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Enter your email address and we'll send you a link to reset your password.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {resetSent ? (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-center">
+                <div className="rounded-full bg-green-100 p-2">
+                  <div className="rounded-full bg-green-500 p-1">
+                    <AlertCircle className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+              </div>
+              <p className="text-center text-sm">
+                Password reset email sent to <span className="font-medium">{resetEmail}</span>.
+                Please check your inbox and follow the instructions.
+              </p>
+              <Button 
+                className="w-full" 
+                onClick={() => {
+                  setForgotPasswordOpen(false);
+                  setResetSent(false);
+                  setResetEmail("");
+                }}
+              >
+                Close
+              </Button>
+            </div>
+          ) : (
+            <form onSubmit={handleForgotPassword} className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setForgotPasswordOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Sending..." : "Send Reset Link"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

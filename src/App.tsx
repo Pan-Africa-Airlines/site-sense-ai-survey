@@ -12,7 +12,6 @@ import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAssessments from "./pages/AdminAssessments";
 import AdminInstallations from "./pages/AdminInstallations";
@@ -39,7 +38,6 @@ function App() {
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/eskom-survey/new" element={<EskomSurvey />} />
           <Route path="/installation" element={<Installation />} />
           <Route path="/my-allocations" element={<MyAllocations />} />

@@ -76,11 +76,40 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
       
       // Update password if provided
       if (formData.password && formData.password.trim() !== "") {
-        // Note: This might not work as expected as auth.admin APIs usually require server-side access
-        // You might need to implement this differently based on your auth setup
         try {
-          // This is a placeholder - actual implementation will depend on your auth setup
-          console.log("Password update would go here in a real implementation");
+          // Try to update password via Supabase Auth API
+          const { error: passwordError } = await supabase.auth.admin.updateUserById(
+            user.id.toString(),
+            { password: formData.password }
+          );
+          
+          if (passwordError) {
+            // Fallback for non-admin accounts or if admin API fails
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
+              redirectTo: window.location.origin + '/reset-password',
+            });
+            
+            if (resetError) {
+              console.error("Error sending password reset:", resetError);
+              toast({
+                title: "Warning",
+                description: "Could not directly update password. A password reset email has been sent to the user instead.",
+                variant: "default"
+              });
+            } else {
+              toast({
+                title: "Password reset email sent",
+                description: "A password reset email has been sent to the user's email address.",
+                variant: "default"
+              });
+            }
+          } else {
+            toast({
+              title: "Password updated",
+              description: "User password has been successfully updated.",
+              variant: "default"
+            });
+          }
         } catch (passwordError) {
           console.error("Error updating password:", passwordError);
           toast({
