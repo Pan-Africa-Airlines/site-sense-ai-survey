@@ -27,6 +27,14 @@ const saRegions = [
   "Northern Cape"
 ];
 
+// Site Types
+const siteTypes = [
+  "Sub-TX",
+  "RS",
+  "PS-Coal",
+  "Other"
+];
+
 const SiteIdentification: React.FC<SiteIdentificationProps> = ({
   formData,
   onInputChange,
@@ -98,12 +106,23 @@ const SiteIdentification: React.FC<SiteIdentificationProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="siteType">Site Type (Sub-TX, RS, PS-Coal)</Label>
-            <Input
-              id="siteType"
-              value={formData.siteType || ""}
-              onChange={(e) => onInputChange("siteType", e.target.value)}
-            />
+            <Label htmlFor="siteType">Site Type</Label>
+            <Select 
+              value={formData.siteType || "select-type"} 
+              onValueChange={(value) => onInputChange("siteType", value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a site type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="select-type">Select a site type</SelectItem>
+                {siteTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">
