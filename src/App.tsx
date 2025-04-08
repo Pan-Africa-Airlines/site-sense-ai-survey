@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   BrowserRouter as Router,
@@ -28,4 +29,70 @@ import Assessment from "./pages/Assessment";
 import EskomSurveys from "./pages/EskomSurveys";
 import CarCheckup from "./pages/CarCheckup";
 
-// ... keep existing code (App function and other components)
+function App() {
+  const [loggedIn, setLoggedIn] = useState(localStorage.getItem("loggedIn") === "true");
+
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Protected routes */}
+          <Route 
+            path="/dashboard" 
+            element={loggedIn ? <Dashboard /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/car-checkup" 
+            element={loggedIn ? <CarCheckup /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/eskom-survey/:id" 
+            element={loggedIn ? <EskomSurvey /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/eskom-survey/new" 
+            element={loggedIn ? <EskomSurvey /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/eskom-surveys" 
+            element={loggedIn ? <EskomSurveys /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/installation" 
+            element={loggedIn ? <Installation /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/my-allocations" 
+            element={loggedIn ? <MyAllocations /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/assessment" 
+            element={loggedIn ? <Assessment /> : <Navigate to="/login" />} 
+          />
+          
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminProtectedRoute />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="assessments" element={<AdminAssessments />} />
+            <Route path="installations" element={<AdminInstallations />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="map" element={<AdminMap />} />
+            <Route path="site-allocation" element={<AdminSiteAllocation />} />
+            <Route path="system-logs" element={<AdminSystemLogs />} />
+            <Route path="configuration" element={<Configuration />} />
+          </Route>
+          
+          {/* Catch-all route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
+}
+
+export default App;

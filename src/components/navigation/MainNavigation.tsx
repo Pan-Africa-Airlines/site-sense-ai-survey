@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Store, Car, FileText, Wrench, Map, Calendar } from "lucide-react";
+import { Store, Car, FileText, Wrench, Map, Calendar, ListChecks } from "lucide-react";
 import { MainNavigationProps } from "./types";
 
 const MainNavigation: React.FC<MainNavigationProps> = ({ 
@@ -10,9 +10,10 @@ const MainNavigation: React.FC<MainNavigationProps> = ({
   onNavigate
 }) => {
   const menuItems = [
-    { path: "/", icon: Store, label: "Dashboard", isActive: activePaths["/"] },
+    { path: "/dashboard", icon: Store, label: "Dashboard", isActive: activePaths["/dashboard"] },
     { path: "/car-checkup", icon: Car, label: "Vehicle Check", isActive: activePaths["/car-checkup"] },
     { path: "/eskom-survey/new", icon: FileText, label: "Site Survey", isActive: activePaths["/eskom-survey"] },
+    { path: "/eskom-surveys", icon: ListChecks, label: "Surveys List", isActive: activePaths["/eskom-surveys"] },
     { path: "/my-allocations", icon: Map, label: "My Allocations", isActive: activePaths["/my-allocations"] }
   ];
 

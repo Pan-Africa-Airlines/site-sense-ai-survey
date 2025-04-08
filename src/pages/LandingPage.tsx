@@ -1,10 +1,19 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+  
+  // Check if user is already logged in, redirect to dashboard
+  React.useEffect(() => {
+    if (localStorage.getItem("loggedIn") === "true") {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-gray-900 dark:bg-gray-950 text-white p-4">
