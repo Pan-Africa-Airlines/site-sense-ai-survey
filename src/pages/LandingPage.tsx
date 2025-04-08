@@ -15,14 +15,15 @@ const LandingPage = () => {
               alt="Akhanya IT" 
               className="h-8 brightness-0 invert" 
               onError={(e) => {
-                e.currentTarget.src = "https://via.placeholder.com/120x45?text=Akhanya";
+                const target = e.currentTarget as HTMLImageElement;
+                target.src = "https://via.placeholder.com/120x45?text=Akhanya";
               }}
             />
           </div>
           <div className="flex items-center space-x-4">
             <nav className="space-x-4">
-              <Link to="/login">Login</Link>
-              <Link to="/register">Register</Link>
+              <Link to="/login" className="hover:underline">Login</Link>
+              <Link to="/register" className="hover:underline">Register</Link>
             </nav>
             <ThemeSwitcher size="sm" />
           </div>
@@ -34,7 +35,7 @@ const LandingPage = () => {
           <h1 className="text-4xl font-bold mb-6 dark:text-white">Welcome to the Akhanya Site Assessment Platform</h1>
           <p className="text-xl mb-8 dark:text-gray-300">A comprehensive platform for managing site assessments and installations</p>
           <div className="space-x-4">
-            <Button asChild variant="default" size="lg">
+            <Button asChild variant="default" size="lg" className="bg-blue-600 hover:bg-blue-700">
               <Link to="/login">Engineer Login</Link>
             </Button>
             <Button asChild variant="outline" size="lg">

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   BrowserRouter as Router,
@@ -31,8 +32,8 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <Router>
         <Routes>
-          {/* Redirect root to system logs */}
-          <Route path="/" element={<Navigate to="/admin/system-logs" replace />} />
+          {/* Redirect root to landing page */}
+          <Route path="/" element={<Navigate to="/landing" replace />} />
           
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
