@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   BrowserRouter as Router,
@@ -7,7 +8,6 @@ import {
   Outlet,
 } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider"
-import { useTheme } from "@/components/hooks/use-theme"
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -27,11 +27,10 @@ import MyAllocations from "./pages/MyAllocations";
 import AdminSystemLogs from "./pages/AdminSystemLogs";
 
 function App() {
-  const { theme } = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-react-theme">
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, ShieldAlert } from "lucide-react";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 // Mock admin credentials - in a real app, these would be stored securely
 const ADMIN_CREDENTIALS = [
@@ -51,32 +52,36 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-white">
-      <Card className="w-full max-w-md border-gray-200 bg-white/90 backdrop-blur-xl shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-950">
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeSwitcher />
+      </div>
+
+      <Card className="w-full max-w-md border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl">
         <CardHeader className="space-y-1 pb-4">
           <div className="flex items-center justify-center mb-4">
             <div className="bg-red-500 p-3 rounded-full">
               <ShieldAlert className="h-6 w-6 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-gray-800 text-center">Admin Access</CardTitle>
-          <CardDescription className="text-gray-600 text-center">Enter your admin credentials to manage the system</CardDescription>
+          <CardTitle className="text-2xl text-gray-800 dark:text-gray-100 text-center">Admin Access</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-400 text-center">Enter your admin credentials to manage the system</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAdminLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-700">Username</Label>
+              <Label htmlFor="username" className="text-gray-700 dark:text-gray-300">Username</Label>
               <Input
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"
                 required
-                className="bg-white border-gray-300 text-gray-800 placeholder-gray-400"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="admin-password" className="text-gray-700">Password</Label>
+              <Label htmlFor="admin-password" className="text-gray-700 dark:text-gray-300">Password</Label>
               <Input
                 id="admin-password"
                 type="password"
@@ -84,7 +89,7 @@ const AdminLogin = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="bg-white border-gray-300 text-gray-800 placeholder-gray-400"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
             <Button 
@@ -97,7 +102,7 @@ const AdminLogin = () => {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center pt-0">
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
             For demo, use username: 'admin' and password: 'admin123'
           </p>
         </CardFooter>

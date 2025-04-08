@@ -1,14 +1,14 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Server, Wifi, Cable, Router, Brain, Sparkles, Lock, Sun, Moon } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import NetworkingBanner from "@/components/NetworkingBanner";
+import { Lock } from "lucide-react";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Admin credentials
 const ADMIN_CREDENTIALS = [
@@ -16,32 +16,15 @@ const ADMIN_CREDENTIALS = [
   { username: "supervisor@akhanya.co.za", password: "super123" }
 ];
 
+type UserRole = "engineer" | "admin";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [role, setRole] = useState<UserRole>("engineer");
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,85 +32,68 @@ const Login = () => {
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Check if admin login
-    const isAdmin = ADMIN_CREDENTIALS.some(
-      admin => admin.username === email && admin.password === password
-    );
+    // Admin login flow
+    if (role === "admin") {
+      const isAdmin = ADMIN_CREDENTIALS.some(
+        admin => admin.username === email && admin.password === password
+      );
 
-    if (isAdmin) {
-      // Admin login
-      localStorage.setItem("adminLoggedIn", "true");
-      localStorage.setItem("adminUsername", email);
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("userEmail", email);
-      
-      toast({
-        title: "Admin login successful",
-        description: `Welcome, ${email}!`,
-      });
-      navigate("/admin/dashboard");
-    } else if (email && password) {
-      // Regular user login
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("adminLoggedIn", "false");
-      localStorage.removeItem("adminUsername");
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome, ${email}!`,
-      });
-      navigate("/");
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
+      if (isAdmin) {
+        localStorage.setItem("adminLoggedIn", "true");
+        localStorage.setItem("adminUsername", email);
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("userEmail", email);
+        
+        toast({
+          title: "Admin login successful",
+          description: `Welcome, ${email}!`,
+        });
+        navigate("/admin/dashboard");
+      } else {
+        toast({
+          title: "Admin login failed",
+          description: "Invalid admin credentials. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } 
+    // Engineer login flow
+    else {
+      if (email && password) {
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("adminLoggedIn", "false");
+        localStorage.removeItem("adminUsername");
+        
+        toast({
+          title: "Engineer login successful",
+          description: `Welcome, ${email}!`,
+        });
+        navigate("/dashboard");
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Invalid credentials. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
 
     setIsLoading(false);
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Theme toggle */}
       <div className="absolute top-4 right-4 z-50">
-        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-full p-2 flex items-center gap-2 border border-gray-200 dark:border-gray-700">
-          <Sun className="h-5 w-5 text-yellow-500 dark:text-yellow-300" />
-          <Switch 
-            checked={isDarkMode}
-            onCheckedChange={toggleTheme}
-            className="data-[state=checked]:bg-akhanya data-[state=checked]:border-akhanya"
-          />
-          <Moon className="h-5 w-5 text-gray-500 dark:text-blue-300" />
-          <span className="text-xs font-medium ml-1 text-gray-800 dark:text-gray-200">
-            {isDarkMode ? 'Dark' : 'Light'}
-          </span>
-        </div>
+        <ThemeSwitcher />
       </div>
 
       {/* Background with overlay and image */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 dark:from-gray-950/90 dark:via-gray-900/90 dark:to-black/90">
         <div className="absolute inset-0 bg-cover bg-center opacity-30" 
              style={{backgroundImage: "url('/lovable-uploads/47596378-d2cb-4456-a4b6-34e2a2abfdba.png')"}}></div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-gray-900/20 to-gray-900/50"></div>
-      </div>
-
-      {/* Tech icons background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/6 text-blue-400 dark:text-blue-500 opacity-5 animate-pulse">
-          <Server size={50} />
-        </div>
-        <div className="absolute top-2/3 left-1/3 text-blue-300 dark:text-blue-400 opacity-5 animate-pulse" style={{animationDelay: "1s"}}>
-          <Wifi size={60} />
-        </div>
-        <div className="absolute top-1/5 right-1/4 text-green-400 dark:text-green-500 opacity-5 animate-pulse" style={{animationDelay: "1.5s"}}>
-          <Cable size={45} />
-        </div>
-        <div className="absolute bottom-1/4 right-1/6 text-purple-400 dark:text-purple-500 opacity-5 animate-pulse" style={{animationDelay: "0.8s"}}>
-          <Router size={55} />
-        </div>
       </div>
       
       {/* Content */}
@@ -175,13 +141,24 @@ const Login = () => {
                   <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100">Sign in to your account</CardTitle>
                   <CardDescription className="text-gray-500 dark:text-gray-400">
                     Enter your credentials to access the platform
-                    {/* Admin login hint */}
-                    <div className="mt-1 text-xs">
-                      Use <span className="font-semibold">admin@akhanya.co.za</span> for admin access
-                    </div>
                   </CardDescription>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-4 mt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="role" className="text-gray-700 dark:text-gray-300">Login as</Label>
+                    <Select
+                      defaultValue="engineer"
+                      onValueChange={(value: string) => setRole(value as UserRole)}
+                    >
+                      <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="engineer">Engineer</SelectItem>
+                        <SelectItem value="admin">Administrator</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
                     <Input
