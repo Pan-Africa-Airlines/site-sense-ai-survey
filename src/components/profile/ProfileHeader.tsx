@@ -53,7 +53,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       </CardHeader>
       <CardContent className="flex flex-col items-center text-center">
         <Avatar className="h-32 w-32 mb-4">
-          <AvatarImage src="/engineer-profile.jpg" alt={userName} />
+          <AvatarImage src="/engineer-profile.jpg" alt={engineerProfile?.name || userName} />
           <AvatarFallback className="bg-akhanya text-white text-2xl">
             {getInitials(userEmail)}
           </AvatarFallback>
