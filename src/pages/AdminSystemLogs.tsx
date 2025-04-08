@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import SystemLogsFilter from "@/components/admin/logs/SystemLogsFilter";
-import SystemLogsList from "@/components/admin/logs/SystemLogsList";
+import SystemLogsFilter from "../components/admin/logs/SystemLogsFilter";
+import SystemLogsList from "../components/admin/logs/SystemLogsList";
 import { fetchSystemLogs, fetchUsers, SystemLog } from "@/utils/systemLogsData";
 import { useToast } from "@/hooks/use-toast";
 
