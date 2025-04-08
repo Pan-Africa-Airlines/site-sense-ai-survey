@@ -28,48 +28,4 @@ import Assessment from "./pages/Assessment";
 import EskomSurveys from "./pages/EskomSurveys";
 import CarCheckup from "./pages/CarCheckup";
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <Router>
-        <Routes>
-          {/* Landing and public pages */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/landing" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Engineer pages */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/eskom-survey/new" element={<EskomSurvey />} />
-          <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
-          <Route path="/eskom-surveys" element={<EskomSurveys />} />
-          <Route path="/installation" element={<Installation />} />
-          <Route path="/my-allocations" element={<MyAllocations />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/car-checkup" element={<CarCheckup />} />
-          
-          {/* Admin Protected Routes */}
-          <Route path="/admin" element={<AdminProtectedRoute><Outlet /></AdminProtectedRoute>}>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="assessments" element={<AdminAssessments />} />
-            <Route path="installations" element={<AdminInstallations />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="map" element={<AdminMap />} />
-            <Route path="site-allocation" element={<AdminSiteAllocation />} />
-            <Route path="system-logs" element={<AdminSystemLogs />} />
-          </Route>
-
-          <Route path="/configuration" element={<Configuration />} />
-          
-          {/* Catch all route for 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
-  );
-}
-
-export default App;
+// ... keep existing code (App function and other components)
