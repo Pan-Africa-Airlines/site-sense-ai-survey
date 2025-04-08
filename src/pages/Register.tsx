@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,31 +29,34 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // This is a dummy implementation; in a real app, you'd integrate with Supabase Auth
     try {
       if (formData.password !== formData.confirmPassword) {
-        toast({
-          title: "Passwords don't match",
-          description: "Please make sure your passwords match.",
-          variant: "destructive"
-        });
+        toast.error("Passwords don't match. Please make sure your passwords match.");
+        setIsLoading(false);
         return;
       }
       
-      // Mock successful registration
-      setTimeout(() => {
-        toast({
-          title: "Registration successful!",
-          description: "You can now log in with your credentials."
-        });
-        navigate("/login");
-      }, 1500);
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: "There was a problem creating your account.",
-        variant: "destructive"
+      // Register user with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+          }
+        }
       });
+      
+      if (error) {
+        toast.error(error.message || "Registration failed");
+        console.error("Registration error:", error);
+      } else {
+        toast.success("Registration successful! You can now log in with your credentials.");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("There was a problem creating your account.");
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +128,7 @@ const Register = () => {
                 onChange={handleChange}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-akhanya hover:bg-akhanya-dark" disabled={isLoading}>
               {isLoading ? "Creating Account..." : "Register"}
             </Button>
           </form>
