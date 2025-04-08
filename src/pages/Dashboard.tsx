@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import EngineerRatingSurvey from "@/components/EngineerRatingSurvey";
-import EngineerProfileCard from "@/components/dashboard/EngineerProfileCard";
 import DashboardStatsCards from "@/components/dashboard/DashboardStatsCards";
 import AIInsightsSection from "@/components/dashboard/AIInsightsSection";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
@@ -14,6 +13,7 @@ import RecentActivitiesCard from "@/components/dashboard/RecentActivitiesCard";
 import SiteAllocationsSection from "@/components/dashboard/SiteAllocationsSection";
 import { EngineerProfile, AllocatedSite, AIInsight, ChartDataPoint, DashboardTotals, RecentActivity } from "@/types/dashboard";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import VehicleStatusCard from "@/components/dashboard/VehicleStatusCard";
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-        <EngineerProfileCard engineerProfile={engineerProfile} />
+        <VehicleStatusCard engineerId={engineerProfile?.id} isLoading={isLoading} />
         
         <div className="md:col-span-3">
           <DashboardStatsCards totals={totals} isLoading={isLoading} />
