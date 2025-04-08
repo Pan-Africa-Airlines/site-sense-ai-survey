@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, ShieldAlert } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { supabase } from "@/integrations/supabase/client";
 
 // Mock admin credentials - in a real app, these would be stored securely
 const ADMIN_CREDENTIALS = [
@@ -26,29 +27,60 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // First try Supabase authentication (if email is provided)
+      if (username.includes('@')) {
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: username,
+          password
+        });
+        
+        if (!authError && authData.user) {
+          localStorage.setItem("adminLoggedIn", "true");
+          localStorage.setItem("adminUsername", username);
+          
+          toast({
+            title: "Admin login successful",
+            description: `Welcome, ${authData.user.email || username}!`,
+          });
+          
+          navigate("/admin/dashboard");
+          return;
+        }
+      }
+      
+      // Fallback to predefined admin credentials
+      const isValidAdmin = ADMIN_CREDENTIALS.some(
+        admin => admin.username === username && admin.password === password
+      );
 
-    const isValidAdmin = ADMIN_CREDENTIALS.some(
-      admin => admin.username === username && admin.password === password
-    );
-
-    if (isValidAdmin) {
-      localStorage.setItem("adminLoggedIn", "true");
-      localStorage.setItem("adminUsername", username);
+      if (isValidAdmin) {
+        localStorage.setItem("adminLoggedIn", "true");
+        localStorage.setItem("adminUsername", username);
+        
+        toast({
+          title: "Admin login successful",
+          description: `Welcome, ${username}!`,
+        });
+        
+        navigate("/admin/dashboard");
+      } else {
+        toast({
+          title: "Admin login failed",
+          description: "Invalid admin credentials. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
       toast({
-        title: "Admin login successful",
-        description: `Welcome, ${username}!`,
-      });
-      navigate("/admin/dashboard");
-    } else {
-      toast({
-        title: "Admin login failed",
-        description: "Invalid admin credentials. Please try again.",
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (

@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Lock } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
-// Admin credentials
+// Admin credentials for demo/fallback
 const ADMIN_CREDENTIALS = [
   { username: "admin@akhanya.co.za", password: "admin123" },
   { username: "supervisor@akhanya.co.za", password: "super123" }
@@ -24,62 +25,125 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<UserRole>("engineer");
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Check for role preselection from URL params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const roleParam = params.get('role');
+    if (roleParam === 'admin') {
+      setRole('admin');
+    }
+  }, [location]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Admin login flow
+      if (role === "admin") {
+        // First try Supabase auth for admins
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
 
-    // Admin login flow
-    if (role === "admin") {
-      const isAdmin = ADMIN_CREDENTIALS.some(
-        admin => admin.username === email && admin.password === password
-      );
+        // If Supabase auth fails or user doesn't exist, try fallback admin credentials
+        if (authError || !authData.user) {
+          console.log("Supabase auth failed, trying fallback admin credentials");
+          
+          const isAdmin = ADMIN_CREDENTIALS.some(
+            admin => admin.username === email && admin.password === password
+          );
 
-      if (isAdmin) {
-        localStorage.setItem("adminLoggedIn", "true");
-        localStorage.setItem("adminUsername", email);
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("userEmail", email);
-        
-        toast({
-          title: "Admin login successful",
-          description: `Welcome, ${email}!`,
+          if (isAdmin) {
+            // Using local storage for demo purposes
+            localStorage.setItem("adminLoggedIn", "true");
+            localStorage.setItem("adminUsername", email);
+            localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("userEmail", email);
+            
+            toast({
+              title: "Admin login successful",
+              description: `Welcome, ${email}!`,
+            });
+            navigate("/admin/dashboard");
+          } else {
+            toast({
+              title: "Admin login failed",
+              description: "Invalid admin credentials. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          // Successful Supabase admin auth
+          localStorage.setItem("adminLoggedIn", "true");
+          localStorage.setItem("adminUsername", email);
+          localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("userEmail", email);
+          
+          toast({
+            title: "Admin login successful",
+            description: `Welcome, ${authData.user.email || email}!`,
+          });
+          navigate("/admin/dashboard");
+        }
+      } 
+      // Engineer login flow
+      else {
+        // Try Supabase auth for engineers
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password
         });
-        navigate("/admin/dashboard");
-      } else {
-        toast({
-          title: "Admin login failed",
-          description: "Invalid admin credentials. Please try again.",
-          variant: "destructive",
-        });
+
+        // For demo purposes, allow any credentials to work for engineers
+        if (authError || !authData.user) {
+          console.log("Auth failed but allowing login for demo purposes");
+          if (email && password) {
+            localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("userEmail", email);
+            localStorage.setItem("adminLoggedIn", "false");
+            localStorage.removeItem("adminUsername");
+            
+            toast({
+              title: "Engineer login successful",
+              description: `Welcome, ${email}!`,
+            });
+            navigate("/dashboard");
+          } else {
+            toast({
+              title: "Login failed",
+              description: "Please enter both email and password.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          // Successful Supabase engineer auth
+          localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("userEmail", authData.user.email || email);
+          localStorage.setItem("adminLoggedIn", "false");
+          localStorage.removeItem("adminUsername");
+          
+          toast({
+            title: "Engineer login successful",
+            description: `Welcome, ${authData.user.email || email}!`,
+          });
+          navigate("/dashboard");
+        }
       }
-    } 
-    // Engineer login flow
-    else {
-      if (email && password) {
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("adminLoggedIn", "false");
-        localStorage.removeItem("adminUsername");
-        
-        toast({
-          title: "Engineer login successful",
-          description: `Welcome, ${email}!`,
-        });
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid credentials. Please try again.",
-          variant: "destructive",
-        });
-      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
@@ -147,7 +211,8 @@ const Login = () => {
                   <div className="space-y-2">
                     <Label htmlFor="role" className="text-gray-700 dark:text-gray-300">Login as</Label>
                     <Select
-                      defaultValue="engineer"
+                      defaultValue={role}
+                      value={role}
                       onValueChange={(value: string) => setRole(value as UserRole)}
                     >
                       <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
