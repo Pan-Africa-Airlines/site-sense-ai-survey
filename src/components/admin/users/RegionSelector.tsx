@@ -8,7 +8,7 @@ interface RegionSelectorProps {
   selectedRegions: string[];
   onRegionChange?: (region: string) => void;
   onChange?: (regions: string[]) => void;
-  regions: string[];
+  regions?: string[];
   control?: Control<any>;
 }
 
@@ -47,6 +47,28 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
   // Use provided regions or fall back to defaults
   const availableRegions = regions || defaultRegions;
 
+  // If we're not using react-hook-form (no control prop), render a simpler version
+  if (!control) {
+    return (
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Regions</label>
+        <div className="flex flex-wrap gap-2">
+          {availableRegions.map((region) => (
+            <Badge 
+              key={region}
+              variant={selectedRegions.includes(region) ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => handleRegionClick(region)}
+            >
+              {region}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // When using with react-hook-form
   return (
     <FormItem>
       <FormLabel>Regions</FormLabel>
