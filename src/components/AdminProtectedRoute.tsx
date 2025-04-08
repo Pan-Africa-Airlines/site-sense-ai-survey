@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean | null>(null);

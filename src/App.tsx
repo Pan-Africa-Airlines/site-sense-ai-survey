@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   BrowserRouter as Router,
@@ -11,6 +12,7 @@ import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAssessments from "./pages/AdminAssessments";
 import AdminInstallations from "./pages/AdminInstallations";
@@ -23,58 +25,35 @@ import EskomSurvey from "./pages/EskomSurvey";
 import Installation from "./pages/Installation";
 import MyAllocations from "./pages/MyAllocations";
 import AdminSystemLogs from "./pages/AdminSystemLogs";
-import NotFound from "./pages/NotFound";
-import Assessment from "./pages/Assessment";
-import EskomSurveys from "./pages/EskomSurveys";
-import CarCheckup from "./pages/CarCheckup";
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState(localStorage.getItem("loggedIn") === "true");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <Router>
         <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<LandingPage />} />
+          {/* Redirect root to system logs */}
+          <Route path="/" element={<Navigate to="/admin/system-logs" replace />} />
+          
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
-          {/* Protected routes */}
-          <Route 
-            path="/dashboard" 
-            element={loggedIn ? <Dashboard /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/car-checkup" 
-            element={loggedIn ? <CarCheckup /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/eskom-survey/:id" 
-            element={loggedIn ? <EskomSurvey /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/eskom-survey/new" 
-            element={loggedIn ? <EskomSurvey /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/eskom-surveys" 
-            element={loggedIn ? <EskomSurveys /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/installation" 
-            element={loggedIn ? <Installation /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/my-allocations" 
-            element={loggedIn ? <MyAllocations /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/assessment" 
-            element={loggedIn ? <Assessment /> : <Navigate to="/login" />} 
-          />
-          
-          {/* Admin routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/eskom-survey/new" element={<EskomSurvey />} />
+          <Route path="/installation" element={<Installation />} />
+          <Route path="/my-allocations" element={<MyAllocations />} />
+
+          {/* Engineer Protected Route */}
+          <Route path="/dashboard" element={
+            isAuthenticated ? (
+              <Dashboard />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } />
+
+          {/* Admin Protected Routes */}
           <Route path="/admin" element={<AdminProtectedRoute><Outlet /></AdminProtectedRoute>}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="assessments" element={<AdminAssessments />} />
@@ -83,11 +62,9 @@ function App() {
             <Route path="map" element={<AdminMap />} />
             <Route path="site-allocation" element={<AdminSiteAllocation />} />
             <Route path="system-logs" element={<AdminSystemLogs />} />
-            <Route path="configuration" element={<Configuration />} />
           </Route>
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
+
+          <Route path="/configuration" element={<Configuration />} />
         </Routes>
       </Router>
     </ThemeProvider>
