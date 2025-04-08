@@ -135,7 +135,7 @@ const AdminLogin = () => {
         </CardContent>
         <CardFooter className="flex justify-center pt-0">
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-            For demo, use username: 'admin' and password: 'admin123'
+            Powered by Akhanya IT Innovations
           </p>
         </CardFooter>
       </Card>

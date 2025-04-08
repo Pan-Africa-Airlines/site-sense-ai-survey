@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -265,8 +264,7 @@ const Login = () => {
             </CardContent>
             <CardFooter className="flex justify-center border-t border-gray-100 dark:border-gray-800 pt-4 pb-6 px-8">
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                For demo: Use <span className="font-medium">admin@akhanya.co.za / admin123</span> for admin access 
-                or any email/password for engineers
+                Powered by Akhanya IT Innovations
               </p>
             </CardFooter>
           </Card>
