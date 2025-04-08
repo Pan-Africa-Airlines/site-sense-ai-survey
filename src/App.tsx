@@ -33,7 +33,10 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          {/* Redirect root to system logs */}
+          <Route path="/" element={<Navigate to="/admin/system-logs" replace />} />
+          
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
