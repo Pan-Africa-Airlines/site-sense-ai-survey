@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -87,88 +86,7 @@ const Register = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-6">
-            <img 
-              src="/lovable-uploads/cb7b4983-dd7e-4498-8586-fbd7f8b6dc3d.png" 
-              alt="Akhanya IT" 
-              className="h-10" 
-              onError={(e) => {
-                e.currentTarget.src = "https://via.placeholder.com/150x50?text=Akhanya";
-              }}
-            />
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
-          <CardDescription className="text-center">
-            Enter your details below to create your engineer account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input 
-                id="name" 
-                name="name" 
-                placeholder="John Doe" 
-                required 
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                name="email" 
-                type="email" 
-                placeholder="engineer@example.com" 
-                required 
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                name="password" 
-                type="password" 
-                required 
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input 
-                id="confirmPassword" 
-                name="confirmPassword" 
-                type="password" 
-                required 
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
-            <Button type="submit" className="w-full bg-akhanya hover:bg-akhanya-dark" disabled={isLoading}>
-              {isLoading ? "Creating Account..." : "Register"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
-            Already have an account? {" "}
-            <Link to="/login" className="text-primary font-medium hover:underline">
-              Log in
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
-  );
+  // ... keep existing code (return statement with the registration form)
 };
 
 export default Register;
