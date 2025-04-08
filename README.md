@@ -1,14 +1,14 @@
-# Welcome to your Lovable project
+# Welcome to your BCX Eskom project by Akhanya IT Innovations
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/90975069-8316-4770-846c-d24f31880053
+**URL**: https:/dev/projects/90975069-8316-4770-846c-d24f31880053
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
+**Use Our Main Repo**
 
 Simply visit the [Lovable Project](https://lovable.dev/projects/90975069-8316-4770-846c-d24f31880053) and start prompting.
 
