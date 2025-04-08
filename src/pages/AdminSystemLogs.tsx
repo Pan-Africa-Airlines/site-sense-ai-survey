@@ -4,7 +4,8 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import SystemLogsFilter from "@/components/admin/logs/SystemLogsFilter";
-import SystemLogsList, { SystemLog } from "@/components/admin/logs/SystemLogsList";
+import SystemLogsList from "@/components/admin/logs/SystemLogsList";
+import { SystemLog, LogFilterValues } from "@/components/admin/logs/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -12,11 +13,11 @@ const AdminSystemLogs = () => {
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<SystemLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<LogFilterValues>({
     search: "",
     action: "",
-    dateFrom: null as Date | null,
-    dateTo: null as Date | null,
+    dateFrom: null,
+    dateTo: null,
   });
 
   useEffect(() => {
@@ -102,7 +103,7 @@ const AdminSystemLogs = () => {
     setFilteredLogs(filtered);
   };
 
-  const handleFilterChange = (newFilters) => {
+  const handleFilterChange = (newFilters: LogFilterValues) => {
     setFilters(newFilters);
   };
 
