@@ -6,6 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
 import MobileAdminNav from "./MobileAdminNav";
+import { BarChart3, ClipboardList, Database, Users, Map, MapPin, Cog, Activity } from "lucide-react";
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toast } = useToast();
@@ -34,6 +35,17 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   
   const adminUsername = localStorage.getItem("adminUsername") || "Admin";
 
+  const navItems = [
+    { path: "/admin/dashboard", icon: BarChart3, label: "Dashboard" },
+    { path: "/admin/assessments", icon: ClipboardList, label: "Assessments" },
+    { path: "/admin/installations", icon: Database, label: "Installations" },
+    { path: "/admin/users", icon: Users, label: "Users" },
+    { path: "/admin/map", icon: Map, label: "Map" },
+    { path: "/admin/site-allocation", icon: MapPin, label: "Site Allocation" },
+    { path: "/admin/system-logs", icon: Activity, label: "System Logs" },
+    { path: "/configuration", icon: Cog, label: "Configuration" },
+  ];
+
   if (isMobile) {
     return (
       <div className="flex flex-col h-screen">
@@ -41,15 +53,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           adminUsername={adminUsername}
           handleLogout={handleLogout}
           isActive={(path) => location.pathname === path}
-          navItems={[
-            { path: "/admin/dashboard", icon: () => <></>, label: "Dashboard" },
-            { path: "/admin/assessments", icon: () => <></>, label: "Assessments" },
-            { path: "/admin/installations", icon: () => <></>, label: "Installations" },
-            { path: "/admin/users", icon: () => <></>, label: "Users" },
-            { path: "/admin/map", icon: () => <></>, label: "Map" },
-            { path: "/admin/site-allocation", icon: () => <></>, label: "Site Allocation" },
-            { path: "/configuration", icon: () => <></>, label: "Configuration" },
-          ]}
+          navItems={navItems}
         />
         <div className="flex-1 overflow-auto bg-gray-50">
           {children}
