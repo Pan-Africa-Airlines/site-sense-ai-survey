@@ -15,13 +15,22 @@ export const fetchEngineerAssessments = async (userId: string) => {
     
     if (assessmentsError) {
       console.error("Error fetching site assessments:", assessmentsError);
-      return { assessments: [], count: 0, status: "None" };
+      return { assessments: [], count: 0, status: "None", completedCount: 0 };
     }
     
     console.log(`Retrieved ${siteAssessments?.length || 0} assessments for user ${userId}`);
     
     // Calculate total assessments count
     const assessmentsCount = siteAssessments?.length || 0;
+    
+    // Count completed assessments
+    const completedAssessments = siteAssessments?.filter(
+      assessment => assessment.status?.toLowerCase() === 'completed' || 
+                    assessment.status?.toLowerCase() === 'approved'
+    ) || [];
+    const completedCount = completedAssessments.length;
+    
+    console.log(`Found ${completedCount} completed assessments`);
     
     // Determine the latest assessment status
     let assessmentStatus = "None";
@@ -34,11 +43,12 @@ export const fetchEngineerAssessments = async (userId: string) => {
     return { 
       assessments: siteAssessments || [], 
       count: assessmentsCount, 
-      status: assessmentStatus 
+      status: assessmentStatus,
+      completedCount: completedCount
     };
   } catch (error) {
     console.error("Error in fetchEngineerAssessments:", error);
-    return { assessments: [], count: 0, status: "None" };
+    return { assessments: [], count: 0, status: "None", completedCount: 0 };
   }
 };
 

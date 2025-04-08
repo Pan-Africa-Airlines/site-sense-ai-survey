@@ -5,7 +5,7 @@ import { processAssessmentData, processInstallationData } from './chartDataUtils
 import { getAuthenticatedUserInfo } from './dashboardUserData';
 import { generateMockDashboardData } from './dashboardMockData';
 import { fetchEngineerAssessments } from './dashboardAssessmentData';
-import { fetchEngineerInstallations, calculateSatisfactionRate } from './dashboardInstallationsData';
+import { fetchEngineerInstallations, fetchEngineerAllocations, calculateSatisfactionRate } from './dashboardInstallationsData';
 import { fetchRecentActivities } from './dashboardActivitiesData';
 
 /**
@@ -47,24 +47,13 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     console.log("Generated insights:", insights.length);
     
     // Fetch engineer allocations for the specific engineer
-    const { data: allocations, error: allocationsError } = await supabase
-      .from('engineer_allocations')
-      .select('*')
-      .eq('engineer_id', engId);
-    
-    if (allocationsError) {
-      console.error("Error fetching allocations:", allocationsError);
-      toast({
-        title: "Error fetching allocations",
-        description: allocationsError.message
-      });
-    }
+    const { allocations, count: allocationsCount } = await fetchEngineerAllocations(engId);
     
     // Get installations data for this engineer
     const { installations, count: installationsCount } = await fetchEngineerInstallations(engId);
     
     // Get site assessments for this engineer
-    const { assessments: siteAssessments, count: assessmentsCount, status: assessmentStatus } = 
+    const { assessments: siteAssessments, count: assessmentsCount, status: assessmentStatus, completedCount: completedAssessmentsCount } = 
       await fetchEngineerAssessments(userInfo.userId);
     
     // Calculate satisfaction rate
@@ -82,6 +71,8 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     const totals = {
       assessments: assessmentsCount,
       completedInstallations: installationsCount,
+      completedAssessments: completedAssessmentsCount,
+      allocations: allocationsCount,
       satisfactionRate: satisfactionRate,
       assessmentStatus: assessmentStatus
     };

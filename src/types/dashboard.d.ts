@@ -28,6 +28,8 @@ export interface DashboardTotals {
   completedInstallations: number;
   satisfactionRate: number;
   assessmentStatus?: string;
+  completedAssessments?: number;
+  allocations?: number;
 }
 
 export interface RecentActivity {

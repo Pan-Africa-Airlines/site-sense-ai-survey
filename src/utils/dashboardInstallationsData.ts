@@ -31,6 +31,35 @@ export const fetchEngineerInstallations = async (engineerId: string) => {
 };
 
 /**
+ * Fetches engineer allocations for a specific engineer
+ */
+export const fetchEngineerAllocations = async (engineerId: string) => {
+  try {
+    console.log("Fetching allocations for engineer:", engineerId);
+    const { data: allocations, error: allocationsError } = await supabase
+      .from('engineer_allocations')
+      .select('*')
+      .eq('engineer_id', engineerId);
+      
+    if (allocationsError) {
+      console.error("Error fetching allocations:", allocationsError);
+      return { allocations: [], count: 0 };
+    }
+    
+    // Log the data for debugging
+    console.log(`Retrieved ${allocations?.length || 0} allocations for engineer ${engineerId}`);
+    
+    return {
+      allocations: allocations || [],
+      count: allocations?.length || 0
+    };
+  } catch (error) {
+    console.error("Error in fetchEngineerAllocations:", error);
+    return { allocations: [], count: 0 };
+  }
+};
+
+/**
  * Calculates satisfaction rate from engineer profile or provides fallback
  */
 export const calculateSatisfactionRate = (profile: any): number => {
