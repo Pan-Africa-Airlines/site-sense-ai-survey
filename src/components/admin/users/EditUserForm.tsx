@@ -4,11 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUserCreation, UserFormData } from "@/hooks/useUserCreation";
+import { UserFormData } from "@/hooks/useUserCreation";
 import RegionSelector from "./RegionSelector";
 import UserFormFields from "./UserFormFields";
 import FormActions from "./FormActions";
-import { supabase } from "@/integrations/supabase/client";
+import { updateUserProfile } from "./UserProfileUpdate";
+import { updateUserPassword } from "./UserPasswordUpdate";
+import { logSystemAction } from "./SystemLogging";
 
 interface EditUserFormProps {
   user: {
@@ -51,89 +53,34 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
     try {
       setIsSubmitting(true);
       
-      // Update engineer profile
-      const { data: updatedEngineer, error } = await supabase
-        .from("engineer_profiles")
-        .update({
-          name: formData.name,
-          email: formData.email,
-          specializations: [formData.role],
-          regions: formData.regions,
-          experience: formData.experience || user.experience
-        })
-        .eq("id", user.id.toString())  // Convert id to string if it's a number
-        .select();
-      
-      if (error) {
-        console.error("Error updating engineer profile:", error);
-        toast({
-          title: "Error updating user",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
+      // Update the user profile
+      await updateUserProfile({
+        userId: user.id,
+        formData,
+        prevExperience: user.experience
+      });
       
       // Update password if provided
       if (formData.password && formData.password.trim() !== "") {
-        try {
-          // Try to update password via Supabase Auth API
-          const { error: passwordError } = await supabase.auth.admin.updateUserById(
-            user.id.toString(),
-            { password: formData.password }
-          );
-          
-          if (passwordError) {
-            // Fallback for non-admin accounts or if admin API fails
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
-              redirectTo: window.location.origin + '/reset-password',
-            });
-            
-            if (resetError) {
-              console.error("Error sending password reset:", resetError);
-              toast({
-                title: "Warning",
-                description: "Could not directly update password. A password reset email has been sent to the user instead.",
-                variant: "default"
-              });
-            } else {
-              toast({
-                title: "Password reset email sent",
-                description: "A password reset email has been sent to the user's email address.",
-                variant: "default"
-              });
-            }
-          } else {
-            toast({
-              title: "Password updated",
-              description: "User password has been successfully updated.",
-              variant: "default"
-            });
-          }
-        } catch (passwordError) {
-          console.error("Error updating password:", passwordError);
-          toast({
-            title: "Error updating password",
-            description: "Failed to update password",
-            variant: "destructive"
-          });
-        }
+        await updateUserPassword({
+          userId: user.id,
+          email: formData.email,
+          password: formData.password
+        });
       }
       
       // Log the action
-      await supabase
-        .from("system_logs")
-        .insert({
-          user_id: user.id.toString(), // Convert id to string if it's a number
-          user_name: formData.name,
-          action: "user_updated",
-          details: { 
-            id: user.id,
-            name: formData.name,
-            email: formData.email,
-            role: formData.role
-          }
-        });
+      await logSystemAction({
+        userId: user.id,
+        userName: formData.name,
+        action: "user_updated",
+        details: { 
+          id: user.id,
+          name: formData.name,
+          email: formData.email,
+          role: formData.role
+        }
+      });
       
       const updatedUser = {
         id: user.id,
