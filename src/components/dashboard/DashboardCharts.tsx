@@ -1,16 +1,22 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, Tooltip } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ChartDataPoint } from "@/types/dashboard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardChartsProps {
   assessmentData: ChartDataPoint[];
   installationData: ChartDataPoint[];
+  isLoading?: boolean;
 }
 
-const DashboardCharts: React.FC<DashboardChartsProps> = ({ assessmentData, installationData }) => {
+const DashboardCharts: React.FC<DashboardChartsProps> = ({ 
+  assessmentData, 
+  installationData,
+  isLoading = false 
+}) => {
   const chartConfig = {
     completed: {
       label: "Completed",
@@ -25,6 +31,38 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ assessmentData, insta
       color: "#E13B45"
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+          <CardHeader>
+            <CardTitle className="text-akhanya">My Assessment Progress</CardTitle>
+            <CardDescription>Monthly site assessments status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 flex items-center justify-center">
+              <Skeleton className="w-full h-40" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+          <CardHeader>
+            <CardTitle className="text-akhanya">My Installation Trend</CardTitle>
+            <CardDescription>Monthly installations completed</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 flex items-center justify-center">
+              <Skeleton className="w-full h-40" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">

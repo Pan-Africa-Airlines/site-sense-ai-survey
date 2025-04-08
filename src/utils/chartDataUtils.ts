@@ -5,18 +5,23 @@
 export const processAssessmentData = (data: any[]) => {
   if (!data || data.length === 0) {
     return [
-      { month: 'Jan', completed: 4, pending: 1 },
-      { month: 'Feb', completed: 5, pending: 0 },
-      { month: 'Mar', completed: 6, pending: 2 },
-      { month: 'Apr', completed: 8, pending: 1 },
-      { month: 'May', completed: 7, pending: 0 },
-      { month: 'Jun', completed: 9, pending: 1 },
+      { month: 'Jan', completed: 0, pending: 0 },
+      { month: 'Feb', completed: 0, pending: 0 },
+      { month: 'Mar', completed: 0, pending: 0 },
+      { month: 'Apr', completed: 0, pending: 0 },
+      { month: 'May', completed: 0, pending: 0 },
+      { month: 'Jun', completed: 0, pending: 0 },
+      { month: 'Jul', completed: 0, pending: 0 },
+      { month: 'Aug', completed: 0, pending: 0 },
+      { month: 'Sep', completed: 0, pending: 0 },
+      { month: 'Oct', completed: 0, pending: 0 },
+      { month: 'Nov', completed: 0, pending: 0 },
+      { month: 'Dec', completed: 0, pending: 0 },
     ];
   }
   
   // Group real data by month
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const currentYear = new Date().getFullYear();
   
   // Initialize months with zeros
   const months: Record<string, { completed: number, pending: number }> = {};
@@ -26,13 +31,36 @@ export const processAssessmentData = (data: any[]) => {
   
   // Process actual data
   data.forEach(item => {
-    const date = new Date(item.created_at);
-    const month = monthNames[date.getMonth()];
-    
-    if (item.status === 'completed') {
-      months[month].completed += 1;
-    } else {
-      months[month].pending += 1;
+    let date;
+    if (item.created_at) {
+      date = new Date(item.created_at);
+    } else if (item.date) {
+      // Handle if date is stored in YYYY-MM-DD format
+      date = new Date(item.date);
+      if (isNaN(date.getTime())) {
+        // Try to parse other date formats
+        const parts = item.date.split(/[-/]/);
+        if (parts.length >= 3) {
+          // Assuming format is YYYY-MM-DD or DD/MM/YYYY
+          if (parts[0].length === 4) {
+            // YYYY-MM-DD
+            date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          } else {
+            // DD/MM/YYYY or similar
+            date = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+          }
+        }
+      }
+    }
+
+    if (date && !isNaN(date.getTime())) {
+      const month = monthNames[date.getMonth()];
+      
+      if (item.status === 'completed' || item.status === 'approved') {
+        months[month].completed += 1;
+      } else {
+        months[month].pending += 1;
+      }
     }
   });
   
@@ -50,12 +78,18 @@ export const processAssessmentData = (data: any[]) => {
 export const processInstallationData = (data: any[]) => {
   if (!data || data.length === 0) {
     return [
-      { month: 'Jan', installations: 2 },
-      { month: 'Feb', installations: 4 },
-      { month: 'Mar', installations: 5 },
-      { month: 'Apr', installations: 7 },
-      { month: 'May', installations: 6 },
-      { month: 'Jun', installations: 8 },
+      { month: 'Jan', installations: 0 },
+      { month: 'Feb', installations: 0 },
+      { month: 'Mar', installations: 0 },
+      { month: 'Apr', installations: 0 },
+      { month: 'May', installations: 0 },
+      { month: 'Jun', installations: 0 },
+      { month: 'Jul', installations: 0 },
+      { month: 'Aug', installations: 0 },
+      { month: 'Sep', installations: 0 },
+      { month: 'Oct', installations: 0 },
+      { month: 'Nov', installations: 0 },
+      { month: 'Dec', installations: 0 },
     ];
   }
   
@@ -70,9 +104,13 @@ export const processInstallationData = (data: any[]) => {
   
   // Process actual data
   data.forEach(item => {
-    const date = new Date(item.installation_date);
-    const month = monthNames[date.getMonth()];
-    months[month].installations += 1;
+    if (item.installation_date) {
+      const date = new Date(item.installation_date);
+      if (!isNaN(date.getTime())) {
+        const month = monthNames[date.getMonth()];
+        months[month].installations += 1;
+      }
+    }
   });
   
   // Convert to array format for chart
@@ -88,20 +126,15 @@ export const processInstallationData = (data: any[]) => {
 export const processActivitiesData = (data: any[]) => {
   if (!data || data.length === 0) {
     return [
-      { action: "Completed site assessment", time: "2 hours ago", location: "Johannesburg CBD" },
-      { action: "Submitted installation report", time: "Yesterday", location: "Pretoria East" },
-      { action: "Started vehicle check", time: "Yesterday", location: "Sandton" },
-      { action: "Completed installation", time: "2 days ago", location: "Midrand" },
+      { action: "No recent activities", time: "N/A", location: "N/A" },
     ];
   }
   
-  // Real implementation would process data here
-  return [
-    { action: "Completed site assessment", time: "2 hours ago", location: "Johannesburg CBD" },
-    { action: "Submitted installation report", time: "Yesterday", location: "Pretoria East" },
-    { action: "Started vehicle check", time: "Yesterday", location: "Sandton" },
-    { action: "Completed installation", time: "2 days ago", location: "Midrand" },
-  ];
+  return data.map(activity => ({
+    action: activity.action || `Activity for ${activity.site_name || 'unknown site'}`,
+    time: activity.time || activity.created_at || "Unknown",
+    location: activity.location || activity.region || "Unknown"
+  }));
 };
 
 /**

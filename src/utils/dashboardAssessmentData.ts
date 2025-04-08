@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const fetchEngineerAssessments = async (userId: string) => {
   try {
+    console.log("Fetching assessments for user:", userId);
     const { data: siteAssessments, error: assessmentsError } = await supabase
       .from('site_surveys')
       .select('*')
@@ -16,6 +17,8 @@ export const fetchEngineerAssessments = async (userId: string) => {
       console.error("Error fetching site assessments:", assessmentsError);
       return { assessments: [], count: 0, status: "None" };
     }
+    
+    console.log(`Retrieved ${siteAssessments?.length || 0} assessments for user ${userId}`);
     
     // Calculate total assessments count
     const assessmentsCount = siteAssessments?.length || 0;

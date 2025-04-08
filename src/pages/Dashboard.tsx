@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Brain, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -75,6 +74,7 @@ const Dashboard: React.FC = () => {
       <DashboardCharts 
         assessmentData={chartData.assessments}
         installationData={chartData.installations}
+        isLoading={isLoading}
       />
 
       <RecentActivitiesCard 

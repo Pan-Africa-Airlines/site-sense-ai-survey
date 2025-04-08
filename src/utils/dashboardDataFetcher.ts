@@ -20,11 +20,13 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     
     // If not authenticated, return mock data
     if (!userInfo.isAuthenticated) {
+      console.log("No authenticated user, using mock data");
       return generateMockDashboardData(userInfo.userId, userInfo.userName, userInfo.userEmail);
     }
     
     // Use auth user ID as the engineer ID
     const engId = userInfo.userId;
+    console.log("Fetching dashboard data for engineer:", engId);
     
     // Ensure engineer profile exists
     const profile = await ensureEngineerProfile(engId, userInfo.userName, userInfo.userEmail);
@@ -53,7 +55,7 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     if (allocationsError) {
       console.error("Error fetching allocations:", allocationsError);
       toast({
-        title: "Error fetching site allocations",
+        title: "Error fetching allocations",
         description: allocationsError.message
       });
     }
@@ -68,14 +70,12 @@ export const fetchDashboardData = async (setIsLoading: (loading: boolean) => voi
     // Calculate satisfaction rate
     const satisfactionRate = calculateSatisfactionRate(profile);
     
+    console.log(`Processing chart data: ${siteAssessments?.length || 0} assessments, ${installations?.length || 0} installations`);
+    
     // Set chart data based on the real assessments and installations
     const chartData = {
-      assessments: siteAssessments.length > 0 
-        ? processAssessmentData(siteAssessments) 
-        : processAssessmentData([]),
-      installations: installations.length > 0
-        ? processInstallationData(installations)
-        : processInstallationData([])
+      assessments: processAssessmentData(siteAssessments), 
+      installations: processInstallationData(installations)
     };
     
     // Set totals using real data

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const fetchEngineerInstallations = async (engineerId: string) => {
   try {
+    console.log("Fetching installations for engineer:", engineerId);
     const { data: installations, error: installationsError } = await supabase
       .from('site_installations')
       .select('*')
@@ -15,6 +16,9 @@ export const fetchEngineerInstallations = async (engineerId: string) => {
       console.error("Error fetching installations:", installationsError);
       return { installations: [], count: 0 };
     }
+    
+    // Log the data for debugging
+    console.log(`Retrieved ${installations?.length || 0} installations for engineer ${engineerId}`);
     
     return {
       installations: installations || [],
