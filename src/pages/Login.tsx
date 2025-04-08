@@ -11,6 +11,7 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/types/user";
+import { isUserAdmin, isAdminEmail } from "@/utils/userRoles";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -27,14 +28,25 @@ const Login = () => {
     if (roleParam === 'admin') {
       setRole('admin');
     }
+    
+    // For development: pre-fill test credentials
+    if (process.env.NODE_ENV === 'development') {
+      if (roleParam === 'admin') {
+        setEmail("admin@akhanya.co.za");
+        setPassword("admin123");
+      } else {
+        setEmail("siyanda@akhanya.co.za");
+        setPassword("password123");
+      }
+    }
   }, [location]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
-      console.log("Logging in with email:", email);
+      console.log("Attempting login with:", email, "as", role);
       
       // Authenticate with Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -60,28 +72,15 @@ const Login = () => {
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("userEmail", email);
       
-      // Check the user's role from engineer_profiles specializations
-      const { data: profileData, error: profileError } = await supabase
-        .from('engineer_profiles')
-        .select('specializations')
-        .eq('id', authData.user.id)
-        .single();
-        
-      if (profileError) {
-        console.error("Error fetching user role:", profileError);
-        toast.error("Could not verify user role. Please try again.");
-        setIsLoading(false);
-        return;
-      }
-      
-      const isAdmin = profileData?.specializations && 
-                     profileData.specializations.includes('Administrator');
-                     
-      console.log("User role from database:", isAdmin ? "admin" : "engineer");
-      
+      // Check if admin role is requested
       if (role === "admin") {
-        // Check if user has admin role
-        if (!isAdmin) {
+        // Check if user has admin privileges
+        const isAdmin = await isUserAdmin(authData.user.id);
+        
+        // Also check email pattern as fallback
+        const hasAdminEmail = isAdminEmail(email);
+        
+        if (!isAdmin && !hasAdminEmail) {
           toast.error("You don't have admin privileges");
           await supabase.auth.signOut();
           localStorage.removeItem("loggedIn");
@@ -96,38 +95,7 @@ const Login = () => {
         toast.success(`Welcome, ${authData.user.email || email}!`);
         navigate("/admin/dashboard");
       } else {
-        // Engineer role - ensure they have an engineer profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('engineer_profiles')
-          .select('*')
-          .eq('id', authData.user.id)
-          .maybeSingle();
-          
-        if (!profileData && !profileError) {
-          console.log("Creating new engineer profile for user:", authData.user.id);
-          const userData = authData.user.user_metadata;
-          const userName = userData?.name || email.split('@')[0].split('.').map(part => 
-            part.charAt(0).toUpperCase() + part.slice(1)
-          ).join(' ');
-          
-          const { error: createError } = await supabase
-            .from('engineer_profiles')
-            .insert({
-              id: authData.user.id,
-              name: userName,
-              email: email,
-              specializations: ['Field Engineer'],
-              regions: [],
-              experience: 'New',
-              average_rating: 0,
-              total_reviews: 0
-            });
-            
-          if (createError) {
-            console.error("Error creating engineer profile:", createError);
-          }
-        }
-        
+        // Normal user login flow
         localStorage.setItem("adminLoggedIn", "false");
         localStorage.removeItem("adminUsername");
         
