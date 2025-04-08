@@ -1,24 +1,30 @@
 
-import * as React from "react";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import * as React from "react"
+import { format } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/popover"
 
 interface DatePickerProps {
   date: Date | null;
-  setDate: (date: Date | null) => void;
-  className?: string;
+  onDateChange: (date: Date | null) => void;
   placeholder?: string;
+  className?: string;
 }
 
-export function DatePicker({ date, setDate, className, placeholder = "Pick a date" }: DatePickerProps) {
+export const DatePicker: React.FC<DatePickerProps> = ({
+  date,
+  onDateChange,
+  placeholder = "Pick a date",
+  className,
+}) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -37,11 +43,12 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={date || undefined}
-          onSelect={setDate}
+          selected={date}
+          onSelect={onDateChange}
           initialFocus
+          className="p-3 pointer-events-auto"
         />
       </PopoverContent>
     </Popover>
-  );
+  )
 }
