@@ -24,6 +24,9 @@ import EskomSurvey from "./pages/EskomSurvey";
 import Installation from "./pages/Installation";
 import MyAllocations from "./pages/MyAllocations";
 import AdminSystemLogs from "./pages/AdminSystemLogs";
+import NotFound from "./pages/NotFound";
+import Assessment from "./pages/Assessment";
+import EskomSurveys from "./pages/EskomSurveys";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,25 +35,22 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <Router>
         <Routes>
-          {/* Redirect root to landing page */}
+          {/* Landing and public pages */}
           <Route path="/" element={<LandingPage />} />
-          
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          
+          {/* Engineer pages */}
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/eskom-survey/new" element={<EskomSurvey />} />
+          <Route path="/eskom-survey/:id" element={<EskomSurvey />} />
+          <Route path="/eskom-surveys" element={<EskomSurveys />} />
           <Route path="/installation" element={<Installation />} />
           <Route path="/my-allocations" element={<MyAllocations />} />
-
-          {/* Engineer Protected Route */}
-          <Route path="/dashboard" element={
-            isAuthenticated ? (
-              <Dashboard />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          } />
-
+          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/car-checkup" element={<CarCheckup />} />
+          
           {/* Admin Protected Routes */}
           <Route path="/admin" element={<AdminProtectedRoute><Outlet /></AdminProtectedRoute>}>
             <Route path="dashboard" element={<AdminDashboard />} />
@@ -63,6 +63,9 @@ function App() {
           </Route>
 
           <Route path="/configuration" element={<Configuration />} />
+          
+          {/* Catch all route for 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </ThemeProvider>

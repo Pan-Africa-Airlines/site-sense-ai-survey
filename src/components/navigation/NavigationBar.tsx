@@ -25,12 +25,13 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   
   const getPageTitle = () => {
     switch(location.pathname) {
-      case "/": return "Dashboard";
+      case "/dashboard": return "Dashboard";
       case "/car-checkup": return "Vehicle Check";
       case "/eskom-survey/new": return "Eskom Site Survey";
       case "/installation": return "Installation";
       case "/eskom-surveys": return "Eskom Surveys";
       case "/my-allocations": return "My Allocations";
+      case "/assessment": return "Site Assessment";
       default: 
         if (location.pathname.startsWith("/eskom-survey/")) return "Eskom Site Survey";
         return "";
@@ -41,10 +42,13 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   const iconSize = isCompact ? 'w-4 h-4' : 'w-5 h-5';
   
   const activePaths = {
-    "/": location.pathname === "/",
+    "/dashboard": location.pathname === "/dashboard",
     "/car-checkup": location.pathname === "/car-checkup",
     "/eskom-survey": location.pathname.startsWith("/eskom-survey"),
-    "/installation": location.pathname === "/installation"
+    "/eskom-surveys": location.pathname === "/eskom-surveys",
+    "/installation": location.pathname === "/installation",
+    "/my-allocations": location.pathname === "/my-allocations",
+    "/assessment": location.pathname === "/assessment"
   };
 
   return (
@@ -57,7 +61,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               isCompact={isCompact} 
               iconSize={iconSize} 
               activePaths={activePaths}
-              onNavigate={navigate}
+              onNavigate={(path) => navigate(path)}
             />
             <UserMenu 
               isCompact={isCompact} 
@@ -67,7 +71,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
         </div>
       </div>
       
-      {location.pathname !== "/" && (
+      {location.pathname !== "/dashboard" && (
         <NavigationBreadcrumb currentPageTitle={getPageTitle()} />
       )}
     </header>
