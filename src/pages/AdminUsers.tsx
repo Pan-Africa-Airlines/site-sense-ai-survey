@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { AdminNavLayout } from "@/components/admin/AdminNavLayout";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { getEngineerProfiles } from "@/utils/dbHelpers";
 import UsersList from "@/components/admin/users/UsersList";
@@ -99,6 +98,13 @@ const AdminUsers = () => {
     setEngineers(prev => [...prev, newUser]);
   };
   
+  const handleUpdateUser = (updatedUser: User) => {
+    setEngineers(prev => 
+      prev.map(user => user.id === updatedUser.id ? updatedUser : user)
+    );
+    toast.success(`User ${updatedUser.name} updated successfully`);
+  };
+  
   return (
     <AdminNavLayout>
       <div className="container mx-auto px-4 py-8 flex-1">
@@ -120,7 +126,8 @@ const AdminUsers = () => {
           <CardContent className="p-0">
             <UsersList 
               users={filteredUsers} 
-              isLoading={isLoading} 
+              isLoading={isLoading}
+              onUserUpdated={handleUpdateUser}
             />
           </CardContent>
         </Card>

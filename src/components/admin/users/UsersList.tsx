@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader, Eye, Edit, Trash2 } from "lucide-react";
+import EditUserForm from "./EditUserForm";
 
 interface User {
   id: string | number;
@@ -18,9 +19,10 @@ interface User {
 interface UsersListProps {
   users: User[];
   isLoading: boolean;
+  onUserUpdated?: (updatedUser: User) => void;
 }
 
-const UsersList: React.FC<UsersListProps> = ({ users, isLoading }) => {
+const UsersList: React.FC<UsersListProps> = ({ users, isLoading, onUserUpdated = () => {} }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -77,9 +79,7 @@ const UsersList: React.FC<UsersListProps> = ({ users, isLoading }) => {
                 <Button variant="ghost" size="icon">
                   <Eye className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <Edit className="h-4 w-4" />
-                </Button>
+                <EditUserForm user={user} onUserUpdated={onUserUpdated} />
                 <Button variant="ghost" size="icon">
                   <Trash2 className="h-4 w-4" />
                 </Button>
