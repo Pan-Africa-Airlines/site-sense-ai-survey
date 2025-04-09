@@ -173,9 +173,32 @@ const Login = () => {
   };
 
   const selectTestUser = (userEmail: string) => {
-    setEmail(userEmail);
-    setPassword(""); // Password not needed in dev mode
-    setErrorMessage(null);
+    // Auto-login when a test user is clicked in development mode
+    if (process.env.NODE_ENV === 'development') {
+      // Set email first (for UI consistency)
+      setEmail(userEmail);
+      
+      // Check if this is an admin email and update role if needed
+      const testUsers = getTestUsers();
+      const matchingUser = Object.values(testUsers).find(
+        user => user.email === userEmail
+      );
+      
+      if (matchingUser?.isAdmin) {
+        setRole('admin');
+      } else {
+        setRole('engineer');
+      }
+      
+      // Login immediately
+      setIsLoading(true);
+      handleDevLogin(userEmail);
+    } else {
+      // In production, just select the email
+      setEmail(userEmail);
+      setPassword(""); 
+      setErrorMessage(null);
+    }
   };
 
   return (
@@ -277,14 +300,17 @@ const Login = () => {
             {Object.entries(getTestUsers()).map(([name, user]) => (
               <div 
                 key={name} 
-                className="text-xs mb-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 p-1 rounded"
+                className="text-xs mb-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 p-1 rounded flex items-center"
                 onClick={() => selectTestUser(user.email)}
               >
-                <span className="font-medium">{user.isAdmin ? 'Admin' : 'Engineer'}:</span> {user.email}
+                <span className={`font-medium ${user.isAdmin ? 'text-red-500' : 'text-green-500'} mr-1`}>
+                  {user.isAdmin ? '🔑 Admin:' : '👷 Engineer:'}
+                </span> 
+                <span className="hover:underline">{user.email}</span>
               </div>
             ))}
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              Click on any email to auto-fill and login
+              Click on any email to log in directly
             </div>
           </div>
         )}
