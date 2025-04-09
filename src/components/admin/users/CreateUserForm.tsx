@@ -70,6 +70,13 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
   const onSubmit = async (data: UserFormValues) => {
     try {
       console.log("Form submitted with data:", data);
+      
+      // For administrators, automatically set "All Regions" if no regions are selected
+      if (data.role === "Administrator" && selectedRegions.length === 0) {
+        setSelectedRegions(["All Regions"]);
+        data.regions = ["All Regions"];
+      }
+      
       const newUser = await createUser(data as UserFormData);
       
       if (newUser) {

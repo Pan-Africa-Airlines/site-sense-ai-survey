@@ -35,7 +35,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
     try {
       console.log("Creating new user with data:", data);
       
-      // Check if the user already exists in our system
+      // First, explicitly check if the user already exists in our system
       const { data: existingUsers, error: searchError } = await supabase
         .from("engineer_profiles")
         .select("id, email")
@@ -44,10 +44,12 @@ export const useUserCreation = (): UseUserCreationReturn => {
       
       if (searchError) {
         console.error("Error checking for existing user:", searchError);
+        toast.error(`Error checking for existing user: ${searchError.message}`);
       }
       
       // If the user already exists, return that user instead of trying to create a new one
       if (existingUsers) {
+        console.log(`User with email ${data.email} already exists:`, existingUsers);
         toast.info(`User with email ${data.email} already exists`);
         return {
           id: existingUsers.id,
@@ -60,6 +62,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
         };
       }
       
+      console.log("Creating new auth user with email:", data.email);
       // Use signUp to create the user in auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -86,14 +89,21 @@ export const useUserCreation = (): UseUserCreationReturn => {
       const userId = authData?.user?.id;
       
       if (!userId) {
+        console.error("Failed to get user ID from auth response:", authData);
         throw new Error("Failed to get user ID from auth response");
       }
+      
+      console.log("Auth user created successfully with ID:", userId);
       
       // Determine if this is an admin user
       const isAdmin = data.role === "Administrator";
       
+      console.log("Creating engineer profile for user ID:", userId);
+      console.log("Is admin user:", isAdmin);
+      console.log("Regions to save:", isAdmin ? ["All Regions"] : data.regions);
+      
       // Create the engineer profile with the role in specializations
-      const { data: newEngineer, error } = await supabase
+      const { data: newEngineer, error: profileError } = await supabase
         .from("engineer_profiles")
         .insert({
           id: userId,
@@ -107,13 +117,16 @@ export const useUserCreation = (): UseUserCreationReturn => {
         })
         .select();
       
-      if (error) {
-        console.error("Error creating engineer profile:", error);
-        throw error;
+      if (profileError) {
+        console.error("Error creating engineer profile:", profileError);
+        toast.error(`Error creating engineer profile: ${profileError.message}`);
+        throw profileError;
       }
       
+      console.log("Engineer profile created successfully:", newEngineer);
+      
       // Log the user creation
-      await supabase
+      const { error: logError } = await supabase
         .from("system_logs")
         .insert({
           user_id: userId,
@@ -125,6 +138,11 @@ export const useUserCreation = (): UseUserCreationReturn => {
             created_by: "admin"
           }
         });
+        
+      if (logError) {
+        console.error("Error logging user creation:", logError);
+        // Don't throw here, just log the error - this shouldn't block user creation
+      }
       
       if (newEngineer && newEngineer.length > 0) {
         const newUser = {
@@ -138,9 +156,11 @@ export const useUserCreation = (): UseUserCreationReturn => {
         };
         
         toast.success(`User ${data.name} created successfully`);
+        console.log("Returning new user object:", newUser);
         return newUser;
       }
       
+      console.error("Failed to create user profile, no data returned from insert");
       throw new Error("Failed to create user profile");
     } catch (error) {
       console.error("Error creating user:", error);
