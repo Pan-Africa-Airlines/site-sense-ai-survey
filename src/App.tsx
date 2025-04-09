@@ -25,6 +25,7 @@ import EskomSurvey from "./pages/EskomSurvey";
 import Installation from "./pages/Installation";
 import MyAllocations from "./pages/MyAllocations";
 import AdminSystemLogs from "./pages/AdminSystemLogs";
+import EngineerDashboard from "./pages/EngineerDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserRole } from "./types/user";
@@ -167,6 +168,14 @@ function App() {
                   <NavigationBar />
                   <Dashboard />
                 </>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } />
+            
+            <Route path="/engineer-dashboard" element={
+              isAuthenticated ? (
+                <EngineerDashboard />
               ) : (
                 <Navigate to="/login" replace />
               )
