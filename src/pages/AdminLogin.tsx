@@ -6,7 +6,14 @@ import { createAdminUser } from "@/utils/dbHelpers/engineerProfiles";
 
 const AdminLogin = () => {
   useEffect(() => {
-    // Ensure admin user exists when this page is loaded
+    // In development mode, we don't need to ensure admin user exists
+    // Just redirect to login page with admin role
+    if (process.env.NODE_ENV === 'development') {
+      toast.success("Development mode: Admin credentials ready.");
+      return;
+    }
+    
+    // Only try to create admin user in production
     const ensureAdminUser = async () => {
       try {
         const adminUser = await createAdminUser();

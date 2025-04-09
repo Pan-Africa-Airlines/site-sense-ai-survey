@@ -55,20 +55,20 @@ const Login = () => {
     };
   };
 
-  const handleDevLogin = (userEmail: string, userPassword: string) => {
-    console.log("Development mode: Handling dev login for:", userEmail);
+  const handleDevLogin = (userEmail: string) => {
+    console.log("Development mode: Direct login for:", userEmail);
     
-    // Get test users
+    // Get test users to check admin status
     const testUsers = getTestUsers();
     
-    // Find matching user
+    // Find matching user by email
     const matchingUser = Object.values(testUsers).find(
-      user => user.email === userEmail && user.password === userPassword
+      user => user.email === userEmail
     );
     
     if (!matchingUser) {
       console.log("No matching test user found");
-      setErrorMessage("Invalid test credentials. Please check the development credentials list below.");
+      setErrorMessage("Invalid email. Please use one of the test emails listed below.");
       setIsLoading(false);
       return false;
     }
@@ -105,16 +105,13 @@ const Login = () => {
     try {
       console.log(`Attempting login as ${role} with:`, email);
       
-      // In development mode, skip Supabase auth and use hardcoded credentials
+      // In development mode, bypass password check entirely
       if (process.env.NODE_ENV === 'development') {
-        const loginSuccessful = handleDevLogin(email, password);
-        if (loginSuccessful) {
-          return;
-        }
-        // If handleDevLogin returns false, we'll continue with regular auth flow as fallback
+        handleDevLogin(email);
+        return;
       }
       
-      // Regular Supabase auth flow
+      // Regular Supabase auth flow for production
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -122,21 +119,7 @@ const Login = () => {
       
       if (authError) {
         console.error("Authentication error:", authError);
-        
-        // For development mode, offer helpful suggestions if login fails
-        if (process.env.NODE_ENV === 'development') {
-          const testUsers = getTestUsers();
-          const matchingEmail = Object.values(testUsers).find(u => u.email === email);
-          
-          if (matchingEmail) {
-            setErrorMessage(`For ${email}, use password: ${matchingEmail.password}`);
-          } else {
-            setErrorMessage("Invalid email or password. Try using one of the test accounts below.");
-          }
-        } else {
-          setErrorMessage("Invalid email or password. Please try again.");
-        }
-        
+        setErrorMessage("Invalid email or password. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -189,9 +172,9 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
-  const selectTestUser = (userEmail: string, userPassword: string) => {
+  const selectTestUser = (userEmail: string) => {
     setEmail(userEmail);
-    setPassword(userPassword);
+    setPassword(""); // Password not needed in dev mode
     setErrorMessage(null);
   };
 
@@ -243,61 +226,65 @@ const Login = () => {
               className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">Password</Label>
-              <Button variant="link" className="text-xs text-akhanya p-0 h-auto">
-                Forgot password?
-              </Button>
+          
+          {process.env.NODE_ENV !== 'development' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">Password</Label>
+                <Button variant="link" className="text-xs text-akhanya p-0 h-auto">
+                  Forgot password?
+                </Button>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 pr-10"
+                />
+                <Button 
+                  type="button"
+                  variant="ghost" 
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </Button>
+              </div>
             </div>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 pr-10"
-              />
-              <Button 
-                type="button"
-                variant="ghost" 
-                size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
-                )}
-              </Button>
-            </div>
-          </div>
+          )}
+          
           <Button 
             type="submit" 
             className="w-full mt-2 bg-akhanya hover:bg-akhanya-dark transition-all duration-300 shadow-lg hover:shadow-akhanya/30 rounded-md" 
             disabled={isLoading}
           >
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? "Signing in..." : (process.env.NODE_ENV === 'development' ? "Enter App" : "Sign in")}
           </Button>
         </form>
         
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Development Login Credentials:</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Quick Access Development Mode:</div>
             {Object.entries(getTestUsers()).map(([name, user]) => (
               <div 
                 key={name} 
                 className="text-xs mb-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 p-1 rounded"
-                onClick={() => selectTestUser(user.email, user.password)}
+                onClick={() => selectTestUser(user.email)}
               >
-                <span className="font-medium">{user.isAdmin ? 'Admin' : 'Engineer'}:</span> {user.email} / {user.password}
+                <span className="font-medium">{user.isAdmin ? 'Admin' : 'Engineer'}:</span> {user.email}
               </div>
             ))}
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              Click on any credential to auto-fill the form
+              Click on any email to auto-fill and login
             </div>
           </div>
         )}
