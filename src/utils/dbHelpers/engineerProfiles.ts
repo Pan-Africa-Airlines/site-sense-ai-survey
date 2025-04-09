@@ -60,6 +60,8 @@ export const updateEngineerProfile = async (
 
 /**
  * Creates an engineer profile directly in the database
+ * 
+ * Fix for TypeScript error: Ensure id is always present in the data we send to Supabase
  */
 export const createEngineerProfile = async (
   profileData: Partial<EngineerProfile>
@@ -67,13 +69,18 @@ export const createEngineerProfile = async (
   try {
     console.log("Creating engineer profile with data:", profileData);
     
-    if (!profileData.id) {
-      profileData.id = crypto.randomUUID();
-    }
+    // Make sure the ID is set before insertion
+    // This is necessary because Supabase expects 'id' to be a required field
+    const dataWithId = {
+      ...profileData,
+      id: profileData.id || crypto.randomUUID()
+    };
+    
+    console.log("Inserting profile with ID:", dataWithId.id);
     
     const { data, error } = await supabase
       .from('engineer_profiles')
-      .insert(profileData)
+      .insert(dataWithId)
       .select()
       .single();
       
