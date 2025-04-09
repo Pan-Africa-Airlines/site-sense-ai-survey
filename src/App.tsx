@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -10,6 +9,8 @@ import {
 import { ThemeProvider } from "@/components/theme-provider"
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import EngineerLogin from "./pages/EngineerLogin";
+import AdminLogin from "./pages/AdminLogin";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAssessments from "./pages/AdminAssessments";
@@ -43,7 +44,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // First set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const hasSession = !!session;
@@ -71,7 +71,6 @@ function App() {
                 localStorage.setItem("adminUsername", session.user.email || "");
               }
             } else {
-              // No profile found - check if email suggests admin role
               const emailSuggestsAdmin = isAdminEmail(session.user.email || '');
               setUserRole(emailSuggestsAdmin ? 'admin' : 'engineer');
               
@@ -95,7 +94,6 @@ function App() {
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       const hasSession = !!session;
       setIsAuthenticated(hasSession);
@@ -122,7 +120,6 @@ function App() {
               localStorage.setItem("adminUsername", session.user.email || "");
             }
           } else {
-            // No profile found - check if email suggests admin role
             const emailSuggestsAdmin = isAdminEmail(session.user.email || '');
             setUserRole(emailSuggestsAdmin ? 'admin' : 'engineer');
             
@@ -142,7 +139,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Helper function to check if email suggests admin role
   const isAdminEmail = (email: string): boolean => {
     return email.includes('admin') || email.endsWith('@akhanya.co.za');
   };
@@ -156,10 +152,12 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <Router>
           <Routes>
-            {/* Redirect root to login page */}
             <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<EngineerLogin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/login/redirect" element={<AdminLoginRedirect />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/login/legacy" element={<Login />} />
             <Route path="/eskom-survey/new" element={<EskomSurvey />} />
             <Route path="/installation" element={<Installation />} />
             <Route path="/my-allocations" element={<MyAllocations />} />
@@ -182,7 +180,6 @@ function App() {
               <Route path="system-logs" element={<AdminSystemLogs />} />
             </Route>
 
-            <Route path="/admin/login" element={<Navigate to="/login?role=admin" replace />} />
             <Route path="/configuration" element={<Configuration />} />
           </Routes>
         </Router>
