@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarCheck, Tool, ClipboardCheck, MapPin, RefreshCw } from "lucide-react";
+import { CalendarCheck, Wrench, ClipboardCheck, MapPin, RefreshCw } from "lucide-react";
 
 interface Activity {
   id: string;
@@ -67,7 +67,7 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ engineerId }) =
       case 'assessment':
         return <CalendarCheck className="h-5 w-5 text-blue-500" />;
       case 'installation':
-        return <Tool className="h-5 w-5 text-green-500" />;
+        return <Wrench className="h-5 w-5 text-green-500" />;
       case 'update':
         return <RefreshCw className="h-5 w-5 text-purple-500" />;
       case 'location':
