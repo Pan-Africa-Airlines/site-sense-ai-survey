@@ -12,7 +12,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { isUserAdmin, isAdminEmail } from "@/utils/userRoles";
 import { UserRole } from "@/types/user";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { createEngineerProfile } from "@/utils/dbHelpers/engineerProfiles";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -46,48 +45,14 @@ const Login = () => {
     }
   }, [location, role]);
 
-  const ensureUserProfile = async (userId: string, userEmail: string, isAdmin: boolean) => {
-    try {
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('engineer_profiles')
-        .select('*')
-        .eq('email', userEmail)
-        .maybeSingle();
-      
-      if (profileError) {
-        console.error("Error checking for existing user profile:", profileError);
-        return;
-      }
-      
-      if (existingProfile) {
-        console.log("User profile already exists:", existingProfile);
-        return existingProfile;
-      }
-      
-      const formattedName = userEmail.split('@')[0].split('.').map(name => 
-        name.charAt(0).toUpperCase() + name.slice(1)
-      ).join(' ');
-      
-      const defaultProfile = {
-        id: userId,
-        name: formattedName,
-        email: userEmail,
-        specializations: isAdmin ? ["Administrator"] : ["Field Engineer"],
-        regions: isAdmin ? ["All Regions"] : ["Gauteng"],
-        experience: "New",
-        average_rating: 0,
-        total_reviews: 0
-      };
-      
-      console.log("Creating new user profile:", defaultProfile);
-      const profile = await createEngineerProfile(defaultProfile);
-      
-      console.log("User profile created successfully");
-      return profile;
-    } catch (error) {
-      console.error("Error ensuring user profile:", error);
-      return null;
-    }
+  const getTestUsers = () => {
+    return {
+      admin: { email: "admin@akhanya.co.za", password: "admin123", isAdmin: true },
+      siyanda: { email: "siyanda@akhanya.co.za", password: "password123", isAdmin: false },
+      andile: { email: "andile@akhanya.co.za", password: "andile123", isAdmin: false },
+      john: { email: "john.doe@example.com", password: "test123", isAdmin: false },
+      jane: { email: "jane.smith@example.com", password: "test123", isAdmin: false }
+    };
   };
 
   const bypassEmailVerification = async (userEmail: string, userPassword: string) => {
@@ -95,17 +60,13 @@ const Login = () => {
       console.log("Development mode: Attempting to bypass email verification for:", userEmail);
       
       if (process.env.NODE_ENV === 'development') {
-        // Development bypass for predefined test users
-        const testUsers = {
-          admin: { email: "admin@akhanya.co.za", password: "admin123", isAdmin: true },
-          siyanda: { email: "siyanda@akhanya.co.za", password: "password123", isAdmin: false },
-          andile: { email: "andile@akhanya.co.za", password: "andile123", isAdmin: false }
-        };
+        // Get test users
+        const testUsers = getTestUsers();
         
+        // Check if credentials match any test user
         let matchFound = false;
         let userData = null;
         
-        // Check if credentials match any test user
         Object.entries(testUsers).forEach(([name, data]) => {
           if (userEmail === data.email && userPassword === data.password) {
             console.log(`Development login match found for ${name}`);
@@ -115,25 +76,12 @@ const Login = () => {
         });
         
         if (matchFound && userData) {
-          const { data: existingProfile, error: profileError } = await supabase
-            .from('engineer_profiles')
-            .select('*')
-            .eq('email', userEmail)
-            .maybeSingle();
-            
-          if (profileError) {
-            console.error("Error checking for existing profile:", profileError);
-          }
-          
-          const userId = existingProfile?.id || crypto.randomUUID();
-          
-          if (!existingProfile) {
-            await ensureUserProfile(userId, userEmail, userData.isAdmin);
-          }
+          console.log("Development login successful for:", userEmail);
           
           localStorage.setItem("loggedIn", "true");
           localStorage.setItem("userEmail", userEmail);
           
+          // Handle admin vs. engineer routing
           if (userData.isAdmin) {
             localStorage.setItem("adminLoggedIn", "true");
             localStorage.setItem("adminUsername", userEmail);
@@ -142,7 +90,9 @@ const Login = () => {
           } else {
             localStorage.setItem("adminLoggedIn", "false");
             localStorage.removeItem("adminUsername");
-            const userName = userEmail.split('@')[0].split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
+            const userName = userEmail.split('@')[0].split('.').map(n => 
+              n.charAt(0).toUpperCase() + n.slice(1)
+            ).join(' ');
             toast.success(`Welcome, ${userName}!`);
             navigate("/dashboard");
           }
@@ -196,7 +146,19 @@ const Login = () => {
             setErrorMessage("Please confirm your email address before logging in.");
           }
         } else if (authError.message === "Invalid login credentials") {
-          setErrorMessage("Invalid email or password. Please try again.");
+          // In development, attempt bypass one more time for predefined test users
+          if (process.env.NODE_ENV === 'development') {
+            const testUsers = getTestUsers();
+            const matchingUser = Object.values(testUsers).find(u => u.email === email);
+            
+            if (matchingUser) {
+              setErrorMessage(`For test user ${email}, please use password: ${matchingUser.password}`);
+            } else {
+              setErrorMessage("Invalid email or password. Please try again.");
+            }
+          } else {
+            setErrorMessage("Invalid email or password. Please try again.");
+          }
         } else {
           setErrorMessage(authError.message || "Invalid credentials. Please try again.");
         }
@@ -218,8 +180,6 @@ const Login = () => {
       const isAdmin = await isUserAdmin(authData.user.id);
       const hasAdminEmail = isAdminEmail(email);
       const userIsAdmin = isAdmin || hasAdminEmail;
-      
-      await ensureUserProfile(authData.user.id, email, userIsAdmin);
       
       if (role === "admin") {
         if (!userIsAdmin) {
@@ -353,8 +313,14 @@ const Login = () => {
             <div className="text-xs mb-1">
               <span className="font-medium">Engineer:</span> siyanda@akhanya.co.za / password123
             </div>
+            <div className="text-xs mb-1">
+              <span className="font-medium">Engineer:</span> andile@akhanya.co.za / andile123
+            </div>
+            <div className="text-xs mb-1">
+              <span className="font-medium">Engineer:</span> john.doe@example.com / test123
+            </div>
             <div className="text-xs">
-              <span className="font-medium">Custom:</span> andile@akhanya.co.za / andile123
+              <span className="font-medium">Engineer:</span> jane.smith@example.com / test123
             </div>
           </div>
         )}
