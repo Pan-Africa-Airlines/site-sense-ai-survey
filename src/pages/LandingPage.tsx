@@ -34,7 +34,7 @@ const LandingPage = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200">
+            <Card className="bg-gray-50 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200">
               <div className="p-6 flex flex-col h-full">
                 <div className="flex-1">
                   <div className="w-16 h-16 bg-akhanya rounded-full flex items-center justify-center mb-4 mx-auto">
@@ -57,7 +57,7 @@ const LandingPage = () => {
               </div>
             </Card>
             
-            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200">
+            <Card className="bg-gray-50 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200">
               <div className="p-6 flex flex-col h-full">
                 <div className="flex-1">
                   <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mb-4 mx-auto">

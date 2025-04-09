@@ -41,7 +41,7 @@ const EngineerDashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <Card className="shadow-sm border-gray-200 h-full bg-white">
+                <Card className="shadow-sm border-gray-200 h-full bg-gray-50">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-xl font-semibold text-gray-800">Performance Overview</CardTitle>
                   </CardHeader>
@@ -52,7 +52,7 @@ const EngineerDashboard: React.FC = () => {
               </div>
               
               <div>
-                <Card className="shadow-sm border-gray-200 h-full bg-white">
+                <Card className="shadow-sm border-gray-200 h-full bg-gray-50">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-xl font-semibold text-gray-800">Recent Activity</CardTitle>
                   </CardHeader>
@@ -63,7 +63,7 @@ const EngineerDashboard: React.FC = () => {
               </div>
             </div>
 
-            <Card className="shadow-sm border-gray-200 bg-white">
+            <Card className="shadow-sm border-gray-200 bg-gray-50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl font-semibold text-gray-800">Upcoming Tasks</CardTitle>
               </CardHeader>
