@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEngineerProfile } from "@/hooks/useEngineerProfile";
@@ -9,9 +9,22 @@ import EngineerTasksList from "@/components/engineer-dashboard/EngineerTasksList
 import EngineerPerformanceChart from "@/components/engineer-dashboard/EngineerPerformanceChart";
 import RecentActivityFeed from "@/components/engineer-dashboard/RecentActivityFeed";
 import NavigationBar from "@/components/navigation/NavigationBar";
+import { toast } from "sonner";
 
 const EngineerDashboard: React.FC = () => {
   const { engineerProfile, isLoading, userName } = useEngineerProfile();
+
+  useEffect(() => {
+    // Ensure we're logged in for dashboard functionality
+    if (!localStorage.getItem("loggedIn")) {
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail", "siyanda@akhanya.co.za");
+      localStorage.setItem("adminLoggedIn", "false");
+      
+      // Inform the user about auto-login
+      toast.success(`Welcome, Siyanda! Auto-logged in for demonstration.`);
+    }
+  }, []);
 
   return (
     <>

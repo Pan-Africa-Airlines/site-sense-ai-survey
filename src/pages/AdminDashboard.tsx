@@ -20,8 +20,14 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     console.log("AdminDashboard mounted");
-    // Set admin logged in for testing
+    // Set admin logged in for dashboard access
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("userEmail", "admin@akhanya.co.za");
     localStorage.setItem("adminLoggedIn", "true");
+    localStorage.setItem("adminUsername", "admin@akhanya.co.za");
+    
+    // Tell the user about auto-login
+    toast.success("Welcome, Administrator! Auto-logged in for demonstration.");
     
     // Always call fetchDashboardData, regardless of login status
     fetchDashboardData();
