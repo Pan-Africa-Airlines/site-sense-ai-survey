@@ -56,45 +56,56 @@ const Login = () => {
   };
 
   const handleDevLogin = (userEmail: string) => {
-    console.log("Development mode: Direct login for:", userEmail);
-    
-    // Get test users to check admin status
-    const testUsers = getTestUsers();
-    
-    // Find matching user by email
-    const matchingUser = Object.values(testUsers).find(
-      user => user.email === userEmail
-    );
-    
-    if (!matchingUser) {
-      console.log("No matching test user found");
-      setErrorMessage("Invalid email. Please use one of the test emails listed below.");
+    try {
+      console.log("Development mode: Direct login for:", userEmail);
+      
+      // Get test users to check admin status
+      const testUsers = getTestUsers();
+      
+      // Find matching user by email
+      const matchingUser = Object.values(testUsers).find(
+        user => user.email === userEmail
+      );
+      
+      if (!matchingUser) {
+        console.log("No matching test user found");
+        setErrorMessage("Invalid email. Please use one of the test emails listed below.");
+        setIsLoading(false);
+        return false;
+      }
+      
+      console.log(`Development login successful for: ${userEmail}`);
+      
+      // Store authentication info in localStorage
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail", userEmail);
+      
+      if (matchingUser.isAdmin) {
+        localStorage.setItem("adminLoggedIn", "true");
+        localStorage.setItem("adminUsername", userEmail);
+        toast.success(`Welcome, Admin!`);
+        // Make sure we're actually navigating
+        navigate("/admin/dashboard");
+      } else {
+        localStorage.setItem("adminLoggedIn", "false");
+        localStorage.removeItem("adminUsername");
+        const userName = userEmail.split('@')[0].split('.').map(n => 
+          n.charAt(0).toUpperCase() + n.slice(1)
+        ).join(' ');
+        toast.success(`Welcome, ${userName}!`);
+        // Make sure we're actually navigating
+        navigate("/dashboard");
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in handleDevLogin:", error);
+      setErrorMessage("An unexpected error occurred during login.");
       setIsLoading(false);
       return false;
+    } finally {
+      setIsLoading(false);
     }
-    
-    console.log(`Development login successful for: ${userEmail}`);
-    
-    // Store authentication info in localStorage
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("userEmail", userEmail);
-    
-    if (matchingUser.isAdmin) {
-      localStorage.setItem("adminLoggedIn", "true");
-      localStorage.setItem("adminUsername", userEmail);
-      toast.success(`Welcome, Admin!`);
-      navigate("/admin/dashboard");
-    } else {
-      localStorage.setItem("adminLoggedIn", "false");
-      localStorage.removeItem("adminUsername");
-      const userName = userEmail.split('@')[0].split('.').map(n => 
-        n.charAt(0).toUpperCase() + n.slice(1)
-      ).join(' ');
-      toast.success(`Welcome, ${userName}!`);
-      navigate("/dashboard");
-    }
-    
-    return true;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -107,7 +118,10 @@ const Login = () => {
       
       // In development mode, bypass password check entirely
       if (process.env.NODE_ENV === 'development') {
-        handleDevLogin(email);
+        const success = handleDevLogin(email);
+        if (!success) {
+          setIsLoading(false);
+        }
         return;
       }
       
