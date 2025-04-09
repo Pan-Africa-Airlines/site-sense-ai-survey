@@ -193,7 +193,10 @@ const AdminUsers = () => {
   };
 
   const handleAddUser = (newUser: User) => {
+    console.log("Adding new user to state:", newUser);
+    // Use the functional update form to ensure we're working with the latest state
     setEngineers(prev => [...prev, newUser]);
+    toast.success(`User ${newUser.name} has been added to the table`);
   };
   
   const handleUpdateUser = (updatedUser: User) => {

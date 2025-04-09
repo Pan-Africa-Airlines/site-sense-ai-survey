@@ -81,6 +81,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
       
       if (newUser) {
         console.log("User created:", newUser);
+        toast.success(`User ${data.name} created successfully`);
         onUserCreated(newUser);
         form.reset();
         setSelectedRegions([]);
@@ -139,7 +140,8 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
             
             <FormActions 
               isSubmitting={isSubmitting} 
-              onCancel={handleCloseSheet} 
+              onCancel={handleCloseSheet}
+              submitLabel="Create User"
             />
           </form>
         </Form>

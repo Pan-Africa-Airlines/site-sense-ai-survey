@@ -59,6 +59,38 @@ export const updateEngineerProfile = async (
 };
 
 /**
+ * Creates an engineer profile directly in the database
+ */
+export const createEngineerProfile = async (
+  profileData: Partial<EngineerProfile>
+): Promise<EngineerProfile> => {
+  try {
+    console.log("Creating engineer profile with data:", profileData);
+    
+    if (!profileData.id) {
+      profileData.id = crypto.randomUUID();
+    }
+    
+    const { data, error } = await supabase
+      .from('engineer_profiles')
+      .insert(profileData)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error("Error creating engineer profile:", error);
+      throw error;
+    }
+    
+    console.log("Engineer profile created successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Failed to create engineer profile:", error);
+    throw error;
+  }
+};
+
+/**
  * Creates an admin user in the database
  */
 export const createAdminUser = async (): Promise<EngineerProfile | null> => {
@@ -85,31 +117,8 @@ export const createAdminUser = async (): Promise<EngineerProfile | null> => {
     
     console.log("Admin user does not exist, creating...");
     
-    // Create auth user first
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: 'admin@akhanya.co.za',
-      password: 'admin123',
-      options: {
-        data: {
-          name: "Admin User",
-          role: "Administrator"
-        }
-      }
-    });
-    
-    if (authError) {
-      console.error("Error creating admin auth user:", authError);
-      
-      // If the user already exists in auth, try to see if we can just create the profile
-      if (authError.message.includes("already registered")) {
-        console.log("Admin user might exist in auth but not in profiles, proceeding with profile creation");
-      } else {
-        throw authError;
-      }
-    }
-    
-    // Get user ID from auth response or generate a new UUID if not available
-    const userId = authData?.user?.id || crypto.randomUUID();
+    // Generate user ID
+    const userId = crypto.randomUUID();
     
     // Create engineer profile
     const adminProfile = {

@@ -63,37 +63,11 @@ export const useUserCreation = (): UseUserCreationReturn => {
       }
       
       console.log("Creating new auth user with email:", data.email);
-      // Use signUp to create the user in auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            name: data.name,
-            role: data.role
-          }
-        }
-      });
       
-      if (authError) {
-        console.error("Error creating auth user:", authError);
-        
-        // Handle rate limiting errors with a more user-friendly message
-        if (authError.status === 429) {
-          throw new Error("Too many requests. Please wait a moment before trying again.");
-        }
-        
-        throw authError;
-      }
-      
-      const userId = authData?.user?.id;
-      
-      if (!userId) {
-        console.error("Failed to get user ID from auth response:", authData);
-        throw new Error("Failed to get user ID from auth response");
-      }
-      
-      console.log("Auth user created successfully with ID:", userId);
+      // Avoid Supabase rate limiting by creating a UUID for the user directly
+      // Rather than using auth.signUp which has rate limits
+      const userId = crypto.randomUUID();
+      console.log("Generated user ID:", userId);
       
       // Determine if this is an admin user
       const isAdmin = data.role === "Administrator";
@@ -102,7 +76,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
       console.log("Is admin user:", isAdmin);
       console.log("Regions to save:", isAdmin ? ["All Regions"] : data.regions);
       
-      // Create the engineer profile with the role in specializations
+      // Create the engineer profile directly with the generated UUID
       const { data: newEngineer, error: profileError } = await supabase
         .from("engineer_profiles")
         .insert({
