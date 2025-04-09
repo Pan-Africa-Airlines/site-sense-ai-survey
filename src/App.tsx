@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -7,11 +8,9 @@ import {
   Outlet,
 } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider"
-import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAssessments from "./pages/AdminAssessments";
 import AdminInstallations from "./pages/AdminInstallations";
@@ -26,7 +25,7 @@ import MyAllocations from "./pages/MyAllocations";
 import AdminSystemLogs from "./pages/AdminSystemLogs";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { User, UserRole } from "./types/user";
+import { UserRole } from "./types/user";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,7 +121,8 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <Router>
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            {/* Redirect root to login page */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/eskom-survey/new" element={<EskomSurvey />} />
