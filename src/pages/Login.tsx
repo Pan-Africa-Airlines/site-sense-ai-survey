@@ -23,7 +23,6 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Check for role preselection from URL params and set up test credentials
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const roleParam = params.get('role');
@@ -31,12 +30,10 @@ const Login = () => {
     if (roleParam === 'admin') {
       setRole('admin');
       
-      // For convenience, pre-fill admin credentials
       setEmail("admin@akhanya.co.za");
       setPassword("admin123");
     }
     
-    // For development: pre-fill test credentials
     if (process.env.NODE_ENV === 'development') {
       if (roleParam === 'admin' || role === 'admin') {
         setEmail("admin@akhanya.co.za");
@@ -48,14 +45,12 @@ const Login = () => {
     }
   }, [location, role]);
 
-  // Ensure user has an engineer profile in the database
   const ensureUserProfile = async (userId: string, userEmail: string, isAdmin: boolean) => {
     try {
-      // Check if user already has a profile
       const { data: existingProfile, error: profileError } = await supabase
         .from('engineer_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('email', userEmail)
         .maybeSingle();
       
       if (profileError) {
@@ -63,18 +58,15 @@ const Login = () => {
         return;
       }
       
-      // If profile exists, no need to create a new one
       if (existingProfile) {
         console.log("User profile already exists:", existingProfile);
-        return;
+        return existingProfile;
       }
       
-      // Format name from email
       const formattedName = userEmail.split('@')[0].split('.').map(name => 
         name.charAt(0).toUpperCase() + name.slice(1)
       ).join(' ');
       
-      // Create a default profile
       const defaultProfile = {
         id: userId,
         name: formattedName,
@@ -87,33 +79,48 @@ const Login = () => {
       };
       
       console.log("Creating new user profile:", defaultProfile);
-      await createEngineerProfile(defaultProfile);
+      const profile = await createEngineerProfile(defaultProfile);
       
       console.log("User profile created successfully");
+      return profile;
     } catch (error) {
       console.error("Error ensuring user profile:", error);
+      return null;
     }
   };
 
-  // Handle email verification bypass for development
   const bypassEmailVerification = async (userEmail: string, userPassword: string) => {
     try {
       console.log("Development mode: Attempting to bypass email verification for:", userEmail);
       
-      // For development bypasses only - this should be removed in production!
-      if (userEmail === "andile@akhanya.co.za" && process.env.NODE_ENV === 'development') {
-        // Create a profile for this user if it doesn't exist yet
-        const mockUserId = "andile-user-id";
-        await ensureUserProfile(mockUserId, userEmail, false);
+      if (process.env.NODE_ENV === 'development') {
+        const { data: existingProfile, error: profileError } = await supabase
+          .from('engineer_profiles')
+          .select('*')
+          .eq('email', userEmail)
+          .maybeSingle();
+          
+        if (profileError) {
+          console.error("Error checking for existing profile:", profileError);
+          return false;
+        }
         
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("userEmail", userEmail);
-        localStorage.setItem("adminLoggedIn", "false");
-        localStorage.removeItem("adminUsername");
+        const userId = existingProfile?.id || crypto.randomUUID();
         
-        toast.success(`Development mode: Welcome, Andile!`);
-        navigate("/dashboard");
-        return true;
+        if (!existingProfile) {
+          await ensureUserProfile(userId, userEmail, false);
+        }
+        
+        if (userEmail === "andile@akhanya.co.za" && userPassword === "andile123") {
+          localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("userEmail", userEmail);
+          localStorage.setItem("adminLoggedIn", "false");
+          localStorage.removeItem("adminUsername");
+          
+          toast.success(`Welcome, Andile!`);
+          navigate("/dashboard");
+          return true;
+        }
       }
       
       return false;
@@ -131,9 +138,16 @@ const Login = () => {
     try {
       console.log(`Attempting login as ${role} with:`, email);
       
-      // Development mode login for testing - bypasses Supabase auth
       if (process.env.NODE_ENV === 'development') {
-        // Admin backdoor login
+        if (email === "andile@akhanya.co.za" && password === "andile123" && role === "engineer") {
+          console.log("Using development login for Andile");
+          const bypassed = await bypassEmailVerification(email, password);
+          if (bypassed) {
+            setIsLoading(false);
+            return;
+          }
+        }
+        
         if (email === "admin@akhanya.co.za" && password === "admin123" && role === "admin") {
           console.log("Using development backdoor login for admin");
           localStorage.setItem("loggedIn", "true");
@@ -141,7 +155,6 @@ const Login = () => {
           localStorage.setItem("adminLoggedIn", "true");
           localStorage.setItem("adminUsername", email);
           
-          // Ensure admin profile exists for the dashboard
           const mockUserId = "admin-mock-id";
           await ensureUserProfile(mockUserId, email, true);
           
@@ -151,7 +164,6 @@ const Login = () => {
           return;
         } 
         
-        // Engineer backdoor login
         if (email === "siyanda@akhanya.co.za" && password === "password123" && role === "engineer") {
           console.log("Using development backdoor login for engineer");
           localStorage.setItem("loggedIn", "true");
@@ -159,7 +171,6 @@ const Login = () => {
           localStorage.setItem("adminLoggedIn", "false");
           localStorage.removeItem("adminUsername");
           
-          // Ensure engineer profile exists for the dashboard
           const mockUserId = "engineer-mock-id";
           await ensureUserProfile(mockUserId, email, false);
           
@@ -169,7 +180,6 @@ const Login = () => {
           return;
         }
         
-        // Try to bypass email verification for development
         const bypassed = await bypassEmailVerification(email, password);
         if (bypassed) {
           setIsLoading(false);
@@ -177,7 +187,6 @@ const Login = () => {
         }
       }
       
-      // If not dev mode or credentials don't match, proceed with Supabase auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -186,12 +195,9 @@ const Login = () => {
       if (authError) {
         console.error("Authentication error:", authError);
         
-        // Handle specific error codes
         if (authError.message === "Email not confirmed") {
-          // For development only - offer to proceed anyway
           if (process.env.NODE_ENV === 'development') {
             setErrorMessage("Email not confirmed. In development mode, you can click 'Sign in' again to bypass this check.");
-            // Try to bypass on next attempt
             const bypassed = await bypassEmailVerification(email, password);
             if (bypassed) {
               setIsLoading(false);
@@ -217,21 +223,16 @@ const Login = () => {
         return;
       }
       
-      // Set up common auth data in localStorage
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("userEmail", email);
       
-      // Check if user is admin either by email pattern or by profile specialization
       const isAdmin = await isUserAdmin(authData.user.id);
       const hasAdminEmail = isAdminEmail(email);
       const userIsAdmin = isAdmin || hasAdminEmail;
       
-      // Ensure the user has a profile in the database
       await ensureUserProfile(authData.user.id, email, userIsAdmin);
       
-      // Handle login based on selected role
       if (role === "admin") {
-        // Verify admin privileges if admin role was selected
         if (!userIsAdmin) {
           setErrorMessage("You don't have admin privileges");
           await supabase.auth.signOut();
@@ -247,7 +248,6 @@ const Login = () => {
         toast.success(`Welcome, ${authData.user.email || email}!`);
         navigate("/admin/dashboard");
       } else {
-        // Engineer login flow
         localStorage.setItem("adminLoggedIn", "false");
         localStorage.removeItem("adminUsername");
         
