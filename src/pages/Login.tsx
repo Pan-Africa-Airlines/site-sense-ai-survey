@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isUserAdmin, isAdminEmail } from "@/utils/userRoles";
 import { UserRole } from "@/types/user";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createEngineerProfile } from "@/utils/dbHelpers/engineerProfiles";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -47,6 +48,53 @@ const Login = () => {
     }
   }, [location, role]);
 
+  // Ensure user has an engineer profile in the database
+  const ensureUserProfile = async (userId: string, userEmail: string, isAdmin: boolean) => {
+    try {
+      // Check if user already has a profile
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('engineer_profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (profileError) {
+        console.error("Error checking for existing user profile:", profileError);
+        return;
+      }
+      
+      // If profile exists, no need to create a new one
+      if (existingProfile) {
+        console.log("User profile already exists:", existingProfile);
+        return;
+      }
+      
+      // Format name from email
+      const formattedName = userEmail.split('@')[0].split('.').map(name => 
+        name.charAt(0).toUpperCase() + name.slice(1)
+      ).join(' ');
+      
+      // Create a default profile
+      const defaultProfile = {
+        id: userId,
+        name: formattedName,
+        email: userEmail,
+        specializations: isAdmin ? ["Administrator"] : ["Field Engineer"],
+        regions: isAdmin ? ["All Regions"] : ["Gauteng"],
+        experience: "New",
+        average_rating: 0,
+        total_reviews: 0
+      };
+      
+      console.log("Creating new user profile:", defaultProfile);
+      await createEngineerProfile(defaultProfile);
+      
+      console.log("User profile created successfully");
+    } catch (error) {
+      console.error("Error ensuring user profile:", error);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -64,6 +112,10 @@ const Login = () => {
           localStorage.setItem("adminLoggedIn", "true");
           localStorage.setItem("adminUsername", email);
           
+          // Ensure admin profile exists for the dashboard
+          const mockUserId = "admin-mock-id";
+          await ensureUserProfile(mockUserId, email, true);
+          
           toast.success(`Development mode: Welcome, Admin!`);
           navigate("/admin/dashboard");
           setIsLoading(false);
@@ -76,6 +128,10 @@ const Login = () => {
           localStorage.setItem("userEmail", email);
           localStorage.setItem("adminLoggedIn", "false");
           localStorage.removeItem("adminUsername");
+          
+          // Ensure engineer profile exists for the dashboard
+          const mockUserId = "engineer-mock-id";
+          await ensureUserProfile(mockUserId, email, false);
           
           toast.success(`Development mode: Welcome, Siyanda!`);
           navigate("/dashboard");
@@ -121,6 +177,9 @@ const Login = () => {
       const isAdmin = await isUserAdmin(authData.user.id);
       const hasAdminEmail = isAdminEmail(email);
       const userIsAdmin = isAdmin || hasAdminEmail;
+      
+      // Ensure the user has a profile in the database
+      await ensureUserProfile(authData.user.id, email, userIsAdmin);
       
       // Handle login based on selected role
       if (role === "admin") {

@@ -38,7 +38,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
       // First, explicitly check if the user already exists in our system
       const { data: existingUsers, error: searchError } = await supabase
         .from("engineer_profiles")
-        .select("id, email")
+        .select("id, email, name")
         .eq("email", data.email)
         .maybeSingle();
       
@@ -53,7 +53,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
         toast.info(`User with email ${data.email} already exists`);
         return {
           id: existingUsers.id,
-          name: data.name,
+          name: existingUsers.name || data.name,
           email: data.email,
           role: data.role,
           status: "active",
@@ -62,9 +62,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
         };
       }
       
-      console.log("Creating new auth user with email:", data.email);
-      
-      // Generate a UUID for the user to avoid Supabase rate limiting
+      // Generate a UUID for the user
       const userId = crypto.randomUUID();
       console.log("Generated user ID:", userId);
       
@@ -75,7 +73,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
       console.log("Is admin user:", isAdmin);
       console.log("Regions to save:", isAdmin ? ["All Regions"] : data.regions);
       
-      // Using service key to bypass RLS policies for admin operations
+      // Create the engineer profile
       const { data: newEngineer, error: profileError } = await supabase
         .from("engineer_profiles")
         .insert({
