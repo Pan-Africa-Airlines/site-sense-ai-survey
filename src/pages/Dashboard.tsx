@@ -1,100 +1,56 @@
 
-import React, { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import React from "react";
+import { DashboardProvider } from "@/contexts/DashboardContext";
+import EngineerDashboardContainer from "@/components/dashboard/EngineerDashboardContainer";
 import { useNavigate } from "react-router-dom";
-import EngineerRatingSurvey from "@/components/EngineerRatingSurvey";
-import DashboardStatsCards from "@/components/dashboard/DashboardStatsCards";
-import AIInsightsSection from "@/components/dashboard/AIInsightsSection";
-import DashboardCharts from "@/components/dashboard/DashboardCharts";
-import RecentActivitiesCard from "@/components/dashboard/RecentActivitiesCard";
-import SiteAllocationsSection from "@/components/dashboard/SiteAllocationsSection";
-import { EngineerProfile, AllocatedSite, AIInsight, ChartDataPoint, DashboardTotals, RecentActivity } from "@/types/dashboard";
-import { useDashboardData } from "@/hooks/useDashboardData";
-import VehicleStatusCard from "@/components/dashboard/VehicleStatusCard";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Dashboard: React.FC = () => {
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const [showSurvey, setShowSurvey] = useState(false);
-  const [selectedSite, setSelectedSite] = useState<AllocatedSite | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
   
-  // Use our custom dashboard data hook to fetch all data from the database
-  const {
-    engineerProfile,
-    allocatedSites,
-    aiInsights,
-    chartData,
-    totals,
-    recentActivities,
-    isLoading,
-    refreshData
-  } = useDashboardData();
-
-  const handleVehicleCheck = () => {
-    navigate("/car-check");
-  };
-
-  const handleOpenSurvey = (site: AllocatedSite) => {
-    setSelectedSite(site);
-    setShowSurvey(true);
-  };
-
-  const handleCloseSurvey = () => {
-    setShowSurvey(false);
-    setSelectedSite(null);
-  };
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-akhanya">Dashboard</h1>
-          <p className="text-gray-600">Welcome to the SiteSense monitoring platform</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-        <VehicleStatusCard engineerId={engineerProfile?.id} isLoading={isLoading} />
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        setIsLoading(true);
         
-        <div className="md:col-span-3">
-          <DashboardStatsCards totals={totals} isLoading={isLoading} />
-        </div>
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          // Check for legacy login method (for backward compatibility)
+          const loggedIn = localStorage.getItem("loggedIn");
+          if (!loggedIn) {
+            navigate("/login");
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        toast("Authentication error. Please log in again.");
+        navigate("/login");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-akhanya"></div>
       </div>
-
-      <AIInsightsSection insights={aiInsights} />
-
-      <SiteAllocationsSection 
-        sites={allocatedSites} 
-        isLoading={isLoading} 
-        onOpenSurvey={handleOpenSurvey}
-      />
-
-      <DashboardCharts 
-        assessmentData={chartData.assessments}
-        installationData={chartData.installations}
-        isLoading={isLoading}
-      />
-
-      <RecentActivitiesCard 
-        activities={recentActivities}
-        engineerName={engineerProfile?.name || ""}
-      />
-
-      <Dialog open={showSurvey} onOpenChange={setShowSurvey}>
-        <DialogContent className="sm:max-w-md">
-          {selectedSite && (
-            <EngineerRatingSurvey
-              engineerId={engineerProfile?.id || ""}
-              engineerName={engineerProfile?.name || ""}
-              siteId={selectedSite.site_id}
-              siteName={selectedSite.site_name}
-              onClose={handleCloseSurvey}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen bg-gray-50 pb-10">
+      <DashboardProvider>
+        <EngineerDashboardContainer />
+      </DashboardProvider>
     </div>
   );
 };

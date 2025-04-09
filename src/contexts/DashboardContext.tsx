@@ -2,10 +2,11 @@
 import React, { createContext, useContext } from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useSurveyHandler } from '@/hooks/useSurveyHandler';
+import { AllocatedSite } from '@/types/dashboard';
 
 interface DashboardContextType {
   engineerProfile: any;
-  allocatedSites: any[];
+  allocatedSites: AllocatedSite[];
   aiInsights: any[];
   chartData: {
     assessments: any[];
@@ -15,19 +16,22 @@ interface DashboardContextType {
     assessments: number;
     completedInstallations: number;
     satisfactionRate: number;
+    completedAssessments?: number;
+    allocations?: number;
+    assessmentStatus?: string;
   };
   recentActivities: any[];
   isLoading: boolean;
-  selectedSite: any;
+  selectedSite: AllocatedSite | null;
   showSurvey: boolean;
   setShowSurvey: (show: boolean) => void;
-  setSelectedSite: (site: any) => void;
-  handleOpenSurvey: (site: any) => void;
+  setSelectedSite: (site: AllocatedSite | null) => void;
+  handleOpenSurvey: (site: AllocatedSite) => void;
   handleCloseSurvey: () => void;
   refreshData: () => Promise<void>;
 }
 
-const defaultContextValue: DashboardContextType = {
+const DashboardContext = createContext<DashboardContextType>({
   engineerProfile: null,
   allocatedSites: [],
   aiInsights: [],
@@ -49,9 +53,7 @@ const defaultContextValue: DashboardContextType = {
   handleOpenSurvey: () => {},
   handleCloseSurvey: () => {},
   refreshData: async () => {},
-};
-
-const DashboardContext = createContext<DashboardContextType>(defaultContextValue);
+});
 
 export const useDashboard = () => useContext(DashboardContext);
 

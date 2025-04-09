@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -30,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserRole } from "./types/user";
 import { toast } from "sonner";
+import NavigationBar from "@/components/navigation/NavigationBar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -160,13 +160,46 @@ function App() {
             <Route path="/admin/login/redirect" element={<AdminLoginRedirect />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login/legacy" element={<Login />} />
-            <Route path="/eskom-survey/new" element={<EskomSurvey />} />
-            <Route path="/installation" element={<Installation />} />
-            <Route path="/my-allocations" element={<MyAllocations />} />
-
+            
             <Route path="/dashboard" element={
               isAuthenticated ? (
-                <Dashboard />
+                <>
+                  <NavigationBar />
+                  <Dashboard />
+                </>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } />
+            
+            <Route path="/eskom-survey/new" element={
+              isAuthenticated ? (
+                <>
+                  <NavigationBar />
+                  <EskomSurvey />
+                </>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } />
+            
+            <Route path="/installation" element={
+              isAuthenticated ? (
+                <>
+                  <NavigationBar />
+                  <Installation />
+                </>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } />
+            
+            <Route path="/my-allocations" element={
+              isAuthenticated ? (
+                <>
+                  <NavigationBar />
+                  <MyAllocations />
+                </>
               ) : (
                 <Navigate to="/login" replace />
               )

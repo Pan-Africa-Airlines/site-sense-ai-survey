@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { DashboardTotals } from "@/types/dashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, ClipboardCheck, HardHat } from "lucide-react";
+import { MapPin, ClipboardCheck, HardHat, TrendingUp } from "lucide-react";
 
 interface DashboardStatsCardsProps {
   totals: DashboardTotals;
@@ -14,7 +14,7 @@ interface DashboardStatsCardsProps {
 const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals, isLoading = false }) => {
   // Function to determine assessment status class
   const getStatusClass = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'started':
         return 'bg-blue-100 text-blue-800';
       case 'in progress':
@@ -30,14 +30,13 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals, isLoa
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className="card-dashboard overflow-hidden h-full flex flex-col">
-        <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+      <Card className="overflow-hidden h-full flex flex-col">
+        <div className="bg-gradient-to-r from-akhanya to-black h-2"></div>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-akhanya flex items-center">
-            <MapPin className="h-5 w-5 mr-2" />
-            Total Site Allocations
+          <CardTitle className="text-md font-medium text-gray-700 flex items-center">
+            <MapPin className="h-4 w-4 mr-2 text-akhanya" />
+            Allocated Sites
           </CardTitle>
-          <CardDescription>All sites allocated to me</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-between">
           {isLoading ? (
@@ -45,18 +44,17 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals, isLoa
           ) : (
             <div className="text-3xl font-bold mb-4 text-akhanya">{totals.allocations || 0}</div>
           )}
-          <div className="text-sm text-green-600 mt-auto">Active allocations</div>
+          <div className="text-sm text-green-600 mt-auto">Active site allocations</div>
         </CardContent>
       </Card>
       
-      <Card className="card-dashboard overflow-hidden h-full flex flex-col">
-        <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+      <Card className="overflow-hidden h-full flex flex-col">
+        <div className="bg-gradient-to-r from-akhanya to-black h-2"></div>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-akhanya flex items-center">
-            <ClipboardCheck className="h-5 w-5 mr-2" />
-            Completed Assessments
+          <CardTitle className="text-md font-medium text-gray-700 flex items-center">
+            <ClipboardCheck className="h-4 w-4 mr-2 text-akhanya" />
+            Assessments
           </CardTitle>
-          <CardDescription>Successfully completed assessments</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-between">
           {isLoading ? (
@@ -75,14 +73,13 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ totals, isLoa
         </CardContent>
       </Card>
       
-      <Card className="card-dashboard overflow-hidden h-full flex flex-col">
-        <div className="bg-gradient-to-r from-akhanya to-black h-3"></div>
+      <Card className="overflow-hidden h-full flex flex-col">
+        <div className="bg-gradient-to-r from-akhanya to-black h-2"></div>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-akhanya flex items-center">
-            <HardHat className="h-5 w-5 mr-2" />
-            Completed Installations
+          <CardTitle className="text-md font-medium text-gray-700 flex items-center">
+            <HardHat className="h-4 w-4 mr-2 text-akhanya" />
+            Installations
           </CardTitle>
-          <CardDescription>Successfully completed installations</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-between">
           {isLoading ? (

@@ -6,7 +6,7 @@ import LoginPageLayout from "@/components/auth/LoginPageLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Eye, EyeOff, User } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, User, LayoutDashboard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -134,7 +134,7 @@ const EngineerLogin = () => {
   return (
     <LoginPageLayout 
       title="Engineer Login"
-      description="Enter your credentials to access the engineering portal"
+      description="Enter your credentials to access the SiteSense monitoring platform"
     >
       <div className="flex flex-col space-y-6">
         <div className="flex items-center justify-center mb-2">
