@@ -23,11 +23,42 @@ export const useUserCreation = (): UseUserCreationReturn => {
   const [error, setError] = useState<Error | null>(null);
 
   const createUser = async (data: UserFormData) => {
+    // If already submitting, prevent duplicate submissions
+    if (isSubmitting) {
+      toast.info("Please wait, a user creation is already in progress");
+      return null;
+    }
+    
     setIsSubmitting(true);
     setError(null);
     
     try {
       console.log("Creating new user with data:", data);
+      
+      // Check if the user already exists in our system
+      const { data: existingUsers, error: searchError } = await supabase
+        .from("engineer_profiles")
+        .select("id, email")
+        .eq("email", data.email)
+        .maybeSingle();
+      
+      if (searchError) {
+        console.error("Error checking for existing user:", searchError);
+      }
+      
+      // If the user already exists, return that user instead of trying to create a new one
+      if (existingUsers) {
+        toast.info(`User with email ${data.email} already exists`);
+        return {
+          id: existingUsers.id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          status: "active",
+          experience: data.experience || "New",
+          regions: data.regions,
+        };
+      }
       
       // Use signUp to create the user in auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -43,6 +74,12 @@ export const useUserCreation = (): UseUserCreationReturn => {
       
       if (authError) {
         console.error("Error creating auth user:", authError);
+        
+        // Handle rate limiting errors with a more user-friendly message
+        if (authError.status === 429) {
+          throw new Error("Too many requests. Please wait a moment before trying again.");
+        }
+        
         throw authError;
       }
       

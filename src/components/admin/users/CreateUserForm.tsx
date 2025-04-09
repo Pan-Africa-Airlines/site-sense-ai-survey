@@ -31,7 +31,7 @@ interface CreateUserFormProps {
 const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  const { createUser, isSubmitting } = useUserCreation();
+  const { createUser, isSubmitting, error } = useUserCreation();
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -44,6 +44,13 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
       experience: "",
     },
   });
+
+  // Display any errors that come from the useUserCreation hook
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || "An error occurred during user creation");
+    }
+  }, [error]);
 
   const handleRegionChange = (region: string) => {
     setSelectedRegions((current) => {
@@ -64,14 +71,17 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
     try {
       console.log("Form submitted with data:", data);
       const newUser = await createUser(data as UserFormData);
-      console.log("User created:", newUser);
-      onUserCreated(newUser);
-      form.reset();
-      setSelectedRegions([]);
-      setIsSheetOpen(false);
+      
+      if (newUser) {
+        console.log("User created:", newUser);
+        onUserCreated(newUser);
+        form.reset();
+        setSelectedRegions([]);
+        setIsSheetOpen(false);
+      }
     } catch (error) {
       console.error("Error in form submission:", error);
-      toast.error("Failed to create user: " + (error.message || "Unknown error"));
+      // Toast error is already handled in the useUserCreation hook
     }
   };
 

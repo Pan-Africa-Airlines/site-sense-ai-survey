@@ -32,7 +32,7 @@ const FormActions: React.FC<FormActionsProps> = ({
       </Button>
       <Button 
         type="submit" 
-        className="bg-akhanya hover:bg-akhanya-dark"
+        className={`bg-akhanya hover:bg-akhanya-dark ${isSubmitting ? 'opacity-80' : ''}`}
         disabled={isSubmitting}
       >
         {isSubmitting ? (
