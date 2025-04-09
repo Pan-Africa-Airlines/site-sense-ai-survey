@@ -52,8 +52,10 @@ export const useUserCreation = (): UseUserCreationReturn => {
         throw new Error("Failed to get user ID from auth response");
       }
       
+      // Determine if this is an admin user
+      const isAdmin = data.role === "Administrator";
+      
       // Create the engineer profile with the role in specializations
-      // The role will be stored in the specializations array
       const { data: newEngineer, error } = await supabase
         .from("engineer_profiles")
         .insert({
@@ -61,7 +63,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
           name: data.name,
           email: data.email,
           specializations: [data.role], // Store role as a specialization
-          regions: data.regions,
+          regions: isAdmin ? ["All Regions"] : data.regions,
           experience: data.experience || "New",
           average_rating: 0,
           total_reviews: 0,
@@ -72,6 +74,20 @@ export const useUserCreation = (): UseUserCreationReturn => {
         console.error("Error creating engineer profile:", error);
         throw error;
       }
+      
+      // Log the user creation
+      await supabase
+        .from("system_logs")
+        .insert({
+          user_id: userId,
+          user_name: data.name,
+          action: isAdmin ? "admin_user_created" : "user_created",
+          details: { 
+            email: data.email, 
+            role: data.role,
+            created_by: "admin"
+          }
+        });
       
       if (newEngineer && newEngineer.length > 0) {
         const newUser = {
@@ -84,7 +100,7 @@ export const useUserCreation = (): UseUserCreationReturn => {
           regions: newEngineer[0].regions,
         };
         
-        toast.success("User created successfully");
+        toast.success(`User ${data.name} created successfully`);
         return newUser;
       }
       

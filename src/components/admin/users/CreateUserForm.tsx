@@ -62,14 +62,16 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
 
   const onSubmit = async (data: UserFormValues) => {
     try {
+      console.log("Form submitted with data:", data);
       const newUser = await createUser(data as UserFormData);
+      console.log("User created:", newUser);
       onUserCreated(newUser);
       form.reset();
       setSelectedRegions([]);
       setIsSheetOpen(false);
     } catch (error) {
-      // Error is already handled in the hook
       console.error("Error in form submission:", error);
+      toast.error("Failed to create user: " + (error.message || "Unknown error"));
     }
   };
 

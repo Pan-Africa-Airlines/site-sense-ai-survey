@@ -38,7 +38,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         {isSubmitting ? (
           <>
             <Loader className="h-4 w-4 animate-spin mr-2" />
-            Creating...
+            {buttonText === "Create User" ? "Creating..." : "Saving..."}
           </>
         ) : buttonText}
       </Button>
