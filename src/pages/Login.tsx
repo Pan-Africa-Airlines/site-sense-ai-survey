@@ -55,57 +55,46 @@ const Login = () => {
     };
   };
 
-  const bypassEmailVerification = async (userEmail: string, userPassword: string) => {
-    try {
-      console.log("Development mode: Attempting to bypass email verification for:", userEmail);
-      
-      if (process.env.NODE_ENV === 'development') {
-        // Get test users
-        const testUsers = getTestUsers();
-        
-        // Check if credentials match any test user
-        let matchFound = false;
-        let userData = null;
-        
-        Object.entries(testUsers).forEach(([name, data]) => {
-          if (userEmail === data.email && userPassword === data.password) {
-            console.log(`Development login match found for ${name}`);
-            matchFound = true;
-            userData = data;
-          }
-        });
-        
-        if (matchFound && userData) {
-          console.log("Development login successful for:", userEmail);
-          
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("userEmail", userEmail);
-          
-          // Handle admin vs. engineer routing
-          if (userData.isAdmin) {
-            localStorage.setItem("adminLoggedIn", "true");
-            localStorage.setItem("adminUsername", userEmail);
-            toast.success(`Welcome, Admin!`);
-            navigate("/admin/dashboard");
-          } else {
-            localStorage.setItem("adminLoggedIn", "false");
-            localStorage.removeItem("adminUsername");
-            const userName = userEmail.split('@')[0].split('.').map(n => 
-              n.charAt(0).toUpperCase() + n.slice(1)
-            ).join(' ');
-            toast.success(`Welcome, ${userName}!`);
-            navigate("/dashboard");
-          }
-          
-          return true;
-        }
-      }
-      
-      return false;
-    } catch (error) {
-      console.error("Error bypassing email verification:", error);
+  const handleDevLogin = (userEmail: string, userPassword: string) => {
+    console.log("Development mode: Handling dev login for:", userEmail);
+    
+    // Get test users
+    const testUsers = getTestUsers();
+    
+    // Find matching user
+    const matchingUser = Object.values(testUsers).find(
+      user => user.email === userEmail && user.password === userPassword
+    );
+    
+    if (!matchingUser) {
+      console.log("No matching test user found");
+      setErrorMessage("Invalid test credentials. Please check the development credentials list below.");
+      setIsLoading(false);
       return false;
     }
+    
+    console.log(`Development login successful for: ${userEmail}`);
+    
+    // Store authentication info in localStorage
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("userEmail", userEmail);
+    
+    if (matchingUser.isAdmin) {
+      localStorage.setItem("adminLoggedIn", "true");
+      localStorage.setItem("adminUsername", userEmail);
+      toast.success(`Welcome, Admin!`);
+      navigate("/admin/dashboard");
+    } else {
+      localStorage.setItem("adminLoggedIn", "false");
+      localStorage.removeItem("adminUsername");
+      const userName = userEmail.split('@')[0].split('.').map(n => 
+        n.charAt(0).toUpperCase() + n.slice(1)
+      ).join(' ');
+      toast.success(`Welcome, ${userName}!`);
+      navigate("/dashboard");
+    }
+    
+    return true;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -116,16 +105,16 @@ const Login = () => {
     try {
       console.log(`Attempting login as ${role} with:`, email);
       
-      // In development mode, try to bypass Supabase auth for test users
+      // In development mode, skip Supabase auth and use hardcoded credentials
       if (process.env.NODE_ENV === 'development') {
-        const bypassed = await bypassEmailVerification(email, password);
-        if (bypassed) {
-          setIsLoading(false);
+        const loginSuccessful = handleDevLogin(email, password);
+        if (loginSuccessful) {
           return;
         }
+        // If handleDevLogin returns false, we'll continue with regular auth flow as fallback
       }
       
-      // If bypass didn't work or we're not in development, try regular auth
+      // Regular Supabase auth flow
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -134,33 +123,18 @@ const Login = () => {
       if (authError) {
         console.error("Authentication error:", authError);
         
-        if (authError.message === "Email not confirmed") {
-          if (process.env.NODE_ENV === 'development') {
-            setErrorMessage("Email not confirmed. In development mode, you can click 'Sign in' again to bypass this check.");
-            const bypassed = await bypassEmailVerification(email, password);
-            if (bypassed) {
-              setIsLoading(false);
-              return;
-            }
+        // For development mode, offer helpful suggestions if login fails
+        if (process.env.NODE_ENV === 'development') {
+          const testUsers = getTestUsers();
+          const matchingEmail = Object.values(testUsers).find(u => u.email === email);
+          
+          if (matchingEmail) {
+            setErrorMessage(`For ${email}, use password: ${matchingEmail.password}`);
           } else {
-            setErrorMessage("Please confirm your email address before logging in.");
-          }
-        } else if (authError.message === "Invalid login credentials") {
-          // In development, attempt bypass one more time for predefined test users
-          if (process.env.NODE_ENV === 'development') {
-            const testUsers = getTestUsers();
-            const matchingUser = Object.values(testUsers).find(u => u.email === email);
-            
-            if (matchingUser) {
-              setErrorMessage(`For test user ${email}, please use password: ${matchingUser.password}`);
-            } else {
-              setErrorMessage("Invalid email or password. Please try again.");
-            }
-          } else {
-            setErrorMessage("Invalid email or password. Please try again.");
+            setErrorMessage("Invalid email or password. Try using one of the test accounts below.");
           }
         } else {
-          setErrorMessage(authError.message || "Invalid credentials. Please try again.");
+          setErrorMessage("Invalid email or password. Please try again.");
         }
         
         setIsLoading(false);
@@ -213,6 +187,12 @@ const Login = () => {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const selectTestUser = (userEmail: string, userPassword: string) => {
+    setEmail(userEmail);
+    setPassword(userPassword);
+    setErrorMessage(null);
   };
 
   return (
@@ -307,20 +287,17 @@ const Login = () => {
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Development Login Credentials:</div>
-            <div className="text-xs mb-1">
-              <span className="font-medium">Admin:</span> admin@akhanya.co.za / admin123
-            </div>
-            <div className="text-xs mb-1">
-              <span className="font-medium">Engineer:</span> siyanda@akhanya.co.za / password123
-            </div>
-            <div className="text-xs mb-1">
-              <span className="font-medium">Engineer:</span> andile@akhanya.co.za / andile123
-            </div>
-            <div className="text-xs mb-1">
-              <span className="font-medium">Engineer:</span> john.doe@example.com / test123
-            </div>
-            <div className="text-xs">
-              <span className="font-medium">Engineer:</span> jane.smith@example.com / test123
+            {Object.entries(getTestUsers()).map(([name, user]) => (
+              <div 
+                key={name} 
+                className="text-xs mb-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 p-1 rounded"
+                onClick={() => selectTestUser(user.email, user.password)}
+              >
+                <span className="font-medium">{user.isAdmin ? 'Admin' : 'Engineer'}:</span> {user.email} / {user.password}
+              </div>
+            ))}
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              Click on any credential to auto-fill the form
             </div>
           </div>
         )}
