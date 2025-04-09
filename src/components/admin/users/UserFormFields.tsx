@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Control } from "react-hook-form";
 import {
   FormField,
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface UserFormFieldsProps {
   control?: Control<any>;
@@ -24,8 +26,13 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
   handleInputChange,
   isEditing = false,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
   // Determine if we're using React Hook Form or controlled inputs
   const isUsingHookForm = !!control;
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const roles = [
     { value: "Field Engineer", label: "Field Engineer" },
@@ -78,12 +85,27 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <FormItem>
               <FormLabel>{isEditing ? "New Password (Optional)" : "Password"}</FormLabel>
               <FormControl>
-                <Input 
-                  type="password" 
-                  placeholder={isEditing ? "Leave blank to keep current" : "••••••••"} 
-                  {...field} 
-                  required={!isEditing}
-                />
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder={isEditing ? "Leave blank to keep current" : "••••••••"} 
+                    {...field} 
+                    required={!isEditing}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -183,15 +205,30 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           <label htmlFor="password" className="text-sm font-medium">
             {isEditing ? "New Password (Optional)" : "Password"}
           </label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            value={formData?.password || ""}
-            onChange={handleInputChange}
-            placeholder={isEditing ? "Leave blank to keep current" : "••••••••"}
-            required={!isEditing}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData?.password || ""}
+              onChange={handleInputChange}
+              placeholder={isEditing ? "Leave blank to keep current" : "••••••••"}
+              required={!isEditing}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2">

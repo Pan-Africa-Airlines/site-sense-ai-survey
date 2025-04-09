@@ -77,6 +77,12 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onUserCreated }) => {
         data.regions = ["All Regions"];
       }
       
+      // Add more validation if needed
+      if (selectedRegions.length === 0 && data.role !== "Administrator") {
+        toast.error("Please select at least one region");
+        return;
+      }
+      
       const newUser = await createUser(data as UserFormData);
       
       if (newUser) {
