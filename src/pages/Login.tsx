@@ -7,16 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock } from "lucide-react";
+import { Lock, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isUserAdmin, isAdminEmail } from "@/utils/userRoles";
 import { UserRole } from "@/types/user";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<UserRole>("engineer");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -44,6 +46,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       console.log(`Attempting login as ${role} with:`, email);
@@ -85,14 +88,23 @@ const Login = () => {
       
       if (authError) {
         console.error("Authentication error:", authError);
-        toast.error(authError.message || "Invalid credentials. Please try again.");
+        
+        // Handle specific error codes
+        if (authError.message === "Email not confirmed") {
+          setErrorMessage("Please confirm your email address before logging in.");
+        } else if (authError.message === "Invalid login credentials") {
+          setErrorMessage("Invalid email or password. Please try again.");
+        } else {
+          setErrorMessage(authError.message || "Invalid credentials. Please try again.");
+        }
+        
         setIsLoading(false);
         return;
       }
       
       if (!authData.user) {
         console.error("No user returned after authentication");
-        toast.error("Login failed. Please try again.");
+        setErrorMessage("Login failed. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -101,14 +113,16 @@ const Login = () => {
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("userEmail", email);
       
-      // Handle admin role if requested
+      // Check if user is admin either by email pattern or by profile specialization
+      const isAdmin = await isUserAdmin(authData.user.id);
+      const hasAdminEmail = isAdminEmail(email);
+      const userIsAdmin = isAdmin || hasAdminEmail;
+      
+      // Handle login based on selected role
       if (role === "admin") {
-        // Check if user has admin privileges
-        const isAdmin = await isUserAdmin(authData.user.id);
-        const hasAdminEmail = isAdminEmail(email);
-        
-        if (!isAdmin && !hasAdminEmail) {
-          toast.error("You don't have admin privileges");
+        // Verify admin privileges if admin role was selected
+        if (!userIsAdmin) {
+          setErrorMessage("You don't have admin privileges");
           await supabase.auth.signOut();
           localStorage.removeItem("loggedIn");
           localStorage.removeItem("userEmail");
@@ -131,7 +145,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -148,6 +162,14 @@ const Login = () => {
             <Lock className="h-5 w-5 text-white" />
           </div>
         </div>
+        
+        {errorMessage && (
+          <Alert variant="destructive" className="border-red-500 bg-red-50 dark:bg-red-900/20">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+        
         <form onSubmit={handleLogin} className="space-y-4 mt-2">
           <div className="space-y-2">
             <Label htmlFor="role" className="text-gray-700 dark:text-gray-300">Login as</Label>
@@ -202,6 +224,18 @@ const Login = () => {
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
+        
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Development Login Credentials:</div>
+            <div className="text-xs mb-1">
+              <span className="font-medium">Admin:</span> admin@akhanya.co.za / admin123
+            </div>
+            <div className="text-xs">
+              <span className="font-medium">Engineer:</span> siyanda@akhanya.co.za / password123
+            </div>
+          </div>
+        )}
       </div>
     </LoginPageLayout>
   );

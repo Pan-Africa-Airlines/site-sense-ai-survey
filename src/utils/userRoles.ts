@@ -8,23 +8,31 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export async function isUserAdmin(userId: string): Promise<boolean> {
   try {
-    // For development: allow known admin emails without DB check
+    // For development mode: allow admin emails to bypass DB check
     if (process.env.NODE_ENV === 'development') {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && isAdminEmail(user.email || '')) {
-        console.log("Development mode: Bypassing DB check for admin");
+      const { data: { session } } = await supabase.auth.getSession();
+      const userEmail = session?.user?.email || '';
+      
+      if (isAdminEmail(userEmail)) {
+        console.log("Development mode: Admin email detected, bypassing DB check");
         return true;
       }
     }
     
+    // Check engineer_profiles for admin specialization
     const { data, error } = await supabase
       .from('engineer_profiles')
       .select('specializations')
       .eq('id', userId)
       .single();
       
-    if (error || !data) {
+    if (error) {
       console.error("Error checking admin status:", error);
+      return false;
+    }
+    
+    if (!data) {
+      console.log("No profile found for user", userId);
       return false;
     }
     
@@ -44,5 +52,6 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
  * @returns Boolean indicating if the email looks like an admin email
  */
 export function isAdminEmail(email: string): boolean {
+  // Check if the email contains 'admin' or is from the organization domain
   return email.includes('admin') || email.endsWith('@akhanya.co.za');
 }

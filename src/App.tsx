@@ -26,6 +26,7 @@ import AdminSystemLogs from "./pages/AdminSystemLogs";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserRole } from "./types/user";
+import { toast } from "sonner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,8 +40,10 @@ const queryClient = new QueryClient({
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // First set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const hasSession = !!session;
@@ -67,6 +70,15 @@ function App() {
                 localStorage.setItem("adminLoggedIn", "true");
                 localStorage.setItem("adminUsername", session.user.email || "");
               }
+            } else {
+              // No profile found - check if email suggests admin role
+              const emailSuggestsAdmin = isAdminEmail(session.user.email || '');
+              setUserRole(emailSuggestsAdmin ? 'admin' : 'engineer');
+              
+              if (emailSuggestsAdmin) {
+                localStorage.setItem("adminLoggedIn", "true");
+                localStorage.setItem("adminUsername", session.user.email || "");
+              }
             }
           } catch (error) {
             console.error("Error fetching user role:", error);
@@ -78,9 +90,12 @@ function App() {
           localStorage.removeItem("adminUsername");
           setUserRole(null);
         }
+        
+        setIsLoading(false);
       }
     );
 
+    // Then check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       const hasSession = !!session;
       setIsAuthenticated(hasSession);
@@ -106,15 +121,35 @@ function App() {
               localStorage.setItem("adminLoggedIn", "true");
               localStorage.setItem("adminUsername", session.user.email || "");
             }
+          } else {
+            // No profile found - check if email suggests admin role
+            const emailSuggestsAdmin = isAdminEmail(session.user.email || '');
+            setUserRole(emailSuggestsAdmin ? 'admin' : 'engineer');
+            
+            if (emailSuggestsAdmin) {
+              localStorage.setItem("adminLoggedIn", "true");
+              localStorage.setItem("adminUsername", session.user.email || "");
+            }
           }
         } catch (error) {
           console.error("Error fetching user role:", error);
         }
       }
+      
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Helper function to check if email suggests admin role
+  const isAdminEmail = (email: string): boolean => {
+    return email.includes('admin') || email.endsWith('@akhanya.co.za');
+  };
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -147,6 +182,7 @@ function App() {
               <Route path="system-logs" element={<AdminSystemLogs />} />
             </Route>
 
+            <Route path="/admin/login" element={<Navigate to="/login?role=admin" replace />} />
             <Route path="/configuration" element={<Configuration />} />
           </Routes>
         </Router>
