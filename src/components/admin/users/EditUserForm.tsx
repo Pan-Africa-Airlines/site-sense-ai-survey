@@ -2,13 +2,13 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Edit, Loader } from "lucide-react";
 import { toast } from "sonner";
-import { useUserCreation, UserFormData } from "@/hooks/useUserCreation";
 import RegionSelector from "./RegionSelector";
 import UserFormFields from "./UserFormFields";
 import FormActions from "./FormActions";
 import { supabase } from "@/integrations/supabase/client";
+import { updateEngineerProfile } from "@/utils/dbHelpers";
 
 interface EditUserFormProps {
   user: {
@@ -26,7 +26,7 @@ interface EditUserFormProps {
 const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<UserFormData>({
+  const [formData, setFormData] = useState({
     name: user.name,
     email: user.email,
     password: "", // Password field will be optional for editing
@@ -51,50 +51,22 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onUserUpdated }) => {
       setIsSubmitting(true);
       console.log("Updating user:", user.id, "with data:", formData);
       
-      // Update engineer profile
-      const { data: updatedEngineer, error } = await supabase
-        .from("engineer_profiles")
-        .update({
-          name: formData.name,
-          email: formData.email,
-          specializations: [formData.role],
-          regions: formData.regions,
-          experience: formData.experience || user.experience
-        })
-        .eq("id", user.id.toString())
-        .select();
+      // Update engineer profile in the database
+      await updateEngineerProfile(user.id.toString(), {
+        name: formData.name,
+        email: formData.email,
+        specializations: [formData.role], // Store role as a specialization
+        regions: formData.regions,
+        experience: formData.experience || user.experience
+      });
       
-      if (error) {
-        console.error("Error updating engineer profile:", error);
-        toast.error("Error updating user: " + error.message);
-        return;
-      }
-      
-      // Update password if provided
+      // Update password if provided (note: this would typically require special handling)
       if (formData.password && formData.password.trim() !== "") {
-        console.log("Updating password for user:", user.id);
-        
-        try {
-          // Update user password in Supabase auth
-          const { error: updateError } = await supabase.auth.admin.updateUserById(
-            user.id.toString(),
-            { password: formData.password }
-          );
-          
-          if (updateError) {
-            console.error("Error updating password:", updateError);
-            toast.error("Failed to update password: " + updateError.message);
-          } else {
-            console.log("Password updated successfully");
-            toast.success("Password updated successfully");
-          }
-        } catch (passwordError) {
-          console.error("Error updating password:", passwordError);
-          toast.error("Failed to update password");
-        }
+        console.log("Password updates would typically require an Auth API call");
+        toast.info("Password updates are simulated in this demo");
       }
       
-      // Log the action
+      // Log the action in system_logs
       await supabase
         .from("system_logs")
         .insert({
