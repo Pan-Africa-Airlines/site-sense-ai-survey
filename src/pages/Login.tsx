@@ -29,6 +29,10 @@ const Login = () => {
     
     if (roleParam === 'admin') {
       setRole('admin');
+      
+      // For convenience, pre-fill admin credentials
+      setEmail("admin@akhanya.co.za");
+      setPassword("admin123");
     }
     
     // For development: pre-fill test credentials

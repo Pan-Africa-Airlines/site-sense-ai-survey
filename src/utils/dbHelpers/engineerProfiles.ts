@@ -1,10 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { EngineerProfile } from "@/types/user";
 
 /**
  * Fetches engineer profiles from the database
  */
-export const getEngineerProfiles = async () => {
+export const getEngineerProfiles = async (): Promise<EngineerProfile[]> => {
   try {
     console.log("Fetching engineer profiles...");
     const { data, error } = await supabase
@@ -31,7 +32,10 @@ export { getEngineerProfiles as getEngineerProfilesInternal };
 /**
  * Updates an engineer profile in the database
  */
-export const updateEngineerProfile = async (profileId, profileData) => {
+export const updateEngineerProfile = async (
+  profileId: string, 
+  profileData: Partial<EngineerProfile>
+): Promise<EngineerProfile> => {
   try {
     console.log("Updating engineer profile:", profileId);
     const { data, error } = await supabase
@@ -51,5 +55,100 @@ export const updateEngineerProfile = async (profileId, profileData) => {
   } catch (error) {
     console.error("Failed to update engineer profile:", error);
     throw error;
+  }
+};
+
+/**
+ * Creates an admin user in the database
+ */
+export const createAdminUser = async (): Promise<EngineerProfile | null> => {
+  try {
+    console.log("Checking if admin user exists...");
+    
+    // First check if admin user already exists
+    const { data: existingAdmin, error: searchError } = await supabase
+      .from('engineer_profiles')
+      .select('*')
+      .eq('email', 'admin@akhanya.co.za')
+      .maybeSingle();
+      
+    if (searchError) {
+      console.error("Error checking for admin user:", searchError);
+      throw searchError;
+    }
+    
+    // If admin already exists, return it
+    if (existingAdmin) {
+      console.log("Admin user already exists:", existingAdmin);
+      return existingAdmin;
+    }
+    
+    console.log("Admin user does not exist, creating...");
+    
+    // Create auth user first
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: 'admin@akhanya.co.za',
+      password: 'admin123',
+      options: {
+        data: {
+          name: "Admin User",
+          role: "Administrator"
+        }
+      }
+    });
+    
+    if (authError) {
+      console.error("Error creating admin auth user:", authError);
+      
+      // If the user already exists in auth, try to see if we can just create the profile
+      if (authError.message.includes("already registered")) {
+        console.log("Admin user might exist in auth but not in profiles, proceeding with profile creation");
+      } else {
+        throw authError;
+      }
+    }
+    
+    // Get user ID from auth response or generate a new UUID if not available
+    const userId = authData?.user?.id || crypto.randomUUID();
+    
+    // Create engineer profile
+    const adminProfile = {
+      id: userId,
+      name: "Admin User",
+      email: "admin@akhanya.co.za",
+      specializations: ["Administrator"],
+      regions: ["All Regions"],
+      experience: "Senior Admin",
+      average_rating: 5.0,
+      total_reviews: 0
+    };
+    
+    const { data: newAdmin, error: profileError } = await supabase
+      .from('engineer_profiles')
+      .insert(adminProfile)
+      .select()
+      .single();
+      
+    if (profileError) {
+      console.error("Error creating admin profile:", profileError);
+      throw profileError;
+    }
+    
+    console.log("Admin user created successfully:", newAdmin);
+    
+    // Log this action
+    await supabase
+      .from('system_logs')
+      .insert({
+        user_id: "system",
+        user_name: "System",
+        action: "admin_user_created",
+        details: { email: 'admin@akhanya.co.za' }
+      });
+      
+    return newAdmin;
+  } catch (error) {
+    console.error("Failed to create admin user:", error);
+    return null;
   }
 };
