@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -94,31 +95,58 @@ const Login = () => {
       console.log("Development mode: Attempting to bypass email verification for:", userEmail);
       
       if (process.env.NODE_ENV === 'development') {
-        const { data: existingProfile, error: profileError } = await supabase
-          .from('engineer_profiles')
-          .select('*')
-          .eq('email', userEmail)
-          .maybeSingle();
+        // Development bypass for predefined test users
+        const testUsers = {
+          admin: { email: "admin@akhanya.co.za", password: "admin123", isAdmin: true },
+          siyanda: { email: "siyanda@akhanya.co.za", password: "password123", isAdmin: false },
+          andile: { email: "andile@akhanya.co.za", password: "andile123", isAdmin: false }
+        };
+        
+        let matchFound = false;
+        let userData = null;
+        
+        // Check if credentials match any test user
+        Object.entries(testUsers).forEach(([name, data]) => {
+          if (userEmail === data.email && userPassword === data.password) {
+            console.log(`Development login match found for ${name}`);
+            matchFound = true;
+            userData = data;
+          }
+        });
+        
+        if (matchFound && userData) {
+          const { data: existingProfile, error: profileError } = await supabase
+            .from('engineer_profiles')
+            .select('*')
+            .eq('email', userEmail)
+            .maybeSingle();
+            
+          if (profileError) {
+            console.error("Error checking for existing profile:", profileError);
+          }
           
-        if (profileError) {
-          console.error("Error checking for existing profile:", profileError);
-          return false;
-        }
-        
-        const userId = existingProfile?.id || crypto.randomUUID();
-        
-        if (!existingProfile) {
-          await ensureUserProfile(userId, userEmail, false);
-        }
-        
-        if (userEmail === "andile@akhanya.co.za" && userPassword === "andile123") {
+          const userId = existingProfile?.id || crypto.randomUUID();
+          
+          if (!existingProfile) {
+            await ensureUserProfile(userId, userEmail, userData.isAdmin);
+          }
+          
           localStorage.setItem("loggedIn", "true");
           localStorage.setItem("userEmail", userEmail);
-          localStorage.setItem("adminLoggedIn", "false");
-          localStorage.removeItem("adminUsername");
           
-          toast.success(`Welcome, Andile!`);
-          navigate("/dashboard");
+          if (userData.isAdmin) {
+            localStorage.setItem("adminLoggedIn", "true");
+            localStorage.setItem("adminUsername", userEmail);
+            toast.success(`Welcome, Admin!`);
+            navigate("/admin/dashboard");
+          } else {
+            localStorage.setItem("adminLoggedIn", "false");
+            localStorage.removeItem("adminUsername");
+            const userName = userEmail.split('@')[0].split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
+            toast.success(`Welcome, ${userName}!`);
+            navigate("/dashboard");
+          }
+          
           return true;
         }
       }
@@ -138,48 +166,8 @@ const Login = () => {
     try {
       console.log(`Attempting login as ${role} with:`, email);
       
+      // In development mode, try to bypass Supabase auth for test users
       if (process.env.NODE_ENV === 'development') {
-        if (email === "andile@akhanya.co.za" && password === "andile123" && role === "engineer") {
-          console.log("Using development login for Andile");
-          const bypassed = await bypassEmailVerification(email, password);
-          if (bypassed) {
-            setIsLoading(false);
-            return;
-          }
-        }
-        
-        if (email === "admin@akhanya.co.za" && password === "admin123" && role === "admin") {
-          console.log("Using development backdoor login for admin");
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("userEmail", email);
-          localStorage.setItem("adminLoggedIn", "true");
-          localStorage.setItem("adminUsername", email);
-          
-          const mockUserId = "admin-mock-id";
-          await ensureUserProfile(mockUserId, email, true);
-          
-          toast.success(`Development mode: Welcome, Admin!`);
-          navigate("/admin/dashboard");
-          setIsLoading(false);
-          return;
-        } 
-        
-        if (email === "siyanda@akhanya.co.za" && password === "password123" && role === "engineer") {
-          console.log("Using development backdoor login for engineer");
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("userEmail", email);
-          localStorage.setItem("adminLoggedIn", "false");
-          localStorage.removeItem("adminUsername");
-          
-          const mockUserId = "engineer-mock-id";
-          await ensureUserProfile(mockUserId, email, false);
-          
-          toast.success(`Development mode: Welcome, Siyanda!`);
-          navigate("/dashboard");
-          setIsLoading(false);
-          return;
-        }
-        
         const bypassed = await bypassEmailVerification(email, password);
         if (bypassed) {
           setIsLoading(false);
@@ -187,6 +175,7 @@ const Login = () => {
         }
       }
       
+      // If bypass didn't work or we're not in development, try regular auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password
