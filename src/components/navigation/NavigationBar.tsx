@@ -1,14 +1,13 @@
+
 import React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import { NavigationBarProps } from "./types";
 import UserMenu from "./UserMenu";
 import LogoSection from "./LogoSection";
-import MainNavigation from "./MainNavigation";
 import NavigationBreadcrumb from "./Breadcrumb";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard } from "lucide-react";
-import { Home, Car, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert, Badge, FileSpreadsheet } from "lucide-react";
+import { LayoutDashboard, Home, Car, HardHat, ChevronRight, Settings, LogOut, User, ShieldAlert, Badge, FileSpreadsheet } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   DropdownMenu, 
@@ -18,7 +17,6 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import BCXLogo from "@/components/ui/logo";
 
 const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   const { toast } = useToast();
@@ -34,7 +32,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
       title: "Logged out",
       description: "You have been successfully logged out."
     });
-    navigate("/login");
+    navigate("/");
   };
   
   const userEmail = localStorage.getItem("userEmail") || "User";
@@ -53,12 +51,13 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
 
   const getPageTitle = () => {
     switch(location.pathname) {
-      case "/": return "Dashboard";
+      case "/dashboard": return "Dashboard";
       case "/car-checkup": return "Vehicle Check";
       case "/eskom-survey/new": return "Eskom Site Survey";
       case "/installation": return "Installation";
       case "/eskom-surveys": return "Eskom Surveys";
       case "/my-allocations": return "My Allocations";
+      case "/engineer-dashboard": return "Engineer Dashboard";
       default: 
         if (location.pathname.startsWith("/eskom-survey/")) return "Eskom Site Survey";
         return "";
@@ -75,11 +74,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
   const breadcrumbHeight = 'h-12';
 
   const activePaths = {
-    "/": location.pathname === "/",
+    "/dashboard": location.pathname === "/dashboard",
     "/car-checkup": location.pathname === "/car-checkup",
     "/eskom-survey": location.pathname.startsWith("/eskom-survey"),
     "/installation": location.pathname === "/installation",
-    "/engineer-dashboard": location.pathname === "/engineer-dashboard"
+    "/engineer-dashboard": location.pathname === "/engineer-dashboard",
+    "/my-allocations": location.pathname === "/my-allocations"
   };
 
   return (
@@ -89,7 +89,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
           <div className="flex justify-between items-center h-full">
             <LogoSection isCompact={isCompact} />
             <div className="flex space-x-3">
-              {/* Add Engineer Dashboard button */}
+              {/* Engineer Dashboard button */}
               <Button
                 variant={activePaths["/engineer-dashboard"] ? "default" : "ghost"}
                 size="sm"
@@ -98,37 +98,55 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ isCompact = false }) => {
               >
                 <LayoutDashboard className={`mr-1 ${iconSize}`} /> Engineer Dashboard
               </Button>
+              
+              {/* Dashboard button */}
               <Button
-                variant={isActive("/") ? "default" : "ghost"}
+                variant={activePaths["/dashboard"] ? "default" : "ghost"}
                 size="sm"
-                onClick={() => navigate("/")}
-                className={`!transition-none !duration-0 ${isActive("/") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
+                onClick={() => navigate("/dashboard")}
+                className={`!transition-none !duration-0 ${activePaths["/dashboard"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
               >
                 <Home className={`mr-1 ${iconSize}`} /> Dashboard
               </Button>
+              
+              {/* Vehicle Check button */}
               <Button
-                variant={isActive("/car-checkup") ? "default" : "ghost"}
+                variant={activePaths["/car-checkup"] ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate("/car-checkup")}
-                className={`!transition-none !duration-0 ${isActive("/car-checkup") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
+                className={`!transition-none !duration-0 ${activePaths["/car-checkup"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
               >
                 <Car className={`mr-1 ${iconSize}`} /> Vehicle Check
               </Button>
+              
+              {/* Eskom Survey button */}
               <Button
-                variant={location.pathname.startsWith("/eskom-survey") ? "default" : "ghost"}
+                variant={activePaths["/eskom-survey"] ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate("/eskom-survey/new")}
-                className={`!transition-none !duration-0 ${location.pathname.startsWith("/eskom-survey") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
+                className={`!transition-none !duration-0 ${activePaths["/eskom-survey"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
               >
                 <FileSpreadsheet className={`mr-1 ${iconSize}`} /> Eskom Survey
               </Button>
+              
+              {/* Installation button */}
               <Button
-                variant={isActive("/installation") ? "default" : "ghost"}
+                variant={activePaths["/installation"] ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate("/installation")}
-                className={`!transition-none !duration-0 ${isActive("/installation") ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
+                className={`!transition-none !duration-0 ${activePaths["/installation"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
               >
                 <HardHat className={`mr-1 ${iconSize}`} /> Installation
+              </Button>
+              
+              {/* My Allocations button */}
+              <Button
+                variant={activePaths["/my-allocations"] ? "default" : "ghost"}
+                size="sm"
+                onClick={() => navigate("/my-allocations")}
+                className={`!transition-none !duration-0 ${activePaths["/my-allocations"] ? "bg-akhanya hover:bg-akhanya-dark" : "text-white hover:text-white hover:bg-gray-800"}`}
+              >
+                <FileSpreadsheet className={`mr-1 ${iconSize}`} /> My Allocations
               </Button>
             </div>
             <UserMenu 

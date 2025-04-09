@@ -53,9 +53,7 @@ function App() {
               </>
             } />
             
-            <Route path="/engineer-dashboard" element={
-              <EngineerDashboard />
-            } />
+            <Route path="/engineer-dashboard" element={<EngineerDashboard />} />
             
             <Route path="/eskom-survey/new" element={
               <>
@@ -75,6 +73,18 @@ function App() {
               <>
                 <NavigationBar />
                 <MyAllocations />
+              </>
+            } />
+            
+            <Route path="/car-checkup" element={
+              <>
+                <NavigationBar />
+                <div className="container mx-auto py-8">
+                  <h1 className="text-2xl font-bold mb-4">Vehicle Check</h1>
+                  <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
+                    <p>Vehicle check functionality will be implemented here.</p>
+                  </div>
+                </div>
               </>
             } />
 
