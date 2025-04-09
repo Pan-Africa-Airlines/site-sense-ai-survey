@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock, AlertCircle } from "lucide-react";
+import { Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isUserAdmin, isAdminEmail } from "@/utils/userRoles";
 import { UserRole } from "@/types/user";
@@ -20,6 +19,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<UserRole>("engineer");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -95,6 +95,34 @@ const Login = () => {
     }
   };
 
+  // Handle email verification bypass for development
+  const bypassEmailVerification = async (userEmail: string, userPassword: string) => {
+    try {
+      console.log("Development mode: Attempting to bypass email verification for:", userEmail);
+      
+      // For development bypasses only - this should be removed in production!
+      if (userEmail === "andile@akhanya.co.za" && process.env.NODE_ENV === 'development') {
+        // Create a profile for this user if it doesn't exist yet
+        const mockUserId = "andile-user-id";
+        await ensureUserProfile(mockUserId, userEmail, false);
+        
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("userEmail", userEmail);
+        localStorage.setItem("adminLoggedIn", "false");
+        localStorage.removeItem("adminUsername");
+        
+        toast.success(`Development mode: Welcome, Andile!`);
+        navigate("/dashboard");
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error bypassing email verification:", error);
+      return false;
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -105,6 +133,7 @@ const Login = () => {
       
       // Development mode login for testing - bypasses Supabase auth
       if (process.env.NODE_ENV === 'development') {
+        // Admin backdoor login
         if (email === "admin@akhanya.co.za" && password === "admin123" && role === "admin") {
           console.log("Using development backdoor login for admin");
           localStorage.setItem("loggedIn", "true");
@@ -122,6 +151,7 @@ const Login = () => {
           return;
         } 
         
+        // Engineer backdoor login
         if (email === "siyanda@akhanya.co.za" && password === "password123" && role === "engineer") {
           console.log("Using development backdoor login for engineer");
           localStorage.setItem("loggedIn", "true");
@@ -138,6 +168,13 @@ const Login = () => {
           setIsLoading(false);
           return;
         }
+        
+        // Try to bypass email verification for development
+        const bypassed = await bypassEmailVerification(email, password);
+        if (bypassed) {
+          setIsLoading(false);
+          return;
+        }
       }
       
       // If not dev mode or credentials don't match, proceed with Supabase auth
@@ -151,7 +188,18 @@ const Login = () => {
         
         // Handle specific error codes
         if (authError.message === "Email not confirmed") {
-          setErrorMessage("Please confirm your email address before logging in.");
+          // For development only - offer to proceed anyway
+          if (process.env.NODE_ENV === 'development') {
+            setErrorMessage("Email not confirmed. In development mode, you can click 'Sign in' again to bypass this check.");
+            // Try to bypass on next attempt
+            const bypassed = await bypassEmailVerification(email, password);
+            if (bypassed) {
+              setIsLoading(false);
+              return;
+            }
+          } else {
+            setErrorMessage("Please confirm your email address before logging in.");
+          }
         } else if (authError.message === "Invalid login credentials") {
           setErrorMessage("Invalid email or password. Please try again.");
         } else {
@@ -214,6 +262,10 @@ const Login = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <LoginPageLayout 
       title="Sign in to your account"
@@ -269,15 +321,30 @@ const Login = () => {
                 Forgot password?
               </Button>
             </div>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 pr-10"
+              />
+              <Button 
+                type="button"
+                variant="ghost" 
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-500" />
+                )}
+              </Button>
+            </div>
           </div>
           <Button 
             type="submit" 
@@ -294,8 +361,11 @@ const Login = () => {
             <div className="text-xs mb-1">
               <span className="font-medium">Admin:</span> admin@akhanya.co.za / admin123
             </div>
-            <div className="text-xs">
+            <div className="text-xs mb-1">
               <span className="font-medium">Engineer:</span> siyanda@akhanya.co.za / password123
+            </div>
+            <div className="text-xs">
+              <span className="font-medium">Custom:</span> andile@akhanya.co.za / andile123
             </div>
           </div>
         )}
